@@ -1,0 +1,722 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add event-detail-page class to body for CSS targeting -->
+<script>
+// Add event-detail-page class to body element immediately
+document.body.classList.add('event-detail-page');
+
+// Modify mobile header for event detail page
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/events';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add event detail title
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'flex-grow-1 d-flex justify-content-center mobile-event-detail-title';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Event Details</h5>';
+        mobileHeader.appendChild(titleDiv);
+        
+        // Add bookmark button
+        const bookmarkButton = document.createElement('button');
+        bookmarkButton.className = 'btn btn-link text-body p-1 mobile-bookmark-btn';
+        bookmarkButton.innerHTML = '<i class="bi {% if event.is_bookmarked %}bi-bookmark-fill{% else %}bi-bookmark{% endif %} fs-5"></i>';
+        bookmarkButton.id = 'mobile-bookmark-btn';
+        bookmarkButton.setAttribute('data-event-id', '{{ event.id }}');
+        mobileHeader.appendChild(bookmarkButton);
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header -->
+                <div class="d-none d-lg-block mb-4 px-3 pt-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <a href="/events" class="btn btn-link text-body p-0">
+                            <i class="bi bi-arrow-left fs-5 me-2"></i> Back to Events
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Event Detail Card -->
+                <div class="event-detail-card p-0 mb-4">
+                    <!-- Event Image -->
+                    {% if event.featured_image %}
+                    <div class="event-detail-image">
+                        {% set image_filename = event.featured_image.split('/')[-1] if '/' in event.featured_image else event.featured_image %}
+                        {% set image_filename = image_filename.split('\\')[-1] if '\\' in image_filename else image_filename %}
+                        <img src="{{ url_for('serve_event_image_db', filename=image_filename) }}" 
+                             class="img-fluid rounded-top" 
+                             alt="{{ event.title }}"
+                             style="width: 100%; max-height: 400px; object-fit: cover;">
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Event Info Section -->
+                    <div class="p-4">
+                        <!-- Event Title & Category Badge -->
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="badge bg-danger text-white">
+                                    <i class="bi {{ event.category|get_category_icon }} me-1"></i>{{ event.category.replace('_', ' ').title() }}
+                                </span>
+                            </div>
+                            <h3 class="mb-2 fw-bold d-flex align-items-center gap-2">
+                                <span>{{ event.title }}</span>
+                                {% if event.is_new %}
+                                <img src="/static/images/events.png" alt="Event" class="event-badge" style="height: 24px; width: auto;">
+                                {% endif %}
+                            </h3>
+                            <p class="text-body-secondary mb-0">Hosted by {{ event.host }}</p>
+                        </div>
+                        
+                        <!-- Event Date/Time -->
+                        <div class="mb-4">
+                            <h2 class="text-danger fw-bold mb-0">{{ event.date }} at {{ event.time }}</h2>
+                        </div>
+                        
+                        <!-- Event Description -->
+                        <div class="mb-4">
+                            <p class="text-body">{{ event.description }}</p>
+                        </div>
+                        
+                        <!-- Event Details Grid -->
+                        <div class="event-details-grid mb-4">
+                            <div class="detail-item">
+                                <i class="bi bi-calendar3 text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Date</small>
+                                    <span class="fw-semibold">{{ event.date }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="bi bi-clock text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Time</small>
+                                    <span class="fw-semibold">{{ event.time }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="bi bi-geo-alt text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Location</small>
+                                    <span class="fw-semibold">{{ event.location }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="bi bi-people text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Attendees</small>
+                                    <span class="fw-semibold" id="attendees-count">{{ event.attendees_count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="event-actions d-flex flex-wrap gap-2 mb-4 pb-4 border-bottom">
+                            <!-- Attend/Unattend Button -->
+                            <button class="btn {% if event.is_attending %}btn-outline-success{% else %}btn-outline-danger{% endif %} flex-grow-1" 
+                                    id="attend-btn" 
+                                    data-event-id="{{ event.id }}">
+                                <i class="bi {% if event.is_attending %}bi-check-circle-fill{% else %}bi-calendar-plus{% endif %} me-2" id="attend-icon"></i>
+                                <span id="attend-text">{% if event.is_attending %}Attending{% else %}Attend{% endif %}</span>
+                            </button>
+                            
+                            <!-- Contact Button -->
+                            <a href="/profile/{{ event.host_username if event.host_username else event.host|lower|replace(' ', '_') }}" 
+                               class="btn btn-outline-danger flex-grow-1" 
+                               id="contact-btn">
+                                <i class="bi bi-telephone me-2"></i>Contact
+                            </a>
+                            
+                            <!-- Share Button -->
+                            <button class="btn btn-outline-dark" id="share-btn" data-event-id="{{ event.id }}">
+                                <i class="bi bi-share me-2"></i>Share
+                            </button>
+                        </div>
+                        
+                        <!-- Attendees Section -->
+                        <div class="attendees-section mb-4 pb-4 border-bottom">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-people me-2"></i>Attendees (<span id="attendees-list-count">{{ event.attendees|length }}</span>)
+                            </h5>
+                            <div id="attendees-list">
+                                {% if event.attendees %}
+                                <div class="attendees-grid">
+                                    {% for attendee in event.attendees %}
+                                    <div class="attendee-item">
+                                        <img src="{{ url_for('serve_avatar', filename=(attendee.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                                             alt="{{ attendee.name }}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div>
+                                            <div class="fw-semibold text-body">{{ attendee.name }}</div>
+                                            <small class="text-body-secondary">@{{ attendee.username }}</small>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                {% else %}
+                                <p class="text-body-secondary text-center py-3">No attendees yet. Be the first to attend!</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Comments Section -->
+                        <div class="comments-section">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-chat-dots me-2"></i>Comments (<span id="comments-count">{{ event.comments|length }}</span>)
+                            </h5>
+                            
+                            <!-- Add Comment Form -->
+                            <div class="add-comment-form mb-3">
+                                <div class="d-flex gap-2">
+                                    <img src="{{ url_for('serve_avatar', filename=(current_user.avatar|default('avatar-1.jpg'))) }}" 
+                                         alt="Your avatar" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <textarea class="form-control" 
+                                                  id="comment-input" 
+                                                  placeholder="Add a comment..." 
+                                                  rows="2"></textarea>
+                                        <button class="btn btn-danger btn-sm mt-2" id="post-comment-btn" data-event-id="{{ event.id }}">
+                                            Post Comment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Comments List -->
+                            <div id="comments-list">
+                                {% if event.comments %}
+                                    {% for comment in event.comments %}
+                                    <div class="comment-item" data-comment-id="{{ comment.id }}">
+                                        <img src="{{ url_for('serve_avatar', filename=(comment.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                                             alt="{{ comment.name }}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="comment-header">
+                                                <span class="fw-semibold text-body">{{ comment.name }}</span>
+                                                <small class="text-body-secondary ms-2">{{ comment.timestamp }}</small>
+                                            </div>
+                                            <div class="comment-text" id="comment-text-{{ comment.id }}">{{ comment.text }}</div>
+                                            
+                                            <!-- Edit/Delete buttons for own comments -->
+                                            {% if comment.username == current_user.username %}
+                                            <div class="comment-actions mt-1">
+                                                <button class="btn btn-link btn-sm text-body-secondary p-0 me-2 edit-comment-btn" data-comment-id="{{ comment.id }}">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                                <button class="btn btn-link btn-sm text-danger p-0 delete-comment-btn" data-comment-id="{{ comment.id }}">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                <p class="text-body-secondary text-center py-3">No comments yet. Be the first to comment!</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Event Modal -->
+{% if is_host %}
+<div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="editEventModalLabel">Edit Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editEventForm">
+                    <!-- Event Title -->
+                    <div class="mb-3">
+                        <label for="editEventTitle" class="form-label">Event Title *</label>
+                        <input type="text" class="form-control" id="editEventTitle" name="title" value="{{ event.title }}" required>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="editEventDescription" class="form-label">Description *</label>
+                        <textarea class="form-control" id="editEventDescription" name="description" rows="3" required>{{ event.description }}</textarea>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="mb-3">
+                        <label for="editEventLocation" class="form-label">Location *</label>
+                        <input type="text" class="form-control" id="editEventLocation" name="location" value="{{ event.location }}" required>
+                    </div>
+                    
+                    <!-- Date and Time -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editEventDate" class="form-label">Date *</label>
+                            <input type="date" class="form-control" id="editEventDate" name="date" value="{{ event.date }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editEventTime" class="form-label">Time *</label>
+                            <input type="time" class="form-control" id="editEventTime" name="time" value="{{ event.time }}" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label for="editEventCategory" class="form-label">Category *</label>
+                        <select class="form-select" id="editEventCategory" name="category" required>
+                            <option value="music" {% if event.category == 'music' %}selected{% endif %}>Music</option>
+                            <option value="sports" {% if event.category == 'sports' %}selected{% endif %}>Sports</option>
+                            <option value="food" {% if event.category == 'food' %}selected{% endif %}>Food</option>
+                            <option value="art" {% if event.category == 'art' %}selected{% endif %}>Art</option>
+                            <option value="tech" {% if event.category == 'tech' %}selected{% endif %}>Tech</option>
+                            <option value="business" {% if event.category == 'business' %}selected{% endif %}>Business</option>
+                            <option value="education" {% if event.category == 'education' %}selected{% endif %}>Education</option>
+                            <option value="health" {% if event.category == 'health' %}selected{% endif %}>Health</option>
+                            <option value="outdoor" {% if event.category == 'outdoor' %}selected{% endif %}>Outdoor</option>
+                            <option value="social" {% if event.category == 'social' %}selected{% endif %}>Social</option>
+                            <option value="charity" {% if event.category == 'charity' %}selected{% endif %}>Charity</option>
+                            <option value="entertainment" {% if event.category == 'entertainment' %}selected{% endif %}>Entertainment</option>
+                            <option value="travel" {% if event.category == 'travel' %}selected{% endif %}>Travel</option>
+                            <option value="fashion" {% if event.category == 'fashion' %}selected{% endif %}>Fashion</option>
+                            <option value="photography" {% if event.category == 'photography' %}selected{% endif %}>Photography</option>
+                            <option value="gaming" {% if event.category == 'gaming' %}selected{% endif %}>Gaming</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="submitEditBtn" data-event-id="{{ event.id }}">
+                    <span id="submitEditBtnText">Save Changes</span>
+                    <span id="submitEditBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Event Detail Page Styles -->
+<style>
+/* Event badge image - make visible in dark mode */
+.event-badge {
+    height: 24px;
+    width: auto;
+}
+
+[data-bs-theme="dark"] .event-badge {
+    filter: brightness(0) invert(1) !important;
+}
+
+[data-bs-theme="light"] .event-badge {
+    filter: none !important;
+}
+
+/* Share button styling for light and dark modes */
+#share-btn {
+    border-color: #000000 !important;
+    color: #000000 !important;
+    background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] #share-btn {
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+}
+
+#share-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
+}
+
+[data-bs-theme="dark"] #share-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+}
+</style>
+
+<!-- Event Detail Page Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const eventId = {{ event.id }};
+    
+    // Attend/Unattend button handler
+    const attendBtn = document.getElementById('attend-btn');
+    if (attendBtn) {
+        attendBtn.addEventListener('click', function() {
+            const isCurrentlyAttending = this.classList.contains('btn-outline-success');
+            const attendIcon = document.getElementById('attend-icon');
+            const attendText = document.getElementById('attend-text');
+            const attendeesCount = document.getElementById('attendees-count');
+            const originalCount = parseInt(attendeesCount.textContent);
+            
+            // Optimistic UI update
+            if (isCurrentlyAttending) {
+                this.classList.remove('btn-outline-success');
+                this.classList.add('btn-outline-danger');
+                attendIcon.classList.remove('bi-check-circle-fill');
+                attendIcon.classList.add('bi-calendar-plus');
+                attendText.textContent = 'Attend';
+                attendeesCount.textContent = Math.max(0, originalCount - 1);
+            } else {
+                this.classList.remove('btn-outline-danger');
+                this.classList.add('btn-outline-success');
+                attendIcon.classList.remove('bi-calendar-plus');
+                attendIcon.classList.add('bi-check-circle-fill');
+                attendText.textContent = 'Attending';
+                attendeesCount.textContent = originalCount + 1;
+            }
+            
+            // API call
+            fetch(`/api/events/${eventId}/attend`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    attendeesCount.textContent = data.attendees_count;
+                    // Reload attendees list
+                    loadAttendees();
+                } else {
+                    // Rollback on error
+                    if (!isCurrentlyAttending) {
+                        attendBtn.classList.remove('btn-outline-success');
+                        attendBtn.classList.add('btn-outline-danger');
+                        attendIcon.classList.remove('bi-check-circle-fill');
+                        attendIcon.classList.add('bi-calendar-plus');
+                        attendText.textContent = 'Attend';
+                    } else {
+                        attendBtn.classList.remove('btn-outline-danger');
+                        attendBtn.classList.add('btn-outline-success');
+                        attendIcon.classList.remove('bi-calendar-plus');
+                        attendIcon.classList.add('bi-check-circle-fill');
+                        attendText.textContent = 'Attending';
+                    }
+                    attendeesCount.textContent = originalCount;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    }
+    
+    // Bookmark button handler (mobile only)
+    const mobileBookmarkBtn = document.getElementById('mobile-bookmark-btn');
+    
+    if (mobileBookmarkBtn) {
+        mobileBookmarkBtn.addEventListener('click', function() {
+            const bookmarkIcon = this.querySelector('i');
+            const isBookmarked = bookmarkIcon.classList.contains('bi-bookmark-fill');
+            
+            // Optimistic UI update
+            if (isBookmarked) {
+                bookmarkIcon.classList.remove('bi-bookmark-fill');
+                bookmarkIcon.classList.add('bi-bookmark');
+            } else {
+                bookmarkIcon.classList.remove('bi-bookmark');
+                bookmarkIcon.classList.add('bi-bookmark-fill');
+            }
+            
+            // API call
+            fetch(`/api/events/${eventId}/bookmark`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    // Rollback on error
+                    if (!isBookmarked) {
+                        bookmarkIcon.classList.remove('bi-bookmark-fill');
+                        bookmarkIcon.classList.add('bi-bookmark');
+                    } else {
+                        bookmarkIcon.classList.remove('bi-bookmark');
+                        bookmarkIcon.classList.add('bi-bookmark-fill');
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+    
+    // Contact button is now a link, no handler needed
+    
+    // Share button handler
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            const eventUrl = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ event.title }}',
+                    text: '{{ event.description }}',
+                    url: eventUrl
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(eventUrl).then(() => {
+                    alert('Event link copied to clipboard!');
+                });
+            }
+        });
+    }
+    
+    // Edit event form submission
+    const submitEditBtn = document.getElementById('submitEditBtn');
+    const editEventForm = document.getElementById('editEventForm');
+    
+    if (submitEditBtn && editEventForm) {
+        submitEditBtn.addEventListener('click', function() {
+            if (!editEventForm.checkValidity()) {
+                editEventForm.reportValidity();
+                return;
+            }
+            
+            // Show loading state
+            const submitBtnText = document.getElementById('submitEditBtnText');
+            const submitBtnSpinner = document.getElementById('submitEditBtnSpinner');
+            submitBtnText.textContent = 'Saving...';
+            submitBtnSpinner.classList.remove('d-none');
+            submitEditBtn.disabled = true;
+            
+            // Prepare form data
+            const formData = new FormData(editEventForm);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+            
+            // Submit form
+            fetch(`/api/events/${eventId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Event updated successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error updating event: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating event');
+            })
+            .finally(() => {
+                submitBtnText.textContent = 'Save Changes';
+                submitBtnSpinner.classList.add('d-none');
+                submitEditBtn.disabled = false;
+            });
+        });
+    }
+    
+    // Post comment handler
+    const postCommentBtn = document.getElementById('post-comment-btn');
+    const commentInput = document.getElementById('comment-input');
+    
+    if (postCommentBtn && commentInput) {
+        postCommentBtn.addEventListener('click', function() {
+            const commentText = commentInput.value.trim();
+            if (!commentText) {
+                alert('Please enter a comment');
+                return;
+            }
+            
+            postCommentBtn.disabled = true;
+            postCommentBtn.textContent = 'Posting...';
+            
+            fetch(`/api/events/${eventId}/comments`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text: commentText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    commentInput.value = '';
+                    loadComments();
+                } else {
+                    alert('Error posting comment: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error posting comment');
+            })
+            .finally(() => {
+                postCommentBtn.disabled = false;
+                postCommentBtn.textContent = 'Post Comment';
+            });
+        });
+    }
+    
+    // Edit comment handlers
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('edit-comment-btn') || e.target.parentElement.classList.contains('edit-comment-btn')) {
+            const btn = e.target.classList.contains('edit-comment-btn') ? e.target : e.target.parentElement;
+            const commentId = btn.getAttribute('data-comment-id');
+            const commentTextDiv = document.getElementById(`comment-text-${commentId}`);
+            const currentText = commentTextDiv.textContent;
+            
+            const newText = prompt('Edit your comment:', currentText);
+            if (newText && newText.trim() && newText !== currentText) {
+                fetch(`/api/events/${eventId}/comments/${commentId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text: newText.trim() })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        commentTextDiv.textContent = newText.trim();
+                    } else {
+                        alert('Error updating comment: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+        
+        // Delete comment handlers
+        if (e.target.classList.contains('delete-comment-btn') || e.target.parentElement.classList.contains('delete-comment-btn')) {
+            const btn = e.target.classList.contains('delete-comment-btn') ? e.target : e.target.parentElement;
+            const commentId = btn.getAttribute('data-comment-id');
+            
+            if (confirm('Delete this comment?')) {
+                fetch(`/api/events/${eventId}/comments/${commentId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadComments();
+                    } else {
+                        alert('Error deleting comment: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    });
+    
+    // Load attendees list
+    function loadAttendees() {
+        fetch(`/api/events/${eventId}/attendees`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const attendeesList = document.getElementById('attendees-list');
+                    const attendeesListCount = document.getElementById('attendees-list-count');
+                    attendeesListCount.textContent = data.attendees.length;
+                    
+                    if (data.attendees.length > 0) {
+                        let html = '<div class="attendees-grid">';
+                        data.attendees.forEach(attendee => {
+                            html += `
+                                <div class="attendee-item">
+                                    <img src="/database/avatars/${attendee.avatar ? (attendee.avatar.includes('/') ? attendee.avatar.split('/').pop() : attendee.avatar) : 'avatar-1.jpg'}" 
+                                         alt="${attendee.name}" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div>
+                                        <div class="fw-semibold text-body">${attendee.name}</div>
+                                        <small class="text-body-secondary">@${attendee.username}</small>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        attendeesList.innerHTML = html;
+                    } else {
+                        attendeesList.innerHTML = '<p class="text-body-secondary text-center py-3">No attendees yet. Be the first to attend!</p>';
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading attendees:', error));
+    }
+    
+    // Load comments list
+    function loadComments() {
+        fetch(`/api/events/${eventId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const commentsList = document.getElementById('comments-list');
+                    const commentsCount = document.getElementById('comments-count');
+                    commentsCount.textContent = data.event.comments.length;
+                    
+                    if (data.event.comments.length > 0) {
+                        let html = '';
+                        data.event.comments.forEach(comment => {
+                            const isOwnComment = comment.username === 'john_doe';
+                            html += `
+                                <div class="comment-item" data-comment-id="${comment.id}">
+                                    <img src="/database/avatars/${comment.avatar ? (comment.avatar.includes('/') ? comment.avatar.split('/').pop() : comment.avatar) : 'avatar-1.jpg'}" 
+                                         alt="${comment.name}" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <div class="comment-header">
+                                            <span class="fw-semibold text-body">${comment.name}</span>
+                                            <small class="text-body-secondary ms-2">${comment.timestamp}</small>
+                                        </div>
+                                        <div class="comment-text" id="comment-text-${comment.id}">${comment.text}</div>
+                                        ${isOwnComment ? `
+                                        <div class="comment-actions mt-1">
+                                            <button class="btn btn-link btn-sm text-body-secondary p-0 me-2 edit-comment-btn" data-comment-id="${comment.id}">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </button>
+                                            <button class="btn btn-link btn-sm text-danger p-0 delete-comment-btn" data-comment-id="${comment.id}">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        commentsList.innerHTML = html;
+                    } else {
+                        commentsList.innerHTML = '<p class="text-body-secondary text-center py-3">No comments yet. Be the first to comment!</p>';
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading comments:', error));
+    }
+});
+</script>
+{% endblock %}
+

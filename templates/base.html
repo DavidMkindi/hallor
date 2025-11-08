@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+    <title>{% block title %}Hallor{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/hallor-icon.svg') }}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap-5.3.8-dist/css/bootstrap.min.css') }}" rel="stylesheet">
+    
+    <!-- Custom Theme CSS -->
+    <link href="{{ url_for('static', filename='css/custom-theme.css') }}" rel="stylesheet">
+    
+    <!-- Post Like Animation Styles -->
+    <style>
+    /* Heart animation keyframes */
+    @keyframes heartPop {
+        0% {
+            transform: scale(0);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 0;
+        }
+    }
+
+    @keyframes heartScale {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.3);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .heart-animation {
+        animation: heartPop 0.6s ease-out forwards;
+    }
+
+    .like-icon.liked {
+        animation: heartScale 0.3s ease-out;
+    }
+
+    /* Scrollable Comments Container Styles */
+    .comments-container {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    }
+
+    .comments-container::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .comments-container::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .comments-container::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+    }
+
+    .comments-container::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.3);
+    }
+
+    /* Dark mode scrollbar */
+    [data-bs-theme="dark"] .comments-container,
+    html[data-bs-theme="dark"] .comments-container {
+        scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+
+    [data-bs-theme="dark"] .comments-container::-webkit-scrollbar-thumb,
+    html[data-bs-theme="dark"] .comments-container::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    [data-bs-theme="dark"] .comments-container::-webkit-scrollbar-thumb:hover,
+    html[data-bs-theme="dark"] .comments-container::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Comment item styles - no borders or backgrounds */
+    .comment-item,
+    .comment-item *,
+    .replies-container,
+    .replies-container * {
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .comment-item {
+        padding: 0 !important;
+    }
+    </style>
+    
+    <!-- Preloader Styles -->
+    <style>
+    /* Load Pacifico font from local file */
+    @font-face {
+        font-family: 'Pacifico';
+        src: url('{{ url_for("static", filename="fonts/Pacifico-Regular.ttf") }}') format('truetype');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+    }
+    
+    #preloader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #ffffff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    }
+    
+    /* Dark mode preloader background */
+    html[data-bs-theme="dark"] #preloader,
+    html.dark #preloader,
+    [data-bs-theme="dark"] #preloader {
+        background-color: #000000 !important;
+    }
+    
+    /* Light mode preloader background */
+    html[data-bs-theme="light"] #preloader,
+    html.light #preloader,
+    [data-bs-theme="light"] #preloader {
+        background-color: #ffffff !important;
+    }
+    
+    /* Auto mode - check system preference */
+    @media (prefers-color-scheme: dark) {
+        html[data-bs-theme="auto"] #preloader {
+            background-color: #000000 !important;
+        }
+    }
+    
+    @media (prefers-color-scheme: light) {
+        html[data-bs-theme="auto"] #preloader {
+            background-color: #ffffff !important;
+        }
+    }
+    
+    #preloader.hidden {
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    .preloader-logo {
+        font-size: 3rem;
+        font-weight: 400;
+        font-family: 'Pacifico', cursive !important;
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        animation: logoFadeIn 0.8s ease-in;
+    }
+    
+    .preloader-logo .hallor-text {
+        font-family: 'Pacifico', cursive !important;
+        font-weight: 400 !important;
+    }
+    
+    /* Preloader text colors */
+    .preloader-logo .hallor-text {
+        color: #000000 !important;
+    }
+    
+    html[data-bs-theme="dark"] .preloader-logo .hallor-text,
+    html.dark .preloader-logo .hallor-text,
+    [data-bs-theme="dark"] .preloader-logo .hallor-text {
+        color: #ffffff !important;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+        html[data-bs-theme="auto"] .preloader-logo .hallor-text {
+            color: #ffffff !important;
+        }
+    }
+    
+    @media (prefers-color-scheme: light) {
+        html[data-bs-theme="auto"] .preloader-logo .hallor-text {
+            color: #000000 !important;
+        }
+    }
+    
+    /* Hand icon visibility - ensure it's visible in both modes */
+    .preloader-logo .hallor-hand {
+        height: 1em !important;
+        width: auto !important;
+        filter: brightness(1) !important;
+        opacity: 1 !important;
+    }
+    
+    /* In dark mode, invert the hand icon if needed for visibility */
+    html[data-bs-theme="dark"] .preloader-logo .hallor-hand,
+    html.dark .preloader-logo .hallor-hand,
+    [data-bs-theme="dark"] .preloader-logo .hallor-hand {
+        filter: brightness(0) invert(1) !important;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+        html[data-bs-theme="auto"] .preloader-logo .hallor-hand {
+            filter: brightness(0) invert(1) !important;
+        }
+    }
+    
+    @keyframes logoFadeIn {
+        0% {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    </style>
+</head>
+<body class="custom-bg text-body">
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="preloader-logo hallor-logo">
+            <span class="hallor-text">Hall</span><img src="/static/images/handlogo.png" class="hallor-hand" alt="hand"><span class="hallor-text">r</span>
+        </div>
+    </div>
+    
+    <!-- Preloader Theme Detection Script (runs immediately) -->
+    <script>
+    (function() {
+        // Detect theme immediately for preloader
+        const html = document.documentElement;
+        const theme = html.getAttribute('data-bs-theme') || 'auto';
+        const preloader = document.getElementById('preloader');
+        
+        if (preloader) {
+            if (theme === 'dark') {
+                html.setAttribute('data-bs-theme', 'dark');
+            } else if (theme === 'light') {
+                html.setAttribute('data-bs-theme', 'light');
+            } else {
+                // Auto mode - check system preference
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (prefersDark) {
+                    html.setAttribute('data-bs-theme', 'dark');
+                } else {
+                    html.setAttribute('data-bs-theme', 'light');
+                }
+            }
+        }
+    })();
+    </script>
+    
+    <!-- Desktop Left Sidebar (Visible only on desktop) -->
+    <div class="d-none d-lg-block position-fixed start-0 top-0 vh-100 custom-sidebar border-end" style="width: 250px; z-index: 1000;" id="desktop-sidebar">
+        <div class="p-3">
+            <!-- Sidebar Logo -->
+            <div class="mb-4">
+                <a class="navbar-brand fw-bold fs-3 hallor-logo" href="/" id="sidebar-brand-logo">
+                    <span class="hallor-text">Hall</span><img src="/static/images/handlogo.png" class="hallor-hand" alt="hand"><span class="hallor-text">r</span>
+                </a>
+            </div>
+            
+            <!-- Sidebar Navigation -->
+            <nav class="nav flex-column">
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/" id="sidebar-home">
+                    <i class="bi bi-house me-3 fs-5"></i>
+                    <span>Home</span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/explore" id="sidebar-explore">
+                    <i class="bi bi-search me-3 fs-5"></i>
+                    <span>Explore</span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/reels" id="sidebar-reels">
+                    <i class="bi bi-play-circle me-3 fs-5"></i>
+                    <span>Reels</span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/create" id="sidebar-create">
+                    <i class="bi bi-plus-circle me-3 fs-5"></i>
+                    <span>Create</span>
+                </a>
+                {% if session.username %}
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/profile" id="sidebar-profile">
+                    <img src="{{ url_for('serve_avatar', filename=(session.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                         alt="Profile" 
+                         class="rounded-circle me-3" 
+                         style="width: 24px; height: 24px; object-fit: cover;"
+                         data-fallback-src="{{ url_for('serve_avatar', filename='avatar-1.jpg') }}">
+                    <span>Profile</span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/logout" id="sidebar-logout">
+                    <i class="bi bi-box-arrow-right me-3 fs-5"></i>
+                    <span>Logout</span>
+                </a>
+                {% else %}
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/login" id="sidebar-login">
+                    <i class="bi bi-box-arrow-in-right me-3 fs-5"></i>
+                    <span>Login</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+
+    <!-- Desktop Right Sidebar (Visible only on desktop) -->
+    <div class="d-none d-lg-block position-fixed end-0 top-0 vh-100 custom-sidebar border-start" style="width: 250px; z-index: 1000;" id="desktop-right-sidebar">
+        <div class="p-3">
+            <!-- Right Sidebar Logo -->
+            <div class="mb-4">
+                <a class="navbar-brand fw-bold fs-3 text-body" href="#" id="right-sidebar-brand-logo">
+                    <i class="bi bi-people-fill"></i> Discover
+                </a>
+            </div>
+            
+            <!-- Right Sidebar Navigation -->
+            <nav class="nav flex-column">
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/explore" id="right-sidebar-trending">
+                    <i class="bi bi-fire me-3 fs-5"></i>
+                    <span>Trending</span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/profile" id="right-sidebar-suggestions">
+                    <i class="bi bi-person-plus me-3 fs-5"></i>
+                    <span>Suggestions</span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/groups" id="right-sidebar-groups">
+                    <i class="bi bi-people me-3 fs-5"></i>
+                    <span>Groups</span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center position-relative" href="/events" id="right-sidebar-events">
+                    <i class="bi bi-calendar-week me-3 fs-5"></i>
+                    <span>Events</span>
+                    <span class="position-absolute top-50 start-0 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.5rem; margin-left: 20px;" id="desktop-events-badge">
+                        0
+                    </span>
+                </a>
+                <a class="nav-link text-body py-3 d-flex align-items-center" href="/settings" id="right-sidebar-settings">
+                    <i class="bi bi-gear me-3 fs-5"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Instagram-inspired Header -->
+    <nav class="navbar navbar-expand-lg custom-header border-bottom sticky-top" id="main-header">
+        <div class="container">
+            <!-- Mobile Layout: Notifications - Logo (Center) - Group - Message -->
+            <div class="d-flex d-sm-none align-items-center w-100">
+                <!-- Notifications (Left Corner) -->
+                <div class="d-flex align-items-center">
+                    <!-- Notifications -->
+                    <a href="/notifications" class="text-body p-1 me-2 position-relative" id="mobile-notifications-icon">
+                        <i class="bi bi-heart fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;" id="mobile-notifications-badge">
+                            5
+                        </span>
+                        <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem; padding: 2px 4px;" id="mobile-reply-indicator">@</span>
+                    </a>
+                    
+                    <!-- Events -->
+                    <a href="/events" class="text-body p-1 position-relative" id="mobile-events-icon">
+                        <i class="bi bi-calendar-week fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.5rem;" id="mobile-events-badge">
+                            0
+                        </span>
+                    </a>
+                </div>
+                
+                <!-- Logo (Center) -->
+                <div class="flex-grow-1 d-flex justify-content-center">
+                    <a class="navbar-brand fw-bold fs-3 hallor-logo d-flex align-items-center justify-content-center" href="/" id="mobile-brand-logo">
+                        <span class="hallor-text">Hall</span><img src="/static/images/handlogo.png" class="hallor-hand" alt="hand"><span class="hallor-text">r</span>
+                    </a>
+                </div>
+                
+                <!-- Shop and Messages (Right) -->
+                <div class="d-flex align-items-center">
+                    <!-- Shop -->
+                    <a href="/shop" class="text-body p-1 me-2" id="mobile-shop-icon">
+                        <i class="bi bi-shop fs-5"></i>
+                    </a>
+                    
+                    <!-- Messages -->
+                    <a href="/messages" class="text-body p-1 position-relative" id="mobile-messages-icon">
+                        <i class="bi bi-chat fs-5"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.5rem;" id="mobile-messages-badge">
+                            0
+                        </span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Desktop Layout -->
+            <div class="d-none d-sm-flex align-items-center w-100">
+                <!-- Logo/Brand -->
+                <a class="navbar-brand fw-bold fs-3 hallor-logo d-flex align-items-center justify-content-center" href="/" id="desktop-brand-logo">
+                    <span class="hallor-text">Hall</span><img src="/static/images/handlogo.png" class="hallor-hand" alt="hand"><span class="hallor-text">r</span>
+                </a>
+                
+                <!-- Search Bar -->
+                <div class="flex-grow-1 d-flex justify-content-center" id="search-container">
+                    <div class="w-75 w-md-50">
+                        <div class="input-group" id="search-input-group">
+                            <span class="input-group-text custom-input-group border-0" id="search-icon">
+                                <i class="bi bi-search text-body"></i>
+                            </span>
+                            <input type="text" class="form-control border-0 custom-form-control text-body" placeholder="Search" id="search-input" style="border-radius: 0 0.375rem 0.375rem 0;">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Navigation Icons -->
+                <div class="d-flex align-items-center" id="desktop-nav-icons">
+                    <!-- Shop -->
+                    <a href="/shop" class="text-body me-2 me-md-3 p-1 p-md-2" id="desktop-shop-icon">
+                        <i class="bi bi-shop fs-5 fs-md-4"></i>
+                    </a>
+                    
+                    <!-- Messages -->
+                    <a href="/messages" class="text-body me-2 me-md-3 p-1 p-md-2 position-relative" id="desktop-messages-icon">
+                        <i class="bi bi-chat fs-5 fs-md-4"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.5rem;" id="desktop-messages-badge">
+                            0
+                        </span>
+                    </a>
+                    
+                    <!-- Events -->
+                    <a href="/events" class="text-body me-2 me-md-3 p-1 p-md-2" id="desktop-events-icon">
+                        <i class="bi bi-calendar-week fs-5 fs-md-4"></i>
+                    </a>
+                    
+                    <!-- Notifications -->
+                    <a href="/notifications" class="text-body me-2 me-md-3 p-1 p-md-2 position-relative" id="desktop-notifications-icon">
+                        <i class="bi bi-heart fs-5 fs-md-4"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.5rem;" id="desktop-notifications-badge">
+                            5
+                        </span>
+                        <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem; padding: 2px 4px;" id="desktop-reply-indicator">@</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Search Modal -->
+    <div class="modal fade" id="mobileSearchModal" tabindex="-1" aria-labelledby="mobileSearchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="mobileSearchModalLabel">Search</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <span class="input-group-text custom-input-group border-0">
+                            <i class="bi bi-search text-body"></i>
+                        </span>
+                        <input type="text" class="form-control border-0 custom-form-control text-body" placeholder="Search" id="mobile-search-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation (Visible only on mobile/tablet) -->
+    <nav class="d-block d-lg-none position-fixed bottom-0 start-0 end-0 custom-bottom-nav border-top" id="mobile-bottom-nav">
+        <div class="container-fluid px-0">
+            <div class="row g-0">
+                <div class="col">
+                    <a class="nav-link text-body py-3 d-flex justify-content-center align-items-center" href="/" id="mobile-nav-home">
+                        <i class="bi bi-house fs-4"></i>
+                    </a>
+                </div>
+                <div class="col">
+                    <a class="nav-link text-body py-3 d-flex justify-content-center align-items-center" href="/explore" id="mobile-nav-explore">
+                        <i class="bi bi-search fs-4"></i>
+                    </a>
+                </div>
+                <div class="col">
+                    <a class="nav-link text-body py-3 d-flex justify-content-center align-items-center" href="/create" id="mobile-nav-create">
+                        <i class="bi bi-plus-circle fs-4"></i>
+                    </a>
+                </div>
+                <div class="col">
+                    <a class="nav-link text-body py-3 d-flex justify-content-center align-items-center" href="/reels" id="mobile-nav-reels">
+                        <i class="bi bi-play-circle fs-4"></i>
+                    </a>
+                </div>
+                {% if session.username %}
+                <div class="col">
+                    <a class="nav-link text-body py-3 d-flex justify-content-center align-items-center" href="/profile" id="mobile-nav-profile">
+                        <img src="{{ url_for('serve_avatar', filename=(session.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                             alt="Profile" 
+                             class="rounded-circle" 
+                             style="width: 28px; height: 28px; object-fit: cover;"
+                             data-fallback-src="{{ url_for('serve_avatar', filename='avatar-1.jpg') }}">
+                    </a>
+                </div>
+                {% else %}
+                <div class="col">
+                    <a class="nav-link text-body py-3 d-flex justify-content-center align-items-center" href="/login" id="mobile-nav-login">
+                        <i class="bi bi-box-arrow-in-right fs-4"></i>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="custom-bg min-vh-100 pb-5 pb-lg-0" id="main-content">
+        <div class="container-fluid">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="{{ url_for('static', filename='css/bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js') }}"></script>
+    
+    <!-- Bootstrap Icons CDN (for icons) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
+    
+    <!-- Theme Management Script -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    
+    <!-- Post Like Functionality Script -->
+    <script>
+    // Track which posts are currently processing likes to prevent duplicate calls
+    const processingLikes = {};
+    
+    // Debounce function to prevent API spam
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // Like functionality - shared between button and double-tap
+    function toggleLike(postId, showAnimation = false) {
+        // Validate postId
+        if (!postId) {
+            console.warn('toggleLike: postId is missing or invalid');
+            return;
+        }
+        
+        // Prevent multiple simultaneous like operations for the same post
+        if (processingLikes[postId]) {
+            console.log(`Like operation already in progress for post ${postId}, ignoring duplicate call`);
+            return;
+        }
+        
+        const likeIcon = document.getElementById('like-icon-' + postId);
+        const likeCount = document.getElementById('like-count-' + postId);
+        
+        // Check if required elements exist
+        if (!likeIcon) {
+            console.warn(`toggleLike: Like icon not found for post ${postId}`);
+            return;
+        }
+        
+        if (!likeCount) {
+            console.warn(`toggleLike: Like count not found for post ${postId}`);
+            return;
+        }
+        
+        // Mark this post as processing
+        processingLikes[postId] = true;
+        
+        // Store original state for rollback
+        const originalIsLiked = likeIcon.classList.contains('bi-heart-fill');
+        const originalCount = parseInt(likeCount.textContent) || 0;
+        
+        // Optimistic UI update - immediate visual feedback
+        if (originalIsLiked) {
+            // Unlike: remove fill, add outline, decrease count
+            likeIcon.classList.remove('bi-heart-fill');
+            likeIcon.classList.add('bi-heart');
+            likeIcon.style.setProperty('color', 'var(--bs-body-color)', 'important');
+            likeIcon.style.setProperty('fill', 'none', 'important');
+            likeIcon.style.setProperty('stroke', 'var(--bs-body-color)', 'important');
+            likeCount.textContent = Math.max(0, originalCount - 1);
+            
+            // Add unlike animation
+            likeIcon.classList.add('liked');
+            setTimeout(() => {
+                likeIcon.classList.remove('liked');
+            }, 300);
+        } else {
+            // Like: set red color FIRST before changing class to prevent black flash
+            likeIcon.style.setProperty('color', '#dc3545', 'important');
+            likeIcon.style.setProperty('fill', '#dc3545', 'important');
+            likeIcon.style.setProperty('stroke', '#dc3545', 'important');
+            // Then change the class
+            likeIcon.classList.remove('bi-heart');
+            likeIcon.classList.add('bi-heart-fill');
+            likeCount.textContent = originalCount + 1;
+            
+            // Add scale animation
+            likeIcon.classList.add('liked');
+            setTimeout(() => {
+                likeIcon.classList.remove('liked');
+            }, 300);
+        }
+        
+        // Show heart animation on double-tap
+        if (showAnimation) {
+            try {
+                const container = document.querySelector(`[data-post-id="${postId}"]`);
+                const heartAnimation = container ? container.querySelector('.heart-animation') : null;
+                if (heartAnimation) {
+                    // Reset animation by removing and re-adding the class
+                    heartAnimation.style.display = 'block';
+                    heartAnimation.style.animation = 'none';
+                    // Force reflow to restart animation
+                    void heartAnimation.offsetWidth;
+                    heartAnimation.style.animation = '';
+                    
+                    setTimeout(() => {
+                        heartAnimation.style.display = 'none';
+                    }, 600);
+                } else {
+                    console.warn(`toggleLike: Heart animation element not found for post ${postId}`);
+                }
+            } catch (error) {
+                console.error('toggleLike: Error showing heart animation:', error);
+            }
+        }
+        
+        // Debounced API call
+        debouncedApiCall(postId, likeIcon, likeCount, originalIsLiked, originalCount);
+    }
+
+    // Debounced API call function
+    const debouncedApiCall = debounce(function(postId, likeIcon, likeCount, originalIsLiked, originalCount) {
+        // Validate parameters
+        if (!postId || !likeIcon || !likeCount) {
+            console.error('debouncedApiCall: Missing required parameters');
+            // Release the lock
+            delete processingLikes[postId];
+            return;
+        }
+        
+        console.log('Making API call to:', `/api/posts/${postId}/like`);
+        
+        // Add timeout to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+        
+        fetch(`/api/posts/${postId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            signal: controller.signal
+        })
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('API response:', data);
+            if (data.success) {
+                console.log('Server confirmed - is_liked:', data.is_liked, 'likes_count:', data.likes_count);
+                
+                // Only update UI if server state differs from our optimistic update
+                const currentIsLiked = likeIcon.classList.contains('bi-heart-fill');
+                const expectedIsLiked = !originalIsLiked; // What we expect after optimistic update
+                
+                if (data.is_liked !== expectedIsLiked) {
+                    console.log('Server state differs from optimistic update, correcting...');
+                    // Server state differs, update to match server
+                    if (data.is_liked) {
+                        // Set red color FIRST before changing class to prevent black flash
+                        likeIcon.style.setProperty('color', '#dc3545', 'important');
+                        likeIcon.style.setProperty('fill', '#dc3545', 'important');
+                        likeIcon.style.setProperty('stroke', '#dc3545', 'important');
+                        likeIcon.classList.remove('bi-heart');
+                        likeIcon.classList.add('bi-heart-fill');
+                    } else {
+                        likeIcon.style.setProperty('color', 'var(--bs-body-color)', 'important');
+                        likeIcon.style.setProperty('fill', 'none', 'important');
+                        likeIcon.style.setProperty('stroke', 'var(--bs-body-color)', 'important');
+                        likeIcon.classList.remove('bi-heart-fill');
+                        likeIcon.classList.add('bi-heart');
+                    }
+                } else {
+                    console.log('Server state matches optimistic update, no UI change needed');
+                }
+                
+                // Always update like count with server value for accuracy
+                likeCount.textContent = data.likes_count;
+                console.log('UI finalized with server response');
+            } else {
+                console.error('Server returned error:', data.error);
+                // Rollback optimistic update on error
+                rollbackLikeState(likeIcon, likeCount, originalIsLiked, originalCount);
+            }
+            
+            // Release the lock after successful or failed API call
+            delete processingLikes[postId];
+        })
+        .catch(error => {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                console.error('API request timed out for post:', postId);
+            } else {
+                console.error('Error toggling like:', error);
+            }
+            // Rollback optimistic update on error
+            rollbackLikeState(likeIcon, likeCount, originalIsLiked, originalCount);
+            
+            // Release the lock on error
+            delete processingLikes[postId];
+        });
+    }, 300); // 300ms debounce
+
+    // Helper function to rollback like state on error
+    function rollbackLikeState(likeIcon, likeCount, originalIsLiked, originalCount) {
+        try {
+            // Check if elements still exist before rollback
+            if (!likeIcon || !likeCount) {
+                console.warn('rollbackLikeState: Elements not found, cannot rollback');
+                return;
+            }
+            
+            if (originalIsLiked) {
+                likeIcon.classList.remove('bi-heart');
+                likeIcon.classList.add('bi-heart-fill');
+                likeIcon.style.setProperty('color', 'red', 'important');
+                likeIcon.style.setProperty('fill', 'red', 'important');
+                likeIcon.style.setProperty('stroke', 'red', 'important');
+            } else {
+                likeIcon.classList.remove('bi-heart-fill');
+                likeIcon.classList.add('bi-heart');
+                likeIcon.style.setProperty('color', 'var(--bs-body-color)', 'important');
+                likeIcon.style.setProperty('fill', 'none', 'important');
+                likeIcon.style.setProperty('stroke', 'var(--bs-body-color)', 'important');
+            }
+            likeCount.textContent = originalCount || 0;
+            console.log('Rollback completed successfully');
+        } catch (error) {
+            console.error('Error during rollback:', error);
+        }
+    }
+
+    // Update notification badge counts
+    function updateNotificationBadges() {
+        fetch('/api/notifications/unread-count')
+            .then(response => response.json())
+            .then(data => {
+                const unreadCount = data.unread_count || 0;
+                const replyCount = data.reply_count || 0;
+                const mobileBadge = document.getElementById('mobile-notifications-badge');
+                const desktopBadge = document.getElementById('desktop-notifications-badge');
+                const mobileReplyIndicator = document.getElementById('mobile-reply-indicator');
+                const desktopReplyIndicator = document.getElementById('desktop-reply-indicator');
+                
+                // Update unread count badge
+                if (unreadCount > 0) {
+                    if (mobileBadge) {
+                        mobileBadge.textContent = unreadCount;
+                        mobileBadge.style.display = 'block';
+                    }
+                    if (desktopBadge) {
+                        desktopBadge.textContent = unreadCount;
+                        desktopBadge.style.display = 'block';
+                    }
+                } else {
+                    if (mobileBadge) {
+                        mobileBadge.style.display = 'none';
+                    }
+                    if (desktopBadge) {
+                        desktopBadge.style.display = 'none';
+                    }
+                }
+                
+                // Update reply indicator (red @ sign)
+                if (replyCount > 0) {
+                    if (mobileReplyIndicator) {
+                        mobileReplyIndicator.style.display = 'block';
+                    }
+                    if (desktopReplyIndicator) {
+                        desktopReplyIndicator.style.display = 'block';
+                    }
+                } else {
+                    if (mobileReplyIndicator) {
+                        mobileReplyIndicator.style.display = 'none';
+                    }
+                    if (desktopReplyIndicator) {
+                        desktopReplyIndicator.style.display = 'none';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching notification count:', error);
+            });
+    }
+
+    // Update message badge counts (1 per chat with unread messages)
+    function updateMessageBadges() {
+        fetch('/api/messages/unread-count')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch unread count');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const unreadCount = data.unread_count || 0;
+                const mobileBadge = document.getElementById('mobile-messages-badge');
+                const desktopBadge = document.getElementById('desktop-messages-badge');
+                
+                if (unreadCount > 0) {
+                    if (mobileBadge) {
+                        mobileBadge.textContent = unreadCount;
+                        mobileBadge.classList.remove('d-none');
+                    }
+                    if (desktopBadge) {
+                        desktopBadge.textContent = unreadCount;
+                        desktopBadge.classList.remove('d-none');
+                    }
+                } else {
+                    if (mobileBadge) {
+                        mobileBadge.classList.add('d-none');
+                    }
+                    if (desktopBadge) {
+                        desktopBadge.classList.add('d-none');
+                    }
+                }
+            })
+            .catch(error => {
+                // Silently fail - user may not be logged in or endpoint unavailable
+                const mobileBadge = document.getElementById('mobile-messages-badge');
+                const desktopBadge = document.getElementById('desktop-messages-badge');
+                if (mobileBadge) mobileBadge.classList.add('d-none');
+                if (desktopBadge) desktopBadge.classList.add('d-none');
+            });
+    }
+
+    // Initialize like functionality when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle image error fallback using data-fallback-src attribute
+        document.querySelectorAll('img[data-fallback-src]').forEach(function(img) {
+            img.addEventListener('error', function() {
+                const fallbackSrc = this.getAttribute('data-fallback-src');
+                if (fallbackSrc && this.src !== fallbackSrc) {
+                    this.src = fallbackSrc;
+                }
+            });
+        });
+        
+        // Update notification badges on page load
+        updateNotificationBadges();
+        // Update message badges on page load
+        updateMessageBadges();
+        // Like button functionality for all posts
+        document.querySelectorAll('.like-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const postId = this.getAttribute('data-post-id');
+                if (!postId) {
+                    console.warn('Like button clicked but no post-id found');
+                    return;
+                }
+                
+                console.log('Like button clicked for post:', postId);
+                
+                try {
+                    toggleLike(postId, false);
+                } catch (error) {
+                    console.error('Error in like button click handler:', error);
+                }
+            });
+        });
+
+        // Double-tap functionality for post images
+        document.querySelectorAll('.post-image-container').forEach(function(container) {
+            let tapCount = 0;
+            let lastTap = 0;
+            let tapTimeout = null;
+            let isProcessing = false; // Flag to prevent processing if 3+ taps detected
+            const DOUBLE_TAP_DELAY = 300; // Maximum time between taps for double-tap (ms)
+            const RESET_DELAY = 500; // Time to reset tap count after last tap (ms)
+            
+            // Touch event handler for mobile
+            container.addEventListener('touchend', function(e) {
+                try {
+                    const currentTime = new Date().getTime();
+                    const timeSinceLastTap = currentTime - lastTap;
+                    
+                    // Clear any existing timeout
+                    if (tapTimeout) {
+                        clearTimeout(tapTimeout);
+                        tapTimeout = null;
+                    }
+                    
+                    // If enough time has passed since last tap, reset everything
+                    if (timeSinceLastTap > RESET_DELAY) {
+                        tapCount = 0;
+                        isProcessing = false;
+                    }
+                    
+                    tapCount++;
+                    lastTap = currentTime;
+                    
+                    // Store postId in closure
+                    const currentPostId = container.getAttribute('data-post-id');
+                    
+                    // If we have 3 or more taps, cancel everything and ignore
+                    if (tapCount >= 3) {
+                        tapCount = 0;
+                        isProcessing = false;
+                        console.log('3+ taps detected, ignoring all taps');
+                        return;
+                    }
+                    
+                    // Only set timeout for exactly 2 taps
+                    if (tapCount === 2) {
+                        isProcessing = true;
+                        // Set timeout to process double-tap after delay
+                        tapTimeout = setTimeout(() => {
+                            // Only process if we still have exactly 2 taps and processing flag is true
+                            if (tapCount === 2 && isProcessing) {
+                                e.preventDefault();
+                                
+                                if (!currentPostId) {
+                                    console.warn('Double-tap detected but no post-id found');
+                                    tapCount = 0;
+                                    isProcessing = false;
+                                    return;
+                                }
+                                
+                                console.log('Double-tap detected for post:', currentPostId);
+                                toggleLike(currentPostId, true);
+                            }
+                            // Reset everything
+                            tapCount = 0;
+                            isProcessing = false;
+                            tapTimeout = null;
+                        }, DOUBLE_TAP_DELAY);
+                    }
+                    // For single tap (tapCount === 1), just wait - don't do anything yet
+                    
+                } catch (error) {
+                    console.error('Error in double-tap handler:', error);
+                    tapCount = 0;
+                    isProcessing = false;
+                    if (tapTimeout) {
+                        clearTimeout(tapTimeout);
+                        tapTimeout = null;
+                    }
+                }
+            });
+            
+            // Mouse double-click handler for desktop
+            container.addEventListener('dblclick', function(e) {
+                try {
+                    e.preventDefault();
+                    const postId = this.getAttribute('data-post-id');
+                    
+                    if (!postId) {
+                        console.warn('Double-click detected but no post-id found');
+                        return;
+                    }
+                    
+                    console.log('Double-click detected for post:', postId);
+                    toggleLike(postId, true);
+                } catch (error) {
+                    console.error('Error in double-click handler:', error);
+                }
+            });
+        });
+
+        // Share button functionality for all posts
+        document.querySelectorAll('.share-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const postId = this.getAttribute('data-post-id');
+                if (!postId) {
+                    console.warn('Share button clicked but no post-id found');
+                    return;
+                }
+                
+                // Call backend API to get share link
+                fetch(`/api/posts/${postId}/share`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.share_link) {
+                        // Update share count in UI
+                        const shareCountEl = document.getElementById(`share-count-${postId}`);
+                        if (shareCountEl && data.shares_count !== undefined) {
+                            shareCountEl.textContent = data.shares_count;
+                        }
+                        
+                        // Copy link to clipboard
+                        if (navigator.clipboard && navigator.clipboard.writeText) {
+                            navigator.clipboard.writeText(data.share_link).then(() => {
+                                // Show success notification
+                                showShareSuccess();
+                            }).catch(err => {
+                                console.error('Failed to copy:', err);
+                                // Fallback: show link in alert
+                                alert('Share link: ' + data.share_link);
+                            });
+                        } else {
+                            // Fallback for older browsers
+                            const textArea = document.createElement('textarea');
+                            textArea.value = data.share_link;
+                            textArea.style.position = 'fixed';
+                            textArea.style.opacity = '0';
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            try {
+                                document.execCommand('copy');
+                                showShareSuccess();
+                            } catch (err) {
+                                alert('Share link: ' + data.share_link);
+                            }
+                            document.body.removeChild(textArea);
+                        }
+                    } else {
+                        console.error('Server returned error:', data.error);
+                        alert('Failed to generate share link');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting share link:', error);
+                    alert('Error generating share link. Please try again.');
+                });
+            });
+        });
+
+        // Function to show share success notification
+        function showShareSuccess() {
+            const notificationOverlay = document.createElement('div');
+            notificationOverlay.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+            notificationOverlay.style.zIndex = '9999';
+            notificationOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+            notificationOverlay.style.backdropFilter = 'blur(4px)';
+            // Check if dark mode
+            const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark' || 
+                              (document.documentElement.getAttribute('data-bs-theme') === 'auto' && 
+                               window.matchMedia('(prefers-color-scheme: dark)').matches);
+            
+            const bgColor = isDarkMode ? 'black' : 'white';
+            const textColor = isDarkMode ? 'white' : 'black';
+            const borderColor = isDarkMode ? 'white' : 'black';
+            
+            notificationOverlay.innerHTML = `
+                <div style="background-color: ${bgColor}; border: 2px solid ${borderColor}; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); padding: 1.5rem; max-width: 280px; width: 85%;">
+                    <div class="d-flex flex-column align-items-center text-center">
+                        <!-- Logo -->
+                        <div class="mb-3">
+                            <span class="hallor-text" style="font-size: 1.5rem; color: ${textColor}; font-family: 'Pacifico', cursive !important; font-weight: 400 !important;">Hall</span>
+                            <img src="/static/images/handlogo.png" alt="Hallor Logo" class="hallor-hand" style="width: 24px; height: 24px; object-fit: contain; vertical-align: middle; margin: 0 2px; ${isDarkMode ? 'filter: brightness(0) invert(1);' : ''}">
+                            <span class="hallor-text" style="font-size: 1.5rem; color: ${textColor}; font-family: 'Pacifico', cursive !important; font-weight: 400 !important;">r</span>
+                        </div>
+                        <!-- Success Icon -->
+                        <div class="mb-2">
+                            <i class="bi bi-check-circle-fill" style="font-size: 2rem; color: #dc3545;"></i>
+                        </div>
+                        <!-- Message -->
+                        <h6 class="mb-1 fw-bold" style="color: ${textColor}; font-size: 1rem;">Link Copied</h6>
+                        <p class="mb-0 small" style="color: ${textColor}; font-size: 0.875rem;">Post link copied to clipboard</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notificationOverlay);
+            
+            // Add fade-in animation
+            setTimeout(() => {
+                notificationOverlay.style.transition = 'opacity 0.3s ease';
+            }, 10);
+            
+            // Auto remove after 3 seconds with fade-out
+            setTimeout(() => {
+                notificationOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    notificationOverlay.remove();
+                }, 300);
+            }, 3000);
+            
+            // Close on click outside
+            notificationOverlay.addEventListener('click', function(e) {
+                if (e.target === notificationOverlay) {
+                    notificationOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        notificationOverlay.remove();
+                    }, 300);
+                }
+            });
+        }
+
+        // Render a single comment with nested replies (recursive)
+        function renderComment(comment, postId, level = 0, showReplies = false) {
+            const avatarFile = comment.avatar ? (comment.avatar.includes('/') ? comment.avatar.split('/').pop() : comment.avatar) : 'avatar-2.jpg';
+            const indentClass = level > 0 ? 'ms-4' : '';
+            const marginTop = level > 0 ? 'mt-2' : 'mb-3';
+            const hasReplies = comment.replies && comment.replies.length > 0;
+            const repliesCount = hasReplies ? comment.replies.length : 0;
+            
+            let html = `
+                <div class="comment-item ${marginTop} ${indentClass}" data-comment-id="${comment.id}" style="border: none !important; background: transparent !important; padding: 0 !important;">
+                    <div class="d-flex" style="border: none !important; background: transparent !important;">
+                        <img src="/database/avatars/${avatarFile}" 
+                             class="rounded-circle me-2" 
+                             width="${level > 0 ? '24' : '28'}" 
+                             height="${level > 0 ? '24' : '28'}" 
+                             alt="User Avatar"
+                             style="object-fit: cover; flex-shrink: 0; border: none !important;">
+                        <div class="flex-grow-1" style="min-width: 0; border: none !important; background: transparent !important;">
+                            <div style="font-size: 0.875rem; border: none !important; background: transparent !important;">
+                                <span class="fw-semibold username-classic">@${comment.username}</span>
+                                <span>${comment.text}</span>
+                            </div>
+                            <div class="d-flex align-items-center mt-1">
+                                <small class="text-muted" style="font-size: 0.75rem;">${comment.time_ago || 'Just now'}</small>
+                                ${level === 0 ? `
+                                <button class="btn btn-link p-0 text-muted reply-btn ms-2" 
+                                        data-comment-id="${comment.id}"
+                                        data-post-id="${postId}"
+                                        style="text-decoration: none; font-size: 0.75rem; padding: 0 !important; border: none; background: none;">
+                                    Reply
+                                </button>
+                                ` : ''}
+                            </div>
+                            ${hasReplies && level === 0 ? `
+                            <div class="mt-1">
+                                <button class="btn btn-link p-0 text-muted see-replies-btn" 
+                                        data-comment-id="${comment.id}"
+                                        data-post-id="${postId}"
+                                        style="text-decoration: none; font-size: 0.75rem; padding: 0 !important; border: none; background: none;">
+                                    <span class="see-replies-text">View replies (${repliesCount})</span>
+                                </button>
+                            </div>
+                            ` : ''}
+                            <!-- Reply input (hidden by default, only show for top-level comments) -->
+                            ${level === 0 ? `
+                            <div class="reply-input-container mt-2" id="reply-input-${comment.id}" style="display: none;">
+                                <div class="d-flex align-items-center">
+                                    <img src="/database/avatars/avatar-2.jpg" 
+                                         class="rounded-circle me-2" 
+                                         width="20" 
+                                         height="20" 
+                                         alt="Your Avatar">
+                                    <div class="flex-grow-1">
+                                        <input type="text" 
+                                               class="form-control form-control-sm border-0 bg-transparent reply-comment-input" 
+                                               id="reply-input-field-${comment.id}"
+                                               data-comment-id="${comment.id}"
+                                               data-post-id="${postId}"
+                                               placeholder="Write a reply..." 
+                                               style="outline: none; box-shadow: none; font-size: 0.875rem;">
+                                    </div>
+                                    <button class="btn btn-link p-0 text-primary post-reply-btn ms-2" 
+                                            data-comment-id="${comment.id}"
+                                            data-post-id="${postId}"
+                                            style="text-decoration: none; font-size: 0.875rem; font-weight: 600; padding: 0 !important;">
+                                        Post
+                                    </button>
+                                </div>
+                            </div>
+                            ` : ''}
+                            <!-- Nested replies -->
+                            <div class="replies-container" id="replies-${comment.id}" style="display: ${showReplies ? 'block' : 'none'}; border: none !important; background: transparent !important;">
+            `;
+            
+            // Render nested replies recursively
+            if (hasReplies) {
+                comment.replies.forEach(reply => {
+                    html += renderComment(reply, postId, level + 1, false);
+                });
+            }
+            
+            html += `
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Load comments for a post
+        function loadPostComments(postId) {
+            const commentsList = document.getElementById('comments-list-' + postId);
+            if (!commentsList) return;
+            
+            fetch(`/api/posts/${postId}/comments`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.comments && data.comments.length > 0) {
+                        let html = '';
+                        data.comments.forEach(comment => {
+                            html += renderComment(comment, postId, 0);
+                        });
+                        commentsList.innerHTML = html;
+                        
+                        // Re-attach event listeners for reply buttons
+                        attachReplyListeners(postId);
+                    } else {
+                        commentsList.innerHTML = '<div class="text-center py-3"><small class="text-muted">No comments yet. Be the first to comment!</small></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading comments:', error);
+                    commentsList.innerHTML = '<div class="text-center py-3"><small class="text-danger">Error loading comments.</small></div>';
+                });
+        }
+
+        // Attach reply button listeners
+        function attachReplyListeners(postId) {
+            // Reply button click handlers
+            document.querySelectorAll(`.reply-btn[data-post-id="${postId}"]`).forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const commentId = this.getAttribute('data-comment-id');
+                    const replyInput = document.getElementById('reply-input-' + commentId);
+                    if (replyInput) {
+                        // Toggle reply input visibility
+                        if (replyInput.style.display === 'none') {
+                            replyInput.style.display = 'block';
+                            // Focus on input
+                            const inputField = document.getElementById('reply-input-field-' + commentId);
+                            if (inputField) {
+                                setTimeout(() => inputField.focus(), 100);
+                            }
+                        } else {
+                            replyInput.style.display = 'none';
+                        }
+                    }
+                });
+            });
+
+            // See replies button click handlers
+            document.querySelectorAll(`.see-replies-btn[data-post-id="${postId}"]`).forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const commentId = this.getAttribute('data-comment-id');
+                    const repliesContainer = document.getElementById('replies-' + commentId);
+                    const seeRepliesText = this.querySelector('.see-replies-text');
+                    
+                    if (repliesContainer) {
+                        if (repliesContainer.style.display === 'none') {
+                            repliesContainer.style.display = 'block';
+                            if (seeRepliesText) {
+                                seeRepliesText.textContent = seeRepliesText.textContent.replace('View', 'Hide');
+                            }
+                        } else {
+                            repliesContainer.style.display = 'none';
+                            if (seeRepliesText) {
+                                seeRepliesText.textContent = seeRepliesText.textContent.replace('Hide', 'View');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Post reply button handlers
+            document.querySelectorAll(`.post-reply-btn[data-post-id="${postId}"]`).forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const commentId = this.getAttribute('data-comment-id');
+                    const postId = this.getAttribute('data-post-id');
+                    const inputField = document.getElementById('reply-input-field-' + commentId);
+                    if (inputField && postId) {
+                        postReply(postId, commentId, inputField);
+                    }
+                });
+            });
+
+            // Enter key handler for reply inputs
+            document.querySelectorAll(`.reply-comment-input[data-post-id="${postId}"]`).forEach(function(input) {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const commentId = this.getAttribute('data-comment-id');
+                        const postId = this.getAttribute('data-post-id');
+                        if (postId) {
+                            postReply(postId, commentId, this);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Toggle comments section
+        function toggleCommentsSection(postId) {
+            const commentsSection = document.getElementById('comments-section-' + postId);
+            const addCommentSection = document.getElementById('add-comment-section-' + postId);
+            const viewCommentsBtn = document.querySelector(`.view-comments-btn[data-post-id="${postId}"]`);
+            
+            if (!commentsSection) return;
+            
+            if (commentsSection.style.display === 'none') {
+                // Show comments section
+                commentsSection.style.display = 'block';
+                if (addCommentSection) {
+                    addCommentSection.style.display = 'none';
+                }
+                // Load comments
+                loadPostComments(postId);
+                // Update button text to "Hide all comments"
+                if (viewCommentsBtn) {
+                    viewCommentsBtn.textContent = 'Hide all comments';
+                }
+            } else {
+                // Hide comments section
+                commentsSection.style.display = 'none';
+                if (addCommentSection) {
+                    addCommentSection.style.display = 'block';
+                }
+                // Update button text back to "View all X comments"
+                if (viewCommentsBtn) {
+                    const commentCountEl = document.getElementById('comment-count-' + postId);
+                    const commentCount = commentCountEl ? commentCountEl.textContent.trim() : 0;
+                    viewCommentsBtn.textContent = `View all ${commentCount} comments`;
+                }
+            }
+        }
+
+        // Comment button click handler
+        document.querySelectorAll('.comment-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const postId = this.getAttribute('data-post-id');
+                if (postId) {
+                    toggleCommentsSection(postId);
+                }
+            });
+        });
+
+        // View all comments button click handler
+        document.querySelectorAll('.view-comments-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const postId = this.getAttribute('data-post-id');
+                if (postId) {
+                    toggleCommentsSection(postId);
+                }
+            });
+        });
+
+        // Post comment functionality
+        function postComment(postId, inputElement, parentId = null) {
+            const commentText = inputElement.value.trim();
+            if (!commentText) {
+                return;
+            }
+            
+            const requestBody = { text: commentText };
+            if (parentId) {
+                requestBody.parent_id = parentId;
+            }
+            
+            fetch(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    inputElement.value = '';
+                    // Clear the simple input too if it exists
+                    const simpleInput = document.getElementById('comment-input-simple-' + postId);
+                    if (simpleInput) {
+                        simpleInput.value = '';
+                    }
+                    
+                    // If comments section is visible, reload comments
+                    const commentsSection = document.getElementById('comments-section-' + postId);
+                    if (commentsSection && commentsSection.style.display !== 'none') {
+                        loadPostComments(postId);
+                    } else if (!parentId) {
+                        // If posting a top-level comment and comments are hidden, show them
+                        toggleCommentsSection(postId);
+                    }
+                    
+                    // Update comment count
+                    const commentCountEl = document.getElementById('comment-count-' + postId);
+                    if (commentCountEl) {
+                        commentCountEl.textContent = data.comments_count || 0;
+                    }
+                    // Update view all comments text
+                    const viewCommentsBtn = document.querySelector(`.view-comments-btn[data-post-id="${postId}"]`);
+                    if (viewCommentsBtn) {
+                        const commentsSection = document.getElementById('comments-section-' + postId);
+                        if (commentsSection && commentsSection.style.display !== 'none') {
+                            viewCommentsBtn.textContent = 'Hide all comments';
+                        } else {
+                            viewCommentsBtn.textContent = `View all ${data.comments_count || 0} comments`;
+                        }
+                    }
+                } else {
+                    console.error('Error posting comment:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error posting comment:', error);
+            });
+        }
+
+        // Post reply functionality
+        function postReply(postId, parentCommentId, inputElement) {
+            const commentText = inputElement.value.trim();
+            if (!commentText) {
+                return;
+            }
+            
+            // Convert parentCommentId to integer
+            const parentId = parseInt(parentCommentId, 10);
+            if (isNaN(parentId)) {
+                console.error('Invalid parent comment ID:', parentCommentId);
+                return;
+            }
+            
+            fetch(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    text: commentText,
+                    parent_id: parentId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    inputElement.value = '';
+                    // Hide reply input
+                    const replyInput = document.getElementById('reply-input-' + parentCommentId);
+                    if (replyInput) {
+                        replyInput.style.display = 'none';
+                    }
+                    
+                    // Show replies container if it was hidden
+                    const repliesContainer = document.getElementById('replies-' + parentCommentId);
+                    if (repliesContainer && repliesContainer.style.display === 'none') {
+                        repliesContainer.style.display = 'block';
+                        // Update "See replies" button text
+                        const seeRepliesBtn = document.querySelector(`.see-replies-btn[data-comment-id="${parentCommentId}"]`);
+                        if (seeRepliesBtn) {
+                            const seeRepliesText = seeRepliesBtn.querySelector('.see-replies-text');
+                            if (seeRepliesText) {
+                                const currentCount = parseInt(seeRepliesText.textContent.match(/\d+/)?.[0] || '0');
+                                seeRepliesText.textContent = `Hide replies (${currentCount + 1})`;
+                            }
+                        }
+                    }
+                    
+                    // Reload comments to show the new reply
+                    loadPostComments(postId);
+                    
+                    // Update comment count
+                    const commentCountEl = document.getElementById('comment-count-' + postId);
+                    if (commentCountEl) {
+                        commentCountEl.textContent = data.comments_count || 0;
+                    }
+                    // Update view all comments text
+                    const viewCommentsBtn = document.querySelector(`.view-comments-btn[data-post-id="${postId}"]`);
+                    if (viewCommentsBtn) {
+                        const commentsSection = document.getElementById('comments-section-' + postId);
+                        if (commentsSection && commentsSection.style.display !== 'none') {
+                            viewCommentsBtn.textContent = 'Hide all comments';
+                        } else {
+                            viewCommentsBtn.textContent = `View all ${data.comments_count || 0} comments`;
+                        }
+                    }
+                } else {
+                    console.error('Error posting reply:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error posting reply:', error);
+            });
+        }
+
+        // Post comment button click handler
+        document.querySelectorAll('.post-comment-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const postId = this.getAttribute('data-post-id');
+                const inputElement = document.getElementById('comment-input-' + postId);
+                if (postId && inputElement) {
+                    postComment(postId, inputElement);
+                }
+            });
+        });
+
+        // Post comment simple button click handler (for simple add comment section)
+        document.querySelectorAll('.post-comment-simple-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const postId = this.getAttribute('data-post-id');
+                const inputElement = document.getElementById('comment-input-simple-' + postId);
+                if (postId && inputElement) {
+                    postComment(postId, inputElement);
+                }
+            });
+        });
+
+        // Enter key handler for comment inputs
+        document.querySelectorAll('.comment-input, .comment-input-simple').forEach(function(input) {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const postId = this.getAttribute('data-post-id');
+                    if (postId) {
+                        postComment(postId, this);
+                    }
+                }
+            });
+        });
+    });
+    
+    // Update new events badge
+    function updateEventsBadges() {
+        fetch('/api/events/new-count')
+            .then(response => response.json())
+            .then(data => {
+                const count = data.new_count;
+                const mobileEventsBadge = document.getElementById('mobile-events-badge');
+                const desktopEventsBadge = document.getElementById('desktop-events-badge');
+                
+                if (count > 0) {
+                    if (mobileEventsBadge) {
+                        mobileEventsBadge.textContent = count;
+                        mobileEventsBadge.classList.remove('d-none');
+                    }
+                    if (desktopEventsBadge) {
+                        desktopEventsBadge.textContent = count;
+                        desktopEventsBadge.classList.remove('d-none');
+                    }
+                } else {
+                    if (mobileEventsBadge) {
+                        mobileEventsBadge.classList.add('d-none');
+                    }
+                    if (desktopEventsBadge) {
+                        desktopEventsBadge.classList.add('d-none');
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching new events count:', error));
+    }
+    
+    // Update events badges on page load
+    updateEventsBadges();
+    
+    // Hide preloader when page is loaded
+    window.addEventListener('load', function() {
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+            setTimeout(function() {
+                preloader.classList.add('hidden');
+                // Remove preloader from DOM after animation
+                setTimeout(function() {
+                    preloader.remove();
+                }, 500);
+            }, 500); // Show preloader for at least 500ms
+        }
+    });
+    </script>
+</body>
+</html>

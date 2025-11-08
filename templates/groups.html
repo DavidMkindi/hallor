@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+
+{% block title %}Group Details - {{ group.name }}{% endblock %}
+
+{% block content %}
+<script>
+document.body.classList.add('groups-page');
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        mobileHeader.innerHTML = '';
+        const backButton = document.createElement('a');
+        backButton.href = '/groups';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'flex-grow-1 d-flex justify-content-center mobile-groups-title';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Group Info</h5>';
+        mobileHeader.appendChild(titleDiv);
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <div class="d-none d-lg-block mb-4">
+                    <div class="d-flex align-items-center">
+                        <a href="/groups" class="btn btn-link text-body p-1 me-2">
+                            <i class="bi bi-arrow-left fs-5"></i>
+                        </a>
+                        <h4 class="mb-0 fw-bold text-body">Group Info</h4>
+                    </div>
+                </div>
+                
+                <div class="groups-detail-container">
+                    <!-- Group Header -->
+                    <div class="text-center mb-4 pb-4 border-bottom">
+                        {% set avatar_filename = group.avatar.split('/')[-1] if '/' in group.avatar else group.avatar %}
+                        {% set avatar_filename = avatar_filename.split('\\')[-1] if '\\' in avatar_filename else avatar_filename %}
+                        <img src="{{ url_for('serve_group_image', filename=avatar_filename) }}" 
+                             alt="{{ group.name }}"
+                             class="rounded-circle mb-3"
+                             style="width: 120px; height: 120px; object-fit: cover;">
+                        <h4 class="fw-bold text-body mb-2">{{ group.name }}</h4>
+                        <p class="text-body-secondary mb-0">{{ group.description }}</p>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="mb-4">
+                        <div class="notification-item p-3 mb-3" id="shareGroupBtn">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-share fs-5 me-3 text-body"></i>
+                                    <span class="text-body">Share Group</span>
+                                </div>
+                                <i class="bi bi-chevron-right text-body-secondary"></i>
+                            </div>
+                        </div>
+                        
+                        {% if group.is_admin %}
+                        <div class="notification-item p-3 mb-3" id="addMembersBtn">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-plus fs-5 me-3 text-body"></i>
+                                    <span class="text-body">Add Members</span>
+                                </div>
+                                <i class="bi bi-chevron-right text-body-secondary"></i>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Group Info -->
+                    <div class="mb-4">
+                        <h6 class="text-body-secondary text-uppercase small mb-3 px-3">Group Info</h6>
+                        <div class="notification-item p-3 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-body-secondary">Privacy</span>
+                                <span class="fw-semibold text-body">{{ group.privacy }}</span>
+                            </div>
+                        </div>
+                        <div class="notification-item p-3 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-body-secondary">Created</span>
+                                <span class="fw-semibold text-body">{{ group.created_at }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Admin Section -->
+                    {% if group.is_admin %}
+                    <div class="mb-4">
+                        <h6 class="text-body-secondary text-uppercase small mb-3 px-3">Admin Settings</h6>
+                        <div class="notification-item p-3 mb-2" id="editGroupNameBtn">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-pencil fs-5 me-3 text-body"></i>
+                                    <span class="text-body">Edit Group Name</span>
+                                </div>
+                                <i class="bi bi-chevron-right text-body-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="notification-item p-3 mb-2" id="editDescriptionBtn">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-pencil fs-5 me-3 text-body"></i>
+                                    <span class="text-body">Edit Description</span>
+                                </div>
+                                <i class="bi bi-chevron-right text-body-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="notification-item p-3 mb-2" id="changePrivacyBtn">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-shield-lock fs-5 me-3 text-body"></i>
+                                    <span class="text-body">Change Privacy</span>
+                                </div>
+                                <i class="bi bi-chevron-right text-body-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="notification-item p-3 mb-2" id="changeAvatarBtn">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-image fs-5 me-3 text-body"></i>
+                                    <span class="text-body">Change Group Icon</span>
+                                </div>
+                                <i class="bi bi-chevron-right text-body-secondary"></i>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Members List -->
+                    <div class="mb-4">
+                        <h6 class="text-body-secondary text-uppercase small mb-3 px-3">
+                            Members ({{ group.members|length if group.members else group.members_count }})
+                        </h6>
+                        {% if group.members %}
+                            {% for member in group.members %}
+                                <div class="notification-item p-3 mb-2 d-flex align-items-center">
+                                    {% set member_avatar = member.avatar if member.avatar else 'avatar-1.jpg' %}
+                                    <img src="{{ url_for('serve_avatar', filename=member_avatar) }}" 
+                                         alt="{{ member.full_name }}"
+                                         class="rounded-circle me-3"
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center">
+                                            <span class="fw-semibold text-body">{{ member.full_name }}</span>
+                                            {% if member.is_admin %}
+                                                <span class="badge bg-primary ms-2" style="font-size: 0.65rem;">Admin</span>
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-body-secondary">@{{ member.username }}</small>
+                                    </div>
+                                    {% if group.is_admin and not member.is_admin %}
+                                        <button class="btn btn-link text-danger p-1 removeMemberBtn" data-username="{{ member.username }}" title="Remove member">
+                                            <i class="bi bi-x-circle fs-5"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-3">
+                                <p class="text-body-secondary">No members found</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Leave Group -->
+                    {% if not group.is_admin %}
+                    <div class="mb-4">
+                        <button class="btn btn-outline-danger w-100" id="leaveGroupBtn">
+                            <i class="bi bi-box-arrow-right me-2"></i>Leave Group
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="mb-4">
+                        <button class="btn btn-outline-danger w-100" id="deleteGroupBtn">
+                            <i class="bi bi-trash me-2"></i>Delete Group
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Group Name Modal -->
+<div class="modal fade" id="editGroupNameModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Edit Group Name</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="newGroupName" value="{{ group.name }}" maxlength="50">
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveGroupNameBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Description Modal -->
+<div class="modal fade" id="editDescriptionModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Edit Description</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <textarea class="form-control" id="newDescription" rows="3" maxlength="200">{{ group.description }}</textarea>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveDescriptionBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Privacy Modal -->
+<div class="modal fade" id="changePrivacyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Change Privacy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <select class="form-select" id="newPrivacy">
+                    <option value="Public" {% if group.privacy == 'Public' %}selected{% endif %}>Public - Anyone can join</option>
+                    <option value="Private" {% if group.privacy == 'Private' %}selected{% endif %}>Private - Approval required</option>
+                </select>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="savePrivacyBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Avatar Modal -->
+<div class="modal fade" id="changeAvatarModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Change Group Icon</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="file" class="form-control" id="newAvatar" accept="image/*">
+                <div id="avatarPreview" class="mt-3 text-center" style="display: none;">
+                    <img id="previewAvatarImg" src="" alt="Preview" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveAvatarBtn">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Members Modal -->
+<div class="modal fade" id="addMembersModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Add Members</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control mb-3" id="searchUsersInput" placeholder="Search users by username...">
+                <div id="usersList" class="list-group"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const groupId = {{ group.id }};
+const isAdmin = {{ 'true' if group.is_admin else 'false' }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Share Group
+    document.getElementById('shareGroupBtn')?.addEventListener('click', function() {
+        const shareUrl = window.location.href;
+        if (navigator.share) {
+            navigator.share({ title: '{{ group.name }}', url: shareUrl });
+        } else {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                alert('Group link copied to clipboard!');
+            });
+        }
+    });
+    
+    // Edit Group Name
+    const editGroupNameBtn = document.getElementById('editGroupNameBtn');
+    if (editGroupNameBtn) {
+        editGroupNameBtn.addEventListener('click', function() {
+            new bootstrap.Modal(document.getElementById('editGroupNameModal')).show();
+        });
+    }
+    
+    document.getElementById('saveGroupNameBtn')?.addEventListener('click', function() {
+        const newName = document.getElementById('newGroupName').value.trim();
+        if (!newName) {
+            alert('Group name cannot be empty');
+            return;
+        }
+        fetch(`/api/groups/${groupId}/update`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name: newName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to update group name'));
+            }
+        });
+    });
+    
+    // Edit Description
+    const editDescriptionBtn = document.getElementById('editDescriptionBtn');
+    if (editDescriptionBtn) {
+        editDescriptionBtn.addEventListener('click', function() {
+            new bootstrap.Modal(document.getElementById('editDescriptionModal')).show();
+        });
+    }
+    
+    document.getElementById('saveDescriptionBtn')?.addEventListener('click', function() {
+        const newDesc = document.getElementById('newDescription').value.trim();
+        fetch(`/api/groups/${groupId}/update`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ description: newDesc })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to update description'));
+            }
+        });
+    });
+    
+    // Change Privacy
+    const changePrivacyBtn = document.getElementById('changePrivacyBtn');
+    if (changePrivacyBtn) {
+        changePrivacyBtn.addEventListener('click', function() {
+            new bootstrap.Modal(document.getElementById('changePrivacyModal')).show();
+        });
+    }
+    
+    document.getElementById('savePrivacyBtn')?.addEventListener('click', function() {
+        const newPrivacy = document.getElementById('newPrivacy').value;
+        fetch(`/api/groups/${groupId}/update`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ privacy: newPrivacy })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to update privacy'));
+            }
+        });
+    });
+    
+    // Change Avatar
+    const changeAvatarBtn = document.getElementById('changeAvatarBtn');
+    if (changeAvatarBtn) {
+        changeAvatarBtn.addEventListener('click', function() {
+            new bootstrap.Modal(document.getElementById('changeAvatarModal')).show();
+        });
+    }
+    
+    document.getElementById('newAvatar')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewAvatarImg').src = e.target.result;
+                document.getElementById('avatarPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    document.getElementById('saveAvatarBtn')?.addEventListener('click', function() {
+        const fileInput = document.getElementById('newAvatar');
+        if (!fileInput.files[0]) {
+            alert('Please select an image');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('avatar', fileInput.files[0]);
+        fetch(`/api/groups/${groupId}/update`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to update avatar'));
+            }
+        });
+    });
+    
+    // Add Members
+    const addMembersBtn = document.getElementById('addMembersBtn');
+    if (addMembersBtn) {
+        addMembersBtn.addEventListener('click', function() {
+            new bootstrap.Modal(document.getElementById('addMembersModal')).show();
+            loadUsers();
+        });
+    }
+    
+    function loadUsers() {
+        fetch('/api/users')
+        .then(response => response.json())
+        .then(data => {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            const currentMembers = {{ group.members|map(attribute='username')|list|tojson|safe }};
+            data.filter(u => !currentMembers.includes(u.username) && u.username !== '{{ session.username }}')
+                .forEach(user => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item d-flex align-items-center';
+                    item.innerHTML = `
+                        <img src="/database/avatars/${user.avatar || 'avatar-1.jpg'}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">${user.full_name || user.username}</div>
+                            <small class="text-body-secondary">@${user.username}</small>
+                        </div>
+                        <button class="btn btn-primary btn-sm addUserBtn" data-username="${user.username}">Add</button>
+                    `;
+                    usersList.appendChild(item);
+                });
+            
+            document.querySelectorAll('.addUserBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    fetch(`/api/groups/${groupId}/add-member`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ username: username })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to add member'));
+                        }
+                    });
+                });
+            });
+        });
+    }
+    
+    // Remove Member
+    document.querySelectorAll('.removeMemberBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('Remove this member from the group?')) return;
+            const username = this.getAttribute('data-username');
+            fetch(`/api/groups/${groupId}/remove-member`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to remove member'));
+                }
+            });
+        });
+    });
+    
+    // Leave Group
+    document.getElementById('leaveGroupBtn')?.addEventListener('click', function() {
+        if (!confirm('Are you sure you want to leave this group?')) return;
+        fetch(`/api/groups/${groupId}/leave`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/groups';
+            } else {
+                alert('Error: ' + (data.error || 'Failed to leave group'));
+            }
+        });
+    });
+    
+    // Delete Group
+    document.getElementById('deleteGroupBtn')?.addEventListener('click', function() {
+        if (!confirm('Are you sure you want to delete this group? This action cannot be undone.')) return;
+        fetch(`/api/groups/${groupId}/delete`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/groups';
+            } else {
+                alert('Error: ' + (data.error || 'Failed to delete group'));
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.groups-detail-container { padding: 1rem; }
+.notification-item { cursor: pointer; transition: background-color 0.2s; }
+.notification-item:hover { background-color: var(--bs-body-secondary-bg); }
+</style>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Post - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add post-view-page class to body for CSS targeting -->
+<script>
+// Add post-view-page class to body element immediately
+document.body.classList.add('post-view-page');
+
+// Modify mobile header for post view page - match groups page style
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add post title (centered)
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'flex-grow-1 d-flex justify-content-center mobile-post-title';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Post</h5>';
+        mobileHeader.appendChild(titleDiv);
+        
+        // Add empty placeholder for balance (like groups page but no action button needed)
+        const placeholder = document.createElement('div');
+        placeholder.className = 'p-1';
+        placeholder.style.width = '32px';
+        mobileHeader.appendChild(placeholder);
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header - Match groups page style -->
+                <div class="d-none d-lg-block mb-4">
+                    <h4 class="mb-0 fw-bold text-body">Post</h4>
+                </div>
+                
+                <!-- Single Post Display - Only this post shown -->
+                <div class="posts-container">
+                    {% include 'posts/post_card.html' with context %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

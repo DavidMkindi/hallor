@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Hallor{% endblock %}
+
+{% block content %}
+<!-- Hide header and footer on mobile/tablet for login page -->
+<style>
+/* Hide header and nav on mobile/tablet for login page */
+@media (max-width: 991.98px) {
+    #main-header,
+    #mobile-bottom-nav {
+        display: none !important;
+    }
+}
+
+/* Change blue to red on login page */
+.btn-primary {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.btn-primary:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+.btn-primary:focus {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5) !important;
+}
+
+.text-primary {
+    color: #dc3545 !important;
+}
+
+.text-primary:hover {
+    color: #c82333 !important;
+}
+
+/* Remove focus borders/outlines from input boxes */
+.form-control:focus,
+.form-control:active,
+input:focus,
+input:active,
+textarea:focus,
+textarea:active {
+    outline: none !important;
+    border-color: var(--bs-border-color) !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus ring from input group */
+.input-group:focus-within .form-control {
+    outline: none !important;
+    border-color: var(--bs-border-color) !important;
+    box-shadow: none !important;
+}
+
+/* Change checkbox color to red when checked */
+.form-check-input:checked {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.form-check-input:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+}
+</style>
+<script>
+(function() {
+    function hideElements() {
+        // Hide header on mobile/tablet
+        const header = document.getElementById('main-header');
+        if (header) {
+            header.classList.add('d-none', 'd-lg-block');
+        }
+        
+        // Hide mobile bottom nav
+        const mobileNav = document.getElementById('mobile-bottom-nav');
+        if (mobileNav) {
+            mobileNav.style.display = 'none';
+        }
+    }
+    
+    // Try immediately
+    hideElements();
+    
+    // Also try on DOMContentLoaded as fallback
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', hideElements);
+    }
+})();
+</script>
+
+<div class="container-fluid d-flex align-items-center justify-content-center min-vh-100" style="padding-top: 20px; padding-bottom: 20px;">
+    <div class="row w-100 justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4 p-md-5">
+                    <!-- Logo -->
+                    <div class="text-center mb-4">
+                        <a class="navbar-brand fw-bold fs-2 hallor-logo d-inline-flex align-items-center" href="/">
+                            <span class="hallor-text">Hall</span><img src="/static/images/handlogo.png" class="hallor-hand" alt="hand" style="height: 1.2em;"><span class="hallor-text">r</span>
+                        </a>
+                        <p class="text-body-secondary mt-3 mb-0">Welcome back! Please login to your account.</p>
+                    </div>
+
+                    <!-- Error/Success Messages -->
+                    {% if error %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+
+                    {% if success %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>{{ success }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+
+                    <!-- Login Form -->
+                    <form method="POST" action="/login" id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label text-body">Username or Email</label>
+                            <div class="input-group">
+                                <span class="input-group-text custom-input-group border-0">
+                                    <i class="bi bi-person text-body"></i>
+                                </span>
+                                <input type="text" class="form-control border-0 custom-form-control text-body" 
+                                       id="username" name="username" placeholder="Enter your username or email" 
+                                       required autofocus>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label text-body">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text custom-input-group border-0">
+                                    <i class="bi bi-lock text-body"></i>
+                                </span>
+                                <input type="password" class="form-control border-0 custom-form-control text-body" 
+                                       id="password" name="password" placeholder="Enter your password" required>
+                                <button class="btn btn-outline-secondary border-0" type="button" id="togglePassword" 
+                                        style="border-left: 1px solid var(--bs-border-color) !important;">
+                                    <i class="bi bi-eye" id="togglePasswordIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+                                <label class="form-check-label text-body-secondary small" for="rememberMe">
+                                    Remember me
+                                </label>
+                            </div>
+                            <a href="#" class="text-decoration-none small" style="color: #dc3545 !important;">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3" id="loginBtn">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="text-center my-4">
+                        <span class="text-body-secondary small">OR</span>
+                    </div>
+
+                    <!-- Register Link -->
+                    <div class="text-center">
+                        <p class="text-body-secondary mb-0">Don't have an account? 
+                            <a href="/register" class="text-decoration-none fw-semibold" style="color: #dc3545 !important;">Sign up</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background-color: var(--bs-body-bg);
+}
+
+#togglePassword {
+    background-color: transparent;
+}
+
+#togglePassword:hover {
+    background-color: var(--bs-secondary-bg);
+}
+
+/* Full height on mobile/tablet when header/footer are hidden */
+@media (max-width: 991.98px) {
+    html, body {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        overflow: hidden !important;
+        height: 100vh !important;
+        position: fixed !important;
+        width: 100% !important;
+    }
+    
+    #main-content {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+    }
+    
+    /* Make form full width on mobile/tablet */
+    .container-fluid {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        height: 100vh !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .row {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        width: 100% !important;
+    }
+    
+    .col-12 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    
+    .card {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        border-radius: 0 !important;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+
+    if (togglePassword && passwordInput && toggleIcon) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        });
+    }
+
+    // Form submission
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const loginBtn = document.getElementById('loginBtn');
+            if (loginBtn) {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Logging in...';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+

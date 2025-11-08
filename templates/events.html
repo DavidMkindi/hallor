@@ -1,0 +1,512 @@
+{% extends "base.html" %}
+
+{% block title %}Events - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add events-page class to body for CSS targeting -->
+<script>
+// Add events-page class to body element immediately
+document.body.classList.add('events-page');
+
+// Modify mobile header for events page - show title by default, toggle to search
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add title/search container - starts with title visible
+        const titleSearchContainer = document.createElement('div');
+        titleSearchContainer.className = 'flex-grow-1';
+        titleSearchContainer.style.cssText = 'padding: 0 0.5rem 0 0.25rem; min-width: 0;';
+        titleSearchContainer.id = 'mobileTitleSearchContainer';
+        
+        // Title (default visible)
+        const titleDiv = document.createElement('div');
+        titleDiv.id = 'mobileEventsTitle';
+        titleDiv.className = 'd-flex justify-content-center align-items-center';
+        titleDiv.style.cssText = 'height: 36px;';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Events</h5>';
+        
+        // Search box (hidden by default)
+        const searchDiv = document.createElement('div');
+        searchDiv.id = 'mobileEventsSearchContainer';
+        searchDiv.style.display = 'none';
+        searchDiv.innerHTML = `
+            <div class="input-group" style="height: 36px;">
+                <span class="input-group-text custom-input-group border-0" style="background-color: var(--bs-body-bg); padding: 0.375rem 0.5rem;">
+                    <i class="bi bi-search text-body" style="font-size: 0.875rem;"></i>
+                </span>
+                <input type="text" 
+                       value=""
+                       class="form-control border-0 custom-form-control text-body" 
+                       placeholder="Search..." 
+                       id="mobileEventsSearchInput"
+                       style="background-color: var(--bs-body-bg); padding: 0.375rem 0.5rem; font-size: 0.875rem; outline: none !important; box-shadow: none !important; border: none !important;"
+                       autocomplete="off">
+            </div>
+        `;
+        
+        titleSearchContainer.appendChild(titleDiv);
+        titleSearchContainer.appendChild(searchDiv);
+        mobileHeader.appendChild(titleSearchContainer);
+        
+        // Add search/close toggle button
+        const toggleButton = document.createElement('button');
+        toggleButton.className = 'btn btn-link text-body p-1 mobile-search-toggle-btn';
+        toggleButton.id = 'mobileSearchToggleBtn';
+        toggleButton.style.cssText = 'width: 32px;';
+        toggleButton.innerHTML = '<i class="bi bi-search fs-5"></i>';
+        toggleButton.addEventListener('click', function() {
+            const titleDiv = document.getElementById('mobileEventsTitle');
+            const searchContainer = document.getElementById('mobileEventsSearchContainer');
+            const searchInput = document.getElementById('mobileEventsSearchInput');
+            
+            if (titleDiv.style.display !== 'none') {
+                // Switch to search mode
+                titleDiv.style.display = 'none';
+                searchContainer.style.display = 'block';
+                toggleButton.innerHTML = '<i class="bi bi-x-lg fs-5"></i>';
+                // Focus on search input
+                setTimeout(() => {
+                    if (searchInput) searchInput.focus();
+                }, 100);
+            } else {
+                // Switch to title mode
+                titleDiv.style.display = 'flex';
+                searchContainer.style.display = 'none';
+                toggleButton.innerHTML = '<i class="bi bi-search fs-5"></i>';
+                // Clear search
+                if (searchInput) {
+                    searchInput.value = '';
+                    performEventsSearch('');
+                }
+            }
+        });
+        mobileHeader.appendChild(toggleButton);
+        
+        // AJAX search on input (debounced) - updates only events section
+        setTimeout(() => {
+            const mobileSearchInput = document.getElementById('mobileEventsSearchInput');
+            if (mobileSearchInput) {
+                mobileSearchInput.addEventListener('input', function() {
+                    clearTimeout(eventsSearchTimeout);
+                    const query = this.value.trim();
+                    eventsSearchTimeout = setTimeout(() => {
+                        performEventsSearch(query);
+                    }, 300);
+                });
+            }
+        }, 100);
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header with Upload Button -->
+                <div class="d-none d-lg-block mb-2 px-3 pt-3">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <a href="/events/upload" class="btn btn-danger">
+                            <i class="bi bi-plus-circle me-2"></i>Create Event
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Search Bar (Desktop and Tablet) - Hidden by default -->
+                <div class="d-none d-sm-block mb-3" id="desktopSearchContainer" style="display: none !important;">
+                    <div class="notification-item p-3 search-bar-container" style="border-radius: 0; margin: 0;">
+                        <div class="input-group" style="width: 100%;">
+                            <span class="input-group-text custom-input-group border-0">
+                                <i class="bi bi-search text-body"></i>
+                            </span>
+                            <input type="text" 
+                                   value=""
+                                   class="form-control border-0 custom-form-control text-body" 
+                                   placeholder="Search for events, categories, hosts..." 
+                                   id="eventsSearchInput"
+                                   style="flex: 1;"
+                                   autocomplete="off">
+                            <button type="button" 
+                                    class="btn btn-link text-body border-0" 
+                                    id="desktopSearchToggleBtn"
+                                    style="padding: 0.375rem 0.75rem;"
+                                    title="Close search">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Title (Desktop and Tablet) - Visible by default -->
+                <div class="d-none d-sm-block mb-4 px-3" id="desktopPageTitle">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0 fw-bold text-body">Discover Events</h4>
+                        <button type="button" 
+                                class="btn btn-link text-body p-0" 
+                                id="desktopSearchOpenBtn"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                title="Search events">
+                            <i class="bi bi-search fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Category Filter Tabs -->
+                <div class="mb-4 px-3">
+                    <ul class="nav nav-pills flex-nowrap overflow-auto" id="categoryTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-category="all" type="button" role="tab">
+                                <i class="bi bi-grid me-2"></i>All
+                            </button>
+                        </li>
+                        {% for cat in categories %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-nowrap" id="{{ cat }}-tab" data-bs-toggle="pill" data-category="{{ cat }}" type="button" role="tab">
+                                <i class="bi {{ cat|get_category_icon }} me-2"></i>{{ cat.replace('_', ' ').title() }}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <!-- Events Container -->
+                <div class="events-container" id="eventsGrid">
+                    {% if events %}
+                        {% for event in events %}
+                            <a href="/events/{{ event.id }}" class="text-decoration-none">
+                                <div class="event-item d-flex align-items-center border-bottom {% if event.is_new %}unread event-new event-premium{% endif %}" data-category="{{ event.category }}" data-event-id="{{ event.id }}" data-is-new="{{ 'true' if event.is_new else 'false' }}">
+                                    <!-- Event Icon/Image -->
+                                    <div class="event-avatar me-3 position-relative">
+                                    {% if event.featured_image %}
+                                    {% set image_filename = event.featured_image.split('/')[-1] if '/' in event.featured_image else event.featured_image %}
+                                    {% set image_filename = image_filename.split('\\')[-1] if '\\' in image_filename else image_filename %}
+                                    <img src="{{ url_for('serve_event_image_db', filename=image_filename) }}" 
+                                             alt="{{ event.title }}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-calendar-event text-white fs-6"></i>
+                                    </div>
+                                    {% endif %}
+                                    
+                                        <!-- Category Icon Badge -->
+                                        <div class="position-absolute bottom-0 end-0 bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 18px; height: 18px; border: 2px solid var(--bs-body-bg);">
+                                            <i class="bi {{ event.category|get_category_icon }} text-white" style="font-size: 0.5rem;"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Event Content -->
+                                    <div class="event-content flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="event-text d-flex align-items-center gap-2">
+                                                <span class="fw-semibold text-body">{{ event.title }}</span>
+                                                {% if event.is_new %}
+                                                <img src="/static/images/events.png" alt="Event" class="event-badge" style="height: 16px; width: auto; display: inline-block;">
+                                                {% endif %}
+                                                <span class="text-body-secondary ms-1">• {{ event.category.replace('_', ' ').title() }}</span>
+                                            </div>
+                                            
+                                            <!-- New Event Indicator -->
+                                            {% if event.is_new %}
+                                                <div class="unread-indicator me-2">
+                                                    <div class="bg-danger rounded-circle" style="width: 8px; height: 8px;"></div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Event Info Row -->
+                                        <div class="mt-1">
+                                            <small class="text-danger fw-bold">{{ event.date }} at {{ event.time }}</small>
+                                    </div>
+                                    
+                                        <!-- Attendees Row -->
+                                        <div class="mt-1">
+                                            <small class="text-body-secondary"><span id="attendees-count-{{ event.id }}">{{ event.attendees_count }}</span> attending • {{ event.host }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <!-- Empty State (shown when no events or all filtered out) -->
+                {% if not events %}
+                <div class="text-center py-5" id="emptyState">
+                    <i class="bi bi-calendar-week fs-1 text-body-secondary mb-3"></i>
+                    <h5 class="text-body-secondary">No events yet</h5>
+                    <p class="text-body-secondary">Create the first event and invite people to join!</p>
+                    <a href="/events/upload" class="btn btn-danger mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>Create Event
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Events Page Styles -->
+<style>
+/* Remove focus border from search inputs */
+#eventsSearchInput:focus,
+#mobileEventsSearchInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.search-bar-container .input-group:focus-within {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Ensure new events appear first */
+.events-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-item.event-new,
+.event-item.event-premium {
+    order: -1;
+}
+
+.event-item:not(.event-new):not(.event-premium) {
+    order: 1;
+}
+
+/* Search toggle button styling */
+#desktopSearchOpenBtn,
+#desktopSearchToggleBtn,
+#mobileSearchToggleBtn {
+    transition: opacity 0.2s ease;
+}
+
+#desktopSearchOpenBtn:hover,
+#desktopSearchToggleBtn:hover,
+#mobileSearchToggleBtn:hover {
+    opacity: 0.7;
+}
+
+/* Smooth transitions for search container */
+#desktopSearchContainer,
+#desktopPageTitle {
+    transition: opacity 0.2s ease;
+}
+
+/* Mobile search container transitions */
+#mobileEventsTitle,
+#mobileEventsSearchContainer {
+    transition: opacity 0.2s ease;
+}
+
+/* Event badge image - make visible in dark mode */
+.event-badge {
+    height: 16px;
+    width: auto;
+}
+
+[data-bs-theme="dark"] .event-badge {
+    filter: brightness(0) invert(1) !important;
+}
+
+[data-bs-theme="light"] .event-badge {
+    filter: none !important;
+}
+</style>
+
+<!-- Event Management Script -->
+<script>
+// Global variables for events search
+let eventsSearchTimeout = null;
+let lastEventsSearchData = null;
+let currentCategoryFilter = 'all';
+
+// Function to perform client-side search and filter events
+function performEventsSearch(query) {
+    const eventsContainer = document.getElementById('eventsGrid');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (!eventsContainer) return;
+    
+    const eventItems = document.querySelectorAll('.event-item');
+    let visibleCount = 0;
+    const queryLower = query.toLowerCase().trim();
+    
+    eventItems.forEach(item => {
+        const itemLink = item.parentElement;
+        const eventText = item.querySelector('.event-text');
+        const eventContent = item.querySelector('.event-content');
+        
+        // Get searchable text
+        let searchableText = '';
+        if (eventText) {
+            searchableText += eventText.textContent.toLowerCase();
+        }
+        if (eventContent) {
+            searchableText += ' ' + eventContent.textContent.toLowerCase();
+        }
+        
+        // Check if matches search query
+        const matchesSearch = !queryLower || searchableText.includes(queryLower);
+        const category = item.getAttribute('data-category');
+        const matchesCategory = currentCategoryFilter === 'all' || category === currentCategoryFilter;
+        
+        if (matchesSearch && matchesCategory) {
+            itemLink.style.display = 'block';
+            visibleCount++;
+        } else {
+            itemLink.style.display = 'none';
+        }
+    });
+    
+    // Show/hide empty state
+    if (emptyState) {
+        if (visibleCount === 0) {
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+        }
+    }
+    
+    // Show/hide no events message
+    const noEventsMessage = document.getElementById('noEventsMessage');
+    if (visibleCount === 0 && eventsContainer) {
+        if (!noEventsMessage && queryLower) {
+            const emptyMessage = document.createElement('div');
+            emptyMessage.id = 'noEventsMessage';
+            emptyMessage.className = 'text-center py-5 w-100';
+            emptyMessage.innerHTML = '<i class="bi bi-calendar-x fs-1 text-body-secondary mb-3"></i><h5 class="text-body-secondary">No events found</h5><p class="text-body-secondary">Try a different search term</p>';
+            eventsContainer.parentElement.appendChild(emptyMessage);
+        }
+    } else {
+        if (noEventsMessage) {
+            noEventsMessage.remove();
+        }
+    }
+}
+
+// Function to sort events: new events first
+function sortEvents() {
+    const eventsContainer = document.getElementById('eventsGrid');
+    if (!eventsContainer) return;
+    
+    const eventLinks = Array.from(eventsContainer.querySelectorAll('a'));
+    const sortedLinks = eventLinks.sort((a, b) => {
+        const itemA = a.querySelector('.event-item');
+        const itemB = b.querySelector('.event-item');
+        const isNewA = itemA && itemA.getAttribute('data-is-new') === 'true';
+        const isNewB = itemB && itemB.getAttribute('data-is-new') === 'true';
+        
+        // New events first
+        if (isNewA && !isNewB) return -1;
+        if (!isNewA && isNewB) return 1;
+        return 0;
+    });
+    
+    // Re-append in sorted order
+    sortedLinks.forEach(link => {
+        eventsContainer.appendChild(link);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Desktop/Tablet search toggle functionality
+    const desktopSearchContainer = document.getElementById('desktopSearchContainer');
+    const desktopPageTitle = document.getElementById('desktopPageTitle');
+    const desktopSearchOpenBtn = document.getElementById('desktopSearchOpenBtn');
+    const desktopSearchToggleBtn = document.getElementById('desktopSearchToggleBtn');
+    const searchInput = document.getElementById('eventsSearchInput');
+    
+    // Open search (show search bar, hide title)
+    if (desktopSearchOpenBtn) {
+        desktopSearchOpenBtn.addEventListener('click', function() {
+            if (desktopSearchContainer) {
+                desktopSearchContainer.style.display = 'block';
+            }
+            if (desktopPageTitle) {
+                desktopPageTitle.style.display = 'none';
+            }
+            // Focus on search input
+            setTimeout(() => {
+                if (searchInput) searchInput.focus();
+            }, 100);
+        });
+    }
+    
+    // Close search (hide search bar, show title)
+    if (desktopSearchToggleBtn) {
+        desktopSearchToggleBtn.addEventListener('click', function() {
+            if (desktopSearchContainer) {
+                desktopSearchContainer.style.display = 'none';
+            }
+            if (desktopPageTitle) {
+                desktopPageTitle.style.display = 'block';
+            }
+            // Clear search
+            if (searchInput) {
+                searchInput.value = '';
+                performEventsSearch('');
+            }
+        });
+    }
+    
+    // Search functionality with debounce (desktop/tablet)
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(eventsSearchTimeout);
+            const query = this.value.trim();
+            eventsSearchTimeout = setTimeout(() => {
+                performEventsSearch(query);
+            }, 300);
+        });
+    }
+    
+    // Category filter functionality
+    const categoryButtons = document.querySelectorAll('#categoryTabs button');
+    const eventsContainer = document.getElementById('eventsGrid');
+    
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            currentCategoryFilter = category;
+            
+            // Update active state
+            categoryButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // Get current search query
+            const currentQuery = (searchInput && searchInput.value) || 
+                                 (document.getElementById('mobileEventsSearchInput') && document.getElementById('mobileEventsSearchInput').value) || 
+                                 '';
+            
+            // Filter events
+            performEventsSearch(currentQuery);
+            
+            // Re-sort visible events to maintain new event priority
+            sortEvents();
+        });
+    });
+    
+    // Initial sort of events
+    sortEvents();
+});
+</script>
+{% endblock %}

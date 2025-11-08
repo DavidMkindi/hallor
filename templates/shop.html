@@ -1,0 +1,636 @@
+{% extends "base.html" %}
+
+{% block title %}Shop - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add shop-page class to body for CSS targeting -->
+<script>
+// Add shop-page class to body element immediately
+document.body.classList.add('shop-page');
+
+// Modify mobile header for shop page - show title by default, toggle to search
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add title/search container - starts with title visible
+        const titleSearchContainer = document.createElement('div');
+        titleSearchContainer.className = 'flex-grow-1';
+        titleSearchContainer.style.cssText = 'padding: 0 0.5rem 0 0.25rem; min-width: 0;';
+        titleSearchContainer.id = 'mobileTitleSearchContainer';
+        
+        // Title (default visible)
+        const titleDiv = document.createElement('div');
+        titleDiv.id = 'mobileShopTitle';
+        titleDiv.className = 'd-flex justify-content-center align-items-center';
+        titleDiv.style.cssText = 'height: 36px;';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Shop</h5>';
+        
+        // Search box (hidden by default)
+        const searchDiv = document.createElement('div');
+        searchDiv.id = 'mobileShopSearchContainer';
+        searchDiv.style.display = 'none';
+        searchDiv.innerHTML = `
+            <div class="input-group" style="height: 36px;">
+                <span class="input-group-text custom-input-group border-0" style="background-color: var(--bs-body-bg); padding: 0.375rem 0.5rem;">
+                    <i class="bi bi-search text-body" style="font-size: 0.875rem;"></i>
+                </span>
+                <input type="text" 
+                       value=""
+                       class="form-control border-0 custom-form-control text-body" 
+                       placeholder="Search..." 
+                       id="mobileShopSearchInput"
+                       style="background-color: var(--bs-body-bg); padding: 0.375rem 0.5rem; font-size: 0.875rem; outline: none !important; box-shadow: none !important; border: none !important;"
+                       autocomplete="off">
+            </div>
+        `;
+        
+        titleSearchContainer.appendChild(titleDiv);
+        titleSearchContainer.appendChild(searchDiv);
+        mobileHeader.appendChild(titleSearchContainer);
+        
+        // Add search/close toggle button
+        const toggleButton = document.createElement('button');
+        toggleButton.className = 'btn btn-link text-body p-1 mobile-search-toggle-btn';
+        toggleButton.id = 'mobileSearchToggleBtn';
+        toggleButton.style.cssText = 'width: 32px;';
+        toggleButton.innerHTML = '<i class="bi bi-search fs-5"></i>';
+        toggleButton.addEventListener('click', function() {
+            const titleDiv = document.getElementById('mobileShopTitle');
+            const searchContainer = document.getElementById('mobileShopSearchContainer');
+            const searchInput = document.getElementById('mobileShopSearchInput');
+            
+            if (titleDiv.style.display !== 'none') {
+                // Switch to search mode
+                titleDiv.style.display = 'none';
+                searchContainer.style.display = 'block';
+                toggleButton.innerHTML = '<i class="bi bi-x-lg fs-5"></i>';
+                // Focus on search input
+                setTimeout(() => {
+                    if (searchInput) searchInput.focus();
+                }, 100);
+            } else {
+                // Switch to title mode
+                titleDiv.style.display = 'flex';
+                searchContainer.style.display = 'none';
+                toggleButton.innerHTML = '<i class="bi bi-search fs-5"></i>';
+                // Clear search
+                if (searchInput) {
+                    searchInput.value = '';
+                    performShopSearch('');
+                }
+            }
+        });
+        mobileHeader.appendChild(toggleButton);
+        
+        // AJAX search on input (debounced) - updates only products section
+        // Note: input will be added after search container is created
+        setTimeout(() => {
+            const mobileSearchInput = document.getElementById('mobileShopSearchInput');
+            if (mobileSearchInput) {
+                mobileSearchInput.addEventListener('input', function() {
+                    clearTimeout(shopSearchTimeout);
+                    const query = this.value.trim();
+                    shopSearchTimeout = setTimeout(() => {
+                        performShopSearch(query);
+                    }, 300);
+                });
+            }
+        }, 100);
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header with Upload Button -->
+                <div class="d-none d-lg-block mb-2 px-3 pt-3">
+                    <div class="d-flex align-items-center justify-content-end">
+                        <a href="/shop/upload" class="btn btn-danger">
+                            <i class="bi bi-plus-circle me-2"></i>List Product
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Search Bar (Desktop and Tablet) - Hidden by default -->
+                <div class="d-none d-sm-block mb-3" id="desktopSearchContainer" style="display: none !important;">
+                    <div class="notification-item p-3 search-bar-container" style="border-radius: 0; margin: 0;">
+                        <div class="input-group" style="width: 100%;">
+                            <span class="input-group-text custom-input-group border-0">
+                                <i class="bi bi-search text-body"></i>
+                            </span>
+                            <input type="text" 
+                                   value=""
+                                   class="form-control border-0 custom-form-control text-body" 
+                                   placeholder="Search for products, categories, sellers..." 
+                                   id="shopSearchInput"
+                                   style="flex: 1;"
+                                   autocomplete="off">
+                            <button type="button" 
+                                    class="btn btn-link text-body border-0" 
+                                    id="desktopSearchToggleBtn"
+                                    style="padding: 0.375rem 0.75rem;"
+                                    title="Close search">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Page Title (Desktop and Tablet) - Visible by default -->
+                <div class="d-none d-sm-block mb-4 px-3" id="desktopPageTitle">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0 fw-bold text-body">Browse Products</h4>
+                        <button type="button" 
+                                class="btn btn-link text-body p-0" 
+                                id="desktopSearchOpenBtn"
+                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;"
+                                title="Search products">
+                            <i class="bi bi-search fs-5"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Category Filter Tabs -->
+                <div class="mb-4 px-3">
+                    <ul class="nav nav-pills flex-nowrap overflow-auto" id="categoryTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="all-tab" data-bs-toggle="pill" data-category="all" type="button" role="tab">
+                                <i class="bi bi-grid me-2"></i>All
+                            </button>
+                        </li>
+                        {% for cat in categories %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link text-nowrap" id="{{ cat }}-tab" data-bs-toggle="pill" data-category="{{ cat }}" type="button" role="tab">
+                                <i class="bi {{ get_shop_category_icon(cat) }} me-2"></i>{{ cat.replace('_', ' ').title() }}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <!-- Products Container -->
+                <div class="products-container" id="productsGrid">
+                    {% if products %}
+                        {% for product in products %}
+                            <a href="/shop/{{ product.id }}" class="text-decoration-none">
+                                <div class="product-item d-flex align-items-center border-bottom {% if product.is_new %}unread product-new product-premium{% endif %}" data-category="{{ product.category }}" data-product-id="{{ product.id }}" data-is-new="{{ 'true' if product.is_new else 'false' }}">
+                                    <!-- Product Icon/Image -->
+                                    <div class="product-avatar me-3 position-relative">
+                                    {% if product.featured_image %}
+                                    <img src="{{ url_for('serve_shop_image_db', filename=product.featured_image) }}" 
+                                             alt="{{ product.name }}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-bag text-white fs-6"></i>
+                                    </div>
+                                    {% endif %}
+                                    
+                                        <!-- Category Icon Badge -->
+                                        <div class="position-absolute bottom-0 end-0 bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 18px; height: 18px; border: 2px solid var(--bs-body-bg);">
+                                            <i class="bi {{ get_shop_category_icon(product.category) }} text-white" style="font-size: 0.5rem;"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Product Content -->
+                                    <div class="product-content flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="product-text d-flex align-items-center gap-2">
+                                                <span class="fw-semibold text-body">{{ product.name }}</span>
+                                                {% if product.is_new %}
+                                                <img src="/static/images/new.png" alt="New" class="new-product-badge" style="height: 16px; width: auto;">
+                                                {% endif %}
+                                                <span class="text-body-secondary ms-1">• {{ product.category.replace('_', ' ').title() }}</span>
+                                            </div>
+                                            
+                                            <!-- New Product Indicator -->
+                                            {% if product.is_new %}
+                                                <div class="unread-indicator me-2">
+                                                    <div class="bg-danger rounded-circle" style="width: 8px; height: 8px;"></div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Price Row -->
+                                        <div class="mt-1">
+                                            <small class="text-danger fw-bold">{{ product.currency }}{{ product.price }}</small>
+                                    </div>
+                                    
+                                        <!-- Stock Row -->
+                                        <div class="mt-1">
+                                            <small class="text-body-secondary"><span id="stock-{{ product.id }}">{{ product.stock }}</span> in stock • {{ product.views }} views</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <!-- Empty State (shown when no products or all filtered out) -->
+                {% if not products %}
+                <div class="text-center py-5" id="emptyState">
+                    <i class="bi bi-shop fs-1 text-body-secondary mb-3"></i>
+                    <h5 class="text-body-secondary">No products yet</h5>
+                    <p class="text-body-secondary">List the first product and start selling!</p>
+                    <a href="/shop/upload" class="btn btn-danger mt-3">
+                        <i class="bi bi-plus-circle me-2"></i>List Product
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Shop Page Styles -->
+<style>
+/* Remove focus border from search inputs */
+#shopSearchInput:focus,
+#mobileShopSearchInput:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.search-bar-container .input-group:focus-within {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Ensure new products appear first */
+.products-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-item.product-new,
+.product-item.product-premium {
+    order: -1;
+}
+
+.product-item:not(.product-new):not(.product-premium) {
+    order: 1;
+}
+
+/* Search toggle button styling */
+#desktopSearchOpenBtn,
+#desktopSearchToggleBtn,
+#mobileSearchToggleBtn {
+    transition: opacity 0.2s ease;
+}
+
+#desktopSearchOpenBtn:hover,
+#desktopSearchToggleBtn:hover,
+#mobileSearchToggleBtn:hover {
+    opacity: 0.7;
+}
+
+/* Smooth transitions for search container */
+#desktopSearchContainer,
+#desktopPageTitle {
+    transition: opacity 0.2s ease;
+}
+
+/* Mobile search container transitions */
+#mobileShopTitle,
+#mobileShopSearchContainer {
+    transition: opacity 0.2s ease;
+}
+</style>
+
+<!-- Product Management Script -->
+<script>
+// Global variables for shop search
+let shopSearchTimeout = null;
+let lastShopSearchData = null;
+let currentCategoryFilter = 'all';
+
+// Function to perform AJAX search and update only products section
+// Defined globally so it can be called from mobile header script
+function performShopSearch(query) {
+    const productsContainer = document.getElementById('productsGrid');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (!productsContainer) return;
+    
+    // Show loading state (you can add a spinner if needed)
+    if (query && query.trim() !== '') {
+        // Fetch search results from backend
+        fetch(`/api/shop/search?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Store search data
+                lastShopSearchData = data;
+                
+                // Display products
+                displayProducts(data.products || [], currentCategoryFilter);
+            })
+            .catch(error => {
+                console.error('Shop search error:', error);
+            });
+    } else {
+        // If query is empty, load all products
+        fetch('/api/shop/search')
+            .then(response => response.json())
+            .then(data => {
+                lastShopSearchData = data;
+                displayProducts(data.products || [], currentCategoryFilter);
+            })
+            .catch(error => {
+                console.error('Shop load error:', error);
+            });
+    }
+}
+
+// Function to display products
+function displayProducts(products, categoryFilter = 'all') {
+    const productsContainer = document.getElementById('productsGrid');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (!productsContainer) return;
+    
+    // Filter by category if not 'all'
+    let filteredProducts = products;
+    if (categoryFilter !== 'all') {
+        filteredProducts = products.filter(p => p.category === categoryFilter);
+    }
+    
+    // Clear container
+    productsContainer.innerHTML = '';
+    
+    // Hide empty state if products exist
+    if (emptyState) {
+        emptyState.style.display = filteredProducts.length === 0 ? 'block' : 'none';
+    }
+    
+    // Remove no products message if it exists
+    const noProductsMessage = document.getElementById('noProductsMessage');
+    if (noProductsMessage) {
+        noProductsMessage.remove();
+    }
+    
+    if (filteredProducts.length === 0) {
+        // Show no products message
+        if (categoryFilter !== 'all') {
+            const noProductsMsg = document.createElement('div');
+            noProductsMsg.id = 'noProductsMessage';
+            noProductsMsg.className = 'text-center py-5 w-100';
+            noProductsMsg.innerHTML = '<i class="bi bi-bag-x fs-1 text-body-secondary mb-3"></i><h5 class="text-body-secondary">No products in this category</h5><p class="text-body-secondary">Try selecting a different category</p>';
+            productsContainer.parentElement.appendChild(noProductsMsg);
+        }
+        return;
+    }
+    
+    // Render products
+    filteredProducts.forEach(product => {
+        const productLink = document.createElement('a');
+        productLink.href = `/shop/${product.id}`;
+        productLink.className = 'text-decoration-none';
+        
+        const isNew = product.is_new || false;
+        const newBadgeHtml = isNew ? '<img src="/static/images/new.png" alt="New" class="new-product-badge" style="height: 16px; width: auto;">' : '';
+        const unreadIndicatorHtml = isNew ? '<div class="unread-indicator me-2"><div class="bg-danger rounded-circle" style="width: 8px; height: 8px;"></div></div>' : '';
+        const productClasses = isNew ? 'product-item d-flex align-items-center border-bottom unread product-new product-premium' : 'product-item d-flex align-items-center border-bottom';
+        
+        // Build image URL correctly - use the correct route path
+        // The route is /database/shop/<filename> as defined in app.py
+        // Make sure to properly encode the filename for URL safety
+        let featuredImageHtml = '';
+        if (product.featured_image && product.featured_image.trim() !== '') {
+            // Use encodeURIComponent to handle special characters in filenames
+            const safeFilename = encodeURIComponent(product.featured_image);
+            const imageUrl = `/database/shop/${safeFilename}`;
+            featuredImageHtml = `<img src="${imageUrl}" alt="${escapeHtml(product.name || '')}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">`;
+        } else {
+            featuredImageHtml = `<div class="rounded-circle bg-danger d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;"><i class="bi bi-bag text-white fs-6"></i></div>`;
+        }
+        
+        // Get category icon (matching backend get_shop_category_icon function)
+        const categoryIcon = getShopCategoryIcon(product.category);
+        
+        const categoryDisplay = (product.category || '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        
+        productLink.innerHTML = `
+            <div class="${productClasses}" data-category="${escapeHtml(product.category || '')}" data-product-id="${product.id}" data-is-new="${isNew}">
+                <div class="product-avatar me-3 position-relative">
+                    ${featuredImageHtml}
+                    <div class="position-absolute bottom-0 end-0 bg-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 18px; height: 18px; border: 2px solid var(--bs-body-bg);">
+                        <i class="bi ${categoryIcon} text-white" style="font-size: 0.5rem;"></i>
+                    </div>
+                </div>
+                <div class="product-content flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="product-text d-flex align-items-center gap-2">
+                            <span class="fw-semibold text-body">${escapeHtml(product.name || '')}</span>
+                            ${newBadgeHtml}
+                            <span class="text-body-secondary ms-1">• ${escapeHtml(categoryDisplay)}</span>
+                        </div>
+                        ${unreadIndicatorHtml}
+                    </div>
+                    <div class="mt-1">
+                        <small class="text-danger fw-bold">${escapeHtml(product.currency || '')}${product.price || 0}</small>
+                    </div>
+                    <div class="mt-1">
+                        <small class="text-body-secondary"><span id="stock-${product.id}">${product.stock || 0}</span> in stock • ${product.views || 0} views</small>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        productsContainer.appendChild(productLink);
+    });
+    
+    // Sort products: new products first
+    sortProducts();
+}
+
+// Helper function to escape HTML (prevent XSS)
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+// Helper function to get category icon (matching backend get_shop_category_icon)
+function getShopCategoryIcon(category) {
+    const icons = {
+        'electronics': 'bi-laptop',
+        'fashion': 'bi-bag',
+        'home': 'bi-house',
+        'sports': 'bi-trophy',
+        'food': 'bi-cup-hot',
+        'books': 'bi-book',
+        'toys': 'bi-balloon',
+        'beauty': 'bi-star',
+        'automotive': 'bi-car-front',
+        'garden': 'bi-flower1',
+        'jewelry': 'bi-gem',
+        'pets': 'bi-heart',
+        'music': 'bi-music-note',
+        'games': 'bi-controller',
+        'office': 'bi-briefcase',
+        'health': 'bi-heart-pulse'
+    };
+    return icons[category] || 'bi-shop';
+}
+
+// Function to sort products: new products first
+function sortProducts() {
+    const productsContainer = document.getElementById('productsGrid');
+    if (!productsContainer) return;
+    
+    const productLinks = Array.from(productsContainer.querySelectorAll('a'));
+    const sortedLinks = productLinks.sort((a, b) => {
+        const itemA = a.querySelector('.product-item');
+        const itemB = b.querySelector('.product-item');
+        const isNewA = itemA && itemA.getAttribute('data-is-new') === 'true';
+        const isNewB = itemB && itemB.getAttribute('data-is-new') === 'true';
+        
+        // New products first
+        if (isNewA && !isNewB) return -1;
+        if (!isNewA && isNewB) return 1;
+        return 0;
+    });
+    
+    // Re-append in sorted order
+    sortedLinks.forEach(link => {
+        productsContainer.appendChild(link);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Desktop/Tablet search toggle functionality
+    const desktopSearchContainer = document.getElementById('desktopSearchContainer');
+    const desktopPageTitle = document.getElementById('desktopPageTitle');
+    const desktopSearchOpenBtn = document.getElementById('desktopSearchOpenBtn');
+    const desktopSearchToggleBtn = document.getElementById('desktopSearchToggleBtn');
+    const searchInput = document.getElementById('shopSearchInput');
+    
+    // Open search (show search bar, hide title)
+    if (desktopSearchOpenBtn) {
+        desktopSearchOpenBtn.addEventListener('click', function() {
+            if (desktopSearchContainer) {
+                desktopSearchContainer.style.display = 'block';
+            }
+            if (desktopPageTitle) {
+                desktopPageTitle.style.display = 'none';
+            }
+            // Focus on search input
+            setTimeout(() => {
+                if (searchInput) searchInput.focus();
+            }, 100);
+        });
+    }
+    
+    // Close search (hide search bar, show title)
+    if (desktopSearchToggleBtn) {
+        desktopSearchToggleBtn.addEventListener('click', function() {
+            if (desktopSearchContainer) {
+                desktopSearchContainer.style.display = 'none';
+            }
+            if (desktopPageTitle) {
+                desktopPageTitle.style.display = 'block';
+            }
+            // Clear search
+            if (searchInput) {
+                searchInput.value = '';
+                performShopSearch('');
+            }
+        });
+    }
+    
+    // Search functionality with debounce (desktop/tablet)
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(shopSearchTimeout);
+            const query = this.value.trim();
+            shopSearchTimeout = setTimeout(() => {
+                performShopSearch(query);
+            }, 300);
+        });
+    }
+    
+    // Mobile search input is already handled in the mobile header script above
+    
+    // Category filter functionality
+    const categoryButtons = document.querySelectorAll('#categoryTabs button');
+    const productsContainer = document.getElementById('productsGrid');
+    
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            currentCategoryFilter = category;
+            
+            // Update active state
+            categoryButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+            
+            // If we have search data from AJAX, use it
+            if (lastShopSearchData && lastShopSearchData.products) {
+                displayProducts(lastShopSearchData.products, category);
+            } else {
+                // Otherwise, filter the existing server-rendered products
+                const productItems = document.querySelectorAll('.product-item');
+                let visibleCount = 0;
+                
+                productItems.forEach(item => {
+                    const itemLink = item.parentElement;
+                    if (category === 'all' || item.getAttribute('data-category') === category) {
+                        itemLink.style.display = 'block';
+                        visibleCount++;
+                    } else {
+                        itemLink.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide empty state message
+                const noProductsMessage = document.getElementById('noProductsMessage');
+                if (visibleCount === 0) {
+                    if (!noProductsMessage) {
+                        const emptyMessage = document.createElement('div');
+                        emptyMessage.id = 'noProductsMessage';
+                        emptyMessage.className = 'text-center py-5 w-100';
+                        emptyMessage.innerHTML = '<i class="bi bi-bag-x fs-1 text-body-secondary mb-3"></i><h5 class="text-body-secondary">No products in this category</h5><p class="text-body-secondary">Try selecting a different category</p>';
+                        productsContainer.parentElement.appendChild(emptyMessage);
+                    }
+                } else {
+                    if (noProductsMessage) {
+                        noProductsMessage.remove();
+                    }
+                }
+                
+                // Re-sort visible products to maintain new product priority
+                sortProducts();
+            }
+        });
+    });
+    
+    // Initial sort of products
+    sortProducts();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,728 @@
+{% extends "base.html" %}
+
+{% block title %}Reels - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add reels-page class to body for CSS targeting -->
+<script>
+// Add reels-page class to body element immediately
+document.body.classList.add('reels-page');
+</script>
+
+<!-- Custom Styles for Reels Page -->
+<style>
+body.reels-page {
+    overflow: hidden;
+    height: 100vh;
+}
+
+.reels-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-snap-type: y proximity;
+    -webkit-overflow-scrolling: touch;
+    background: #000;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Desktop layout adjustments - centered like Instagram */
+@media (min-width: 992px) {
+    body.reels-page #main-content {
+        margin-left: 250px !important;
+        margin-right: 250px !important;
+    }
+    
+    .reels-wrapper {
+        position: fixed;
+        left: 250px;
+        right: 250px;
+        width: auto;
+    }
+    
+    .reels-container {
+        max-width: 500px;
+        width: 100%;
+        margin: 0 auto;
+    }
+    
+    .reel-item {
+        padding-bottom: 0 !important; /* Remove bottom padding on desktop */
+    }
+    
+    .reel-overlay {
+        padding: 20px 20px 20px 20px !important; /* Remove extra bottom padding on desktop */
+        bottom: 0 !important;
+    }
+    
+    .reel-actions {
+        bottom: 50px !important; /* Position higher on desktop */
+    }
+}
+
+.reels-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.reels-container {
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.reel-item {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 100vh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 80px; /* Space for bottom navigation */
+    box-sizing: border-box;
+}
+
+.reel-video-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reel-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 80px; /* Space for action buttons on the right */
+    padding: 20px 20px 100px 20px; /* Extra bottom padding for navigation bar */
+    background: transparent;
+    color: white;
+    z-index: 2;
+    max-height: 50%;
+    overflow-y: auto;
+    word-wrap: break-word;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9); /* Text shadow for readability */
+}
+
+.reel-actions {
+    position: absolute;
+    right: 15px;
+    bottom: 110px; /* Positioned higher up from bottom */
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Reduced spacing between buttons */
+    z-index: 3;
+}
+
+.reel-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    font-size: 24px;
+    cursor: pointer;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.reel-action-btn small {
+    font-size: 12px;
+    margin-top: 4px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+
+.reel-action-btn:hover {
+    color: white;
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
+@media (max-width: 768px) {
+    .reels-container {
+        max-width: 100%;
+    }
+    
+    .reel-item {
+        height: 100vh;
+        min-height: 100vh;
+        padding-bottom: 70px; /* Slightly less padding on mobile */
+    }
+    
+    .reel-overlay {
+        right: 70px; /* Space for action buttons on mobile */
+        padding: 15px 15px 90px 15px; /* Adjusted for mobile navigation */
+    }
+    
+    .reel-actions {
+        bottom: 100px; /* Higher position for mobile */
+        gap: 6px; /* Even smaller gap on mobile */
+    }
+}
+</style>
+
+<div class="reels-wrapper">
+    <div class="reels-container">
+        {% if reels %}
+            {% for reel in reels %}
+                <div class="reel-item" data-reel-id="{{ reel.id }}">
+                    <!-- Video Placeholder (would be video element in production) -->
+                    <img src="{{ url_for('serve_reel_media', filename=reel.video_thumbnail) }}" 
+                         alt="Reel by {{ reel.username }}"
+                         class="reel-video-placeholder">
+                    
+                    <!-- Play Icon Overlay -->
+                    <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 1;">
+                        <i class="bi bi-play-circle text-white" style="font-size: 4rem; opacity: 0.7;"></i>
+                    </div>
+                    
+                    <!-- User Info & Caption Overlay -->
+                    <div class="reel-overlay">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="{{ url_for('serve_avatar', filename=(reel.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                                 alt="{{ reel.username }}"
+                                 class="rounded-circle me-2"
+                                 style="width: 40px; height: 40px; object-fit: cover;">
+                            <div class="flex-grow-1 d-flex align-items-center" style="min-width: 0;">
+                                <h6 class="mb-0 fw-bold me-2" style="white-space: nowrap;">{{ reel.username }}</h6>
+                                <button class="btn btn-outline-light btn-sm reel-follow-btn" data-reel-id="{{ reel.id }}" data-username="{{ reel.username }}" style="flex-shrink: 0; padding: 2px 12px; font-size: 0.75rem;">Follow</button>
+                            </div>
+                        </div>
+                        
+                        <p class="mb-2" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal;">{{ reel.caption }}</p>
+                        <small class="text-white-50">
+                            <i class="bi bi-play-fill me-1"></i>{{ reel.views_count | format_number }} views
+                        </small>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="reel-actions">
+                        <!-- Like Button -->
+                        <a href="#" class="reel-action-btn reel-like-btn" data-reel-id="{{ reel.id }}">
+                            <i class="bi {% if reel.is_liked %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}" 
+                               id="reel-like-icon-{{ reel.id }}"></i>
+                            <small id="reel-like-count-{{ reel.id }}">{{ reel.likes_count | format_number }}</small>
+                        </a>
+                        
+                        <!-- Comment Button -->
+                        <a href="#" class="reel-action-btn reel-comment-btn" data-reel-id="{{ reel.id }}" data-bs-toggle="modal" data-bs-target="#commentModal{{ reel.id }}">
+                            <i class="bi bi-chat"></i>
+                            <small id="reel-comment-count-{{ reel.id }}">{{ reel.comments_count }}</small>
+                        </a>
+                        
+                        <!-- Share Button -->
+                        <a href="#" class="reel-action-btn reel-share-btn" data-reel-id="{{ reel.id }}">
+                            <i class="bi bi-send"></i>
+                            <small>Share</small>
+                        </a>
+                        
+                        <!-- Save Button -->
+                        <a href="#" class="reel-action-btn reel-save-btn" data-reel-id="{{ reel.id }}">
+                            <i class="bi {% if reel.is_saved %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}" 
+                               id="reel-save-icon-{{ reel.id }}"></i>
+                            <small>Save</small>
+                        </a>
+                        
+                        <!-- More Options -->
+                        <a href="#" class="reel-action-btn">
+                            <i class="bi bi-three-dots"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Comments Modal -->
+                <div class="modal fade" id="commentModal{{ reel.id }}" tabindex="-1" aria-labelledby="commentModalLabel{{ reel.id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content bg-body" data-bs-theme="auto" style="background-color: var(--bs-body-bg) !important;">
+                            <div class="modal-header border-0" style="background-color: var(--bs-body-bg) !important;">
+                                <h5 class="modal-title" id="commentModalLabel{{ reel.id }}">Comments</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" style="background-color: var(--bs-body-bg) !important; max-height: 500px; overflow-y: auto;">
+                                <!-- Comments List -->
+                                <div id="comments-list-{{ reel.id }}" class="mb-3">
+                                    <!-- Comments will be loaded here -->
+                                    <p class="text-muted text-center">Loading comments...</p>
+                                </div>
+                                
+                                <!-- Add Comment Form -->
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ url_for('serve_avatar', filename='avatar-2.jpg') }}" 
+                                         class="rounded-circle me-2 border" 
+                                         width="32" 
+                                         height="32" 
+                                         alt="User Avatar">
+                                    <div class="flex-grow-1">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="comment-input-{{ reel.id }}" 
+                                               placeholder="Add a comment..."
+                                               onkeypress="if(event.key === 'Enter') { postReelComment({{ reel.id }}); }">
+                                    </div>
+                                    <button class="btn btn-primary ms-2" onclick="postReelComment({{ reel.id }})">Post</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-5 text-white">
+                <i class="bi bi-play-circle fs-1 mb-3"></i>
+                <h5>No reels yet</h5>
+                <p class="text-white-50">Start creating reels to share with the community!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Reels Script -->
+<script>
+// Custom filter to format numbers (e.g., 1000 -> 1K)
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // Like button functionality
+    document.querySelectorAll('.reel-like-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const reelId = this.getAttribute('data-reel-id');
+            const likeIcon = document.getElementById('reel-like-icon-' + reelId);
+            const likeCount = document.getElementById('reel-like-count-' + reelId);
+            
+            // Store original state
+            const originalIsLiked = likeIcon.classList.contains('bi-heart-fill');
+            let originalCountText = likeCount.textContent.trim();
+            let originalCount = 0;
+            
+            // Parse the count correctly (handles "1.2K", "3.4K", etc.)
+            if (originalCountText.includes('K')) {
+                originalCount = Math.round(parseFloat(originalCountText.replace('K', '')) * 1000);
+            } else if (originalCountText.includes('M')) {
+                originalCount = Math.round(parseFloat(originalCountText.replace('M', '')) * 1000000);
+            } else {
+                originalCount = parseInt(originalCountText) || 0;
+            }
+            
+            // Optimistic UI update
+            let newCount;
+            if (originalIsLiked) {
+                likeIcon.classList.remove('bi-heart-fill', 'text-danger');
+                likeIcon.classList.add('bi-heart');
+                newCount = Math.max(0, originalCount - 1);
+            } else {
+                likeIcon.classList.remove('bi-heart');
+                likeIcon.classList.add('bi-heart-fill', 'text-danger');
+                newCount = originalCount + 1;
+            }
+            likeCount.textContent = formatNumber(newCount);
+            
+            // Make API call
+            fetch(`/api/reels/${reelId}/like`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update with server response
+                    likeCount.textContent = formatNumber(data.likes_count);
+                    if (data.is_liked) {
+                        likeIcon.classList.remove('bi-heart');
+                        likeIcon.classList.add('bi-heart-fill', 'text-danger');
+                    } else {
+                        likeIcon.classList.remove('bi-heart-fill', 'text-danger');
+                        likeIcon.classList.add('bi-heart');
+                    }
+                } else {
+                    // Rollback on error
+                    likeCount.textContent = formatNumber(originalCount);
+                    if (originalIsLiked) {
+                        likeIcon.classList.remove('bi-heart');
+                        likeIcon.classList.add('bi-heart-fill', 'text-danger');
+                    } else {
+                        likeIcon.classList.remove('bi-heart-fill', 'text-danger');
+                        likeIcon.classList.add('bi-heart');
+                    }
+                    console.error('Error toggling like:', data.error);
+                }
+            })
+            .catch(error => {
+                // Rollback on error
+                likeCount.textContent = formatNumber(originalCount);
+                if (originalIsLiked) {
+                    likeIcon.classList.remove('bi-heart');
+                    likeIcon.classList.add('bi-heart-fill', 'text-danger');
+                } else {
+                    likeIcon.classList.remove('bi-heart-fill', 'text-danger');
+                    likeIcon.classList.add('bi-heart');
+                }
+                console.error('Error toggling like:', error);
+            });
+            
+            console.log('Like toggled for reel:', reelId);
+        });
+    });
+    
+    // Save button functionality
+    document.querySelectorAll('.reel-save-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const reelId = this.getAttribute('data-reel-id');
+            const saveIcon = document.getElementById('reel-save-icon-' + reelId);
+            
+            // Store original state
+            const originalIsSaved = saveIcon.classList.contains('bi-bookmark-fill');
+            
+            // Optimistic UI update
+            if (originalIsSaved) {
+                saveIcon.classList.remove('bi-bookmark-fill');
+                saveIcon.classList.add('bi-bookmark');
+            } else {
+                saveIcon.classList.remove('bi-bookmark');
+                saveIcon.classList.add('bi-bookmark-fill');
+            }
+            
+            // Make API call
+            fetch(`/api/reels/${reelId}/save`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update with server response
+                    if (data.is_saved) {
+                        saveIcon.classList.remove('bi-bookmark');
+                        saveIcon.classList.add('bi-bookmark-fill');
+                    } else {
+                        saveIcon.classList.remove('bi-bookmark-fill');
+                        saveIcon.classList.add('bi-bookmark');
+                    }
+                } else {
+                    // Rollback on error
+                    if (originalIsSaved) {
+                        saveIcon.classList.remove('bi-bookmark');
+                        saveIcon.classList.add('bi-bookmark-fill');
+                    } else {
+                        saveIcon.classList.remove('bi-bookmark-fill');
+                        saveIcon.classList.add('bi-bookmark');
+                    }
+                    console.error('Error toggling save:', data.error);
+                }
+            })
+            .catch(error => {
+                // Rollback on error
+                if (originalIsSaved) {
+                    saveIcon.classList.remove('bi-bookmark');
+                    saveIcon.classList.add('bi-bookmark-fill');
+                } else {
+                    saveIcon.classList.remove('bi-bookmark-fill');
+                    saveIcon.classList.add('bi-bookmark');
+                }
+                console.error('Error toggling save:', error);
+            });
+            
+            console.log('Save toggled for reel:', reelId);
+        });
+    });
+    
+    // Follow button functionality
+    document.querySelectorAll('.reel-follow-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const reelId = this.getAttribute('data-reel-id');
+            const username = this.getAttribute('data-username');
+            const originalText = this.textContent.trim();
+            
+            // Optimistic UI update
+            if (originalText === 'Follow') {
+                this.textContent = 'Following';
+                this.classList.remove('btn-outline-light');
+                this.classList.add('btn-light');
+            } else {
+                this.textContent = 'Follow';
+                this.classList.remove('btn-light');
+                this.classList.add('btn-outline-light');
+            }
+            
+            // Make API call
+            fetch(`/api/reels/${reelId}/follow`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update with server response
+                    if (data.is_following) {
+                        this.textContent = 'Following';
+                        this.classList.remove('btn-outline-light');
+                        this.classList.add('btn-light');
+                    } else {
+                        this.textContent = 'Follow';
+                        this.classList.remove('btn-light');
+                        this.classList.add('btn-outline-light');
+                    }
+                } else {
+                    // Rollback on error
+                    this.textContent = originalText;
+                    if (originalText === 'Follow') {
+                        this.classList.remove('btn-light');
+                        this.classList.add('btn-outline-light');
+                    } else {
+                        this.classList.remove('btn-outline-light');
+                        this.classList.add('btn-light');
+                    }
+                    console.error('Error toggling follow:', data.error);
+                }
+            })
+            .catch(error => {
+                // Rollback on error
+                this.textContent = originalText;
+                if (originalText === 'Follow') {
+                    this.classList.remove('btn-light');
+                    this.classList.add('btn-outline-light');
+                } else {
+                    this.classList.remove('btn-outline-light');
+                    this.classList.add('btn-light');
+                }
+                console.error('Error toggling follow:', error);
+            });
+            
+            console.log('Follow toggled for reel:', reelId);
+        });
+    });
+    
+    // Share button functionality
+    document.querySelectorAll('.reel-share-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const reelId = this.getAttribute('data-reel-id');
+            const reelUrl = window.location.origin + '/reels#' + reelId;
+            
+            // Try to use Web Share API if available
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Check out this reel!',
+                    text: 'Check out this reel on SocialApp',
+                    url: reelUrl
+                })
+                .then(() => console.log('Shared successfully'))
+                .catch((error) => {
+                    console.error('Error sharing:', error);
+                    // Fallback to clipboard
+                    copyToClipboard(reelUrl);
+                });
+            } else {
+                // Fallback to clipboard
+                copyToClipboard(reelUrl);
+            }
+        });
+    });
+    
+    // Helper function to copy to clipboard
+    function copyToClipboard(text) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show a temporary notification
+                const notification = document.createElement('div');
+                notification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3 alert alert-success alert-dismissible fade show';
+                notification.style.zIndex = '9999';
+                notification.innerHTML = '<strong>Link copied!</strong> Share it with your friends.<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy link. Please copy manually: ' + text);
+            });
+        } else {
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('Link copied to clipboard: ' + text);
+            } catch (err) {
+                alert('Failed to copy link. Please copy manually: ' + text);
+            }
+            document.body.removeChild(textArea);
+        }
+    }
+    
+    // Comment functionality - make functions global so they can be called from inline handlers
+    window.loadReelComments = function(reelId) {
+        fetch(`/api/reels/${reelId}/comments`)
+            .then(response => response.json())
+            .then(data => {
+                const commentsList = document.getElementById(`comments-list-${reelId}`);
+                if (data.success && data.comments && data.comments.length > 0) {
+                    let html = '';
+                    data.comments.forEach(comment => {
+                        html += `
+                            <div class="mb-3">
+                                <div class="d-flex">
+                                    <img src="${comment.avatar ? '/database/avatars/' + (comment.avatar.includes('/') ? comment.avatar.split('/').pop() : comment.avatar) : '/database/avatars/avatar-2.jpg'}" 
+                                         class="rounded-circle me-2 border" 
+                                         width="32" 
+                                         height="32" 
+                                         alt="User Avatar">
+                                    <div class="flex-grow-1">
+                                        <div class="bg-body-secondary rounded p-2">
+                                            <span class="fw-semibold username-classic">@${comment.username}</span>
+                                            <span>${comment.text}</span>
+                                        </div>
+                                        <small class="text-muted">${comment.time_ago || 'Just now'}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    commentsList.innerHTML = html;
+                } else {
+                    commentsList.innerHTML = '<p class="text-muted text-center py-3">No comments yet. Be the first to comment!</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading comments:', error);
+                document.getElementById(`comments-list-${reelId}`).innerHTML = '<p class="text-danger text-center py-3">Error loading comments.</p>';
+            });
+    }
+    
+    window.postReelComment = function(reelId) {
+        const commentInput = document.getElementById(`comment-input-${reelId}`);
+        const commentText = commentInput.value.trim();
+        
+        if (!commentText) {
+            return;
+        }
+        
+        fetch(`/api/reels/${reelId}/comments`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ text: commentText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                commentInput.value = '';
+                window.loadReelComments(reelId);
+                // Update comment count
+                const commentCountEl = document.getElementById(`reel-comment-count-${reelId}`);
+                if (commentCountEl) {
+                    const currentCount = parseInt(commentCountEl.textContent) || 0;
+                    commentCountEl.textContent = currentCount + 1;
+                }
+            } else {
+                alert('Error posting comment: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error posting comment:', error);
+            alert('Error posting comment');
+        });
+    }
+    
+    // Load comments when modal is shown
+    document.querySelectorAll('.reel-comment-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const reelId = this.getAttribute('data-reel-id');
+            setTimeout(() => {
+                window.loadReelComments(reelId);
+            }, 300); // Wait for modal to open
+        });
+    });
+    
+    // Close comment modal properly
+    document.querySelectorAll('[data-bs-target^="#commentModal"]').forEach(function(btn) {
+        const modalId = btn.getAttribute('data-bs-target');
+        const modal = document.querySelector(modalId);
+        if (modal) {
+            modal.addEventListener('hidden.bs.modal', function() {
+                const reelId = btn.getAttribute('data-reel-id');
+                // Clear comment input when modal closes
+                const commentInput = document.getElementById(`comment-input-${reelId}`);
+                if (commentInput) {
+                    commentInput.value = '';
+                }
+            });
+        }
+    });
+    
+    // Light magnetic snap - gentle alignment when scrolling stops
+    const reelsWrapper = document.querySelector('.reels-wrapper');
+    if (reelsWrapper) {
+        const reelItems = Array.from(document.querySelectorAll('.reel-item'));
+        let scrollTimeout;
+        let isScrolling = false;
+        
+        // Light magnetic function - gently snaps to nearest reel
+        function gentleSnap() {
+            const scrollTop = reelsWrapper.scrollTop;
+            const viewportHeight = window.innerHeight;
+            
+            // Find the nearest reel
+            let nearestReel = null;
+            let minDistance = Infinity;
+            
+            reelItems.forEach((reel) => {
+                const reelTop = reel.offsetTop;
+                const distance = Math.abs(scrollTop - reelTop);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestReel = reel;
+                }
+            });
+            
+            // If we're not aligned well enough (within 50px threshold), gently snap
+            if (nearestReel && minDistance > 50) {
+                const targetScrollTop = nearestReel.offsetTop;
+                
+                // Smooth scroll with gentle easing
+                reelsWrapper.scrollTo({
+                    top: targetScrollTop,
+                    behavior: 'smooth'
+                });
+            }
+        }
+        
+        // Detect when scrolling stops
+        reelsWrapper.addEventListener('scroll', function() {
+            isScrolling = true;
+            clearTimeout(scrollTimeout);
+            
+            // Wait for scrolling to stop, then apply gentle snap
+            scrollTimeout = setTimeout(function() {
+                isScrolling = false;
+                gentleSnap();
+            }, 150);
+        }, { passive: true });
+    }
+});
+</script>
+{% endblock %}
+

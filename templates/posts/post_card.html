@@ -1,0 +1,191 @@
+<!-- Post Card Template -->
+<div class="post-card-wrapper" id="post-{{ post.id }}">
+    <div class="card bg-body shadow-sm mb-3" data-bs-theme="auto" style="background-color: var(--bs-body-bg) !important; border: 1px solid var(--bs-border-color) !important; border-radius: 12px !important; padding: 0 !important;">
+    <!-- Post Header -->
+    <div class="card-header bg-transparent border-0 p-2" style="background-color: var(--bs-body-bg) !important;">
+        <div class="d-flex align-items-center">
+            <!-- User Avatar -->
+            <div class="me-2">
+                {% set post_username = post.user.username if post.user else post.username %}
+                <a href="/profile/{{ post_username }}" class="text-decoration-none">
+                    {% if post.user %}
+                    {% set avatar_file = post.user.avatar|avatar_filename %}
+                    <img src="{{ url_for('serve_avatar', filename=avatar_file) }}" 
+                         class="rounded-circle border border-1" 
+                         width="32" 
+                         height="32" 
+                         alt="User Avatar"
+                         style="cursor: pointer;">
+                    {% else %}
+                    <img src="{{ url_for('serve_avatar', filename=post.avatar|avatar_filename if post.avatar else 'avatar-1.jpg') }}" 
+                         class="rounded-circle border border-1" 
+                         width="32" 
+                         height="32" 
+                         alt="User Avatar"
+                         style="cursor: pointer;">
+                    {% endif %}
+                </a>
+            </div>
+            
+            <!-- User Info -->
+            <div class="flex-grow-1">
+                {% set post_username = post.user.username if post.user else post.username %}
+                <a href="/profile/{{ post_username }}" class="text-decoration-none text-body">
+                    <h6 class="mb-0 fw-semibold small">{{ post.user.username if post.user else '@' + post.username }}</h6>
+                </a>
+                <small class="text-muted" style="font-size: 0.75rem;">{{ post.time if post.time else post.time_ago }}</small>
+            </div>
+            
+            <!-- More Options -->
+            <div class="dropdown">
+                <button class="btn btn-link p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-three-dots-vertical fs-6"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-bookmark me-2"></i>Save</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-share me-2"></i>Share</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="bi bi-flag me-2"></i>Report</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Post Image -->
+    <div class="position-relative post-image-container" data-post-id="{{ post.id }}" style="overflow: hidden; width: 100%; margin: 0; padding: 0;">
+        {% set image_filename = post.image.split('/')[-1] if '/' in post.image else post.image %}
+        {% set image_filename = image_filename.split('\\')[-1] if '\\' in image_filename else image_filename %}
+        <img src="{{ url_for('serve_post_image', filename=image_filename) }}" 
+             class="card-img-top post-image" 
+             alt="Post Image"
+             style="cursor: pointer; margin: 0; padding: 0; display: block;">
+        
+        <!-- Double-tap Heart Animation -->
+        <div class="position-absolute top-50 start-50 translate-middle heart-animation" 
+             style="display: none; pointer-events: none; z-index: 10;">
+            <i class="bi bi-heart-fill" style="font-size: 2rem; color: #dc3545 !important; fill: #dc3545 !important; stroke: #dc3545 !important; text-shadow: 0 0 10px rgba(220, 53, 69, 0.8);"></i>
+        </div>
+        
+        <!-- Play Button for Video Posts -->
+        <div class="position-absolute top-50 start-50 translate-middle" style="display: none;">
+            <button class="btn btn-light rounded-circle p-2 shadow">
+                <i class="bi bi-play-fill fs-5 text-dark"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Post Actions -->
+    <div class="card-body p-2" style="background-color: var(--bs-body-bg) !important;">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="d-flex align-items-center">
+                <!-- Like Button -->
+                <button class="btn btn-link p-2 like-btn" data-post-id="{{ post.id }}" 
+                        style="cursor: pointer; border: none; background: none; outline: none; transition: all 0.2s ease; min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; padding-right: 0 !important;">
+                    <i class="bi bi-heart{% if post.is_liked %}-fill{% endif %} fs-4 like-icon" 
+                       id="like-icon-{{ post.id }}" 
+                       style="color: {% if post.is_liked %}red !important{% else %}var(--bs-body-color) !important{% endif %}; 
+                              fill: {% if post.is_liked %}red !important{% else %}none !important{% endif %}; 
+                              stroke: {% if post.is_liked %}red !important{% else %}var(--bs-body-color) !important{% endif %};
+                              transition: all 0.2s ease; transform-origin: center;"></i>
+                </button>
+                <span class="like-count me-2" id="like-count-{{ post.id }}" style="margin-left: 0;">{{ post.likes_count }}</span>
+                
+                <!-- Comment Button -->
+                <button class="btn btn-link p-1 comment-btn" data-post-id="{{ post.id }}"
+                        style="cursor: pointer; border: none; background: none; outline: none; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; padding-right: 0 !important;">
+                    <i class="bi bi-chat fs-5"></i>
+                </button>
+                <span class="comment-count me-2" id="comment-count-{{ post.id }}" style="margin-left: 0.5rem;">{{ post.comments_count if post.comments_count else 0 }}</span>
+                
+                <!-- Share Button -->
+                <button class="btn btn-link p-1 share-btn" data-post-id="{{ post.id }}"
+                        style="cursor: pointer; border: none; background: none; outline: none; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; padding-right: 0 !important;">
+                    <i class="bi bi-share fs-5"></i>
+                </button>
+                <span class="share-count me-2" id="share-count-{{ post.id }}" style="margin-left: 0.5rem;">{{ post.shares_count if post.shares_count else 0 }}</span>
+            </div>
+            
+            <!-- AI Button -->
+            <button class="btn btn-link p-2 ai-btn" data-post-id="{{ post.id }}"
+                    style="cursor: pointer; border: none; background: none; outline: none; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; padding-right: 0 !important; padding-left: 0.5rem !important;">
+                <img src="{{ url_for('static', filename='images/Ai.png') }}" alt="AI" class="ai-icon" style="width: 1.75rem; height: 1.75rem; object-fit: contain;">
+            </button>
+        </div>
+        
+        <!-- Post Caption -->
+        <div class="mb-1">
+            <span class="small">
+                {% set post_username = post.user.username if post.user else post.username %}
+                <a href="/profile/{{ post_username }}" class="text-decoration-none text-body fw-semibold username-classic">{{ post.user.username if post.user else '@' + post.username }}</a> 
+                {{ post.caption }}
+            </span>
+        </div>
+        
+        <!-- View Comments Link -->
+        <div class="mb-1">
+            <button class="btn btn-link p-0 text-decoration-none text-muted small view-comments-btn" 
+                    data-post-id="{{ post.id }}">
+                View all {{ post.comments_count if post.comments_count else 0 }} comments
+            </button>
+        </div>
+        
+        <!-- Comments Section (Hidden by default) -->
+        <div class="comments-section" id="comments-section-{{ post.id }}" style="display: none; margin-top: 0.5rem;">
+            <!-- Scrollable Comments Container -->
+            <div class="comments-container" id="comments-container-{{ post.id }}" 
+                 style="max-height: 300px; overflow-y: auto; margin-bottom: 0.5rem; padding-right: 0.5rem;">
+                <!-- Comments will be loaded here dynamically -->
+                <div id="comments-list-{{ post.id }}">
+                    <div class="text-center py-3">
+                        <small class="text-muted">Loading comments...</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Comment -->
+            <div class="d-flex align-items-center mt-2">
+                <img src="{{ url_for('serve_avatar', filename='avatar-2.jpg') }}" 
+                     class="rounded-circle me-2" 
+                     width="24" 
+                     height="24" 
+                     alt="Your Avatar">
+                <div class="flex-grow-1">
+                    <input type="text" 
+                           class="form-control form-control-sm border-0 bg-transparent comment-input" 
+                           id="comment-input-{{ post.id }}"
+                           data-post-id="{{ post.id }}"
+                           placeholder="Add a comment..." 
+                           style="outline: none; box-shadow: none;">
+                </div>
+                <button class="btn btn-link p-0 text-primary post-comment-btn" 
+                        data-post-id="{{ post.id }}"
+                        style="text-decoration: none; font-size: 0.875rem; font-weight: 600;">
+                    Post
+                </button>
+            </div>
+        </div>
+        
+        <!-- Add Comment (shown when comments are hidden) -->
+        <div class="add-comment-section" id="add-comment-section-{{ post.id }}">
+            <div class="d-flex align-items-center">
+                <img src="{{ url_for('serve_avatar', filename='avatar-2.jpg') }}" 
+                     class="rounded-circle me-2" 
+                     width="20" 
+                     height="20" 
+                     alt="Your Avatar">
+                <div class="flex-grow-1">
+                    <input type="text" 
+                           class="form-control form-control-sm border-0 bg-transparent comment-input-simple" 
+                           id="comment-input-simple-{{ post.id }}"
+                           data-post-id="{{ post.id }}"
+                           placeholder="Add a comment..." 
+                           style="outline: none; box-shadow: none;">
+                </div>
+                <button class="btn btn-link p-0 text-primary post-comment-simple-btn" 
+                        data-post-id="{{ post.id }}"
+                        style="text-decoration: none; font-size: 0.875rem; font-weight: 600; margin-left: 0.5rem;">
+                    Post
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add homepage class to body for CSS targeting -->
+<script>
+// Add homepage class to body element immediately
+document.body.classList.add('homepage');
+</script>
+
+<style>
+/* Backend-controlled scroll offset: CSS handles header offset automatically */
+.post-card-wrapper[id^="post-"] {
+    scroll-margin-top: 100px;
+}
+</style>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Posts Feed -->
+                <div class="posts-container">
+                    {% for post in posts %}
+                        {% include 'posts/post_card.html' with context %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if scroll_to_post and highlight_post_id %}
+<!-- Backend-controlled scroll: Backend generates exact scroll behavior -->
+<script>
+(function() {
+    // Backend tells us which post to scroll to
+    const targetPostId = {{ highlight_post_id }};
+    const postElementId = 'post-' + targetPostId;
+    
+    // Function to scroll and highlight - executed when page is ready
+    function scrollToPostAndHighlight() {
+        const postElement = document.getElementById(postElementId);
+        if (!postElement) {
+            // Retry if element not ready
+            setTimeout(scrollToPostAndHighlight, 100);
+            return;
+        }
+        
+        // Backend command: Scroll post to exact position - centered in viewport, fully visible
+        // Step 1: Get element's absolute position in document
+        const headerOffset = 100; // Backend-determined header height
+        const rect = postElement.getBoundingClientRect();
+        const elementAbsoluteTop = rect.top + window.pageYOffset;
+        const elementHeight = rect.height;
+        const viewportHeight = window.innerHeight;
+        
+        // Step 2: Calculate exact scroll position to center post in available viewport
+        // Available viewport = viewportHeight - headerOffset
+        // We want post centered in this space
+        const availableHeight = viewportHeight - headerOffset;
+        const centerY = headerOffset + (availableHeight / 2);
+        const targetScroll = elementAbsoluteTop - centerY + (elementHeight / 2);
+        
+        // Step 3: Execute scroll to exact position
+        window.scrollTo({
+            top: Math.max(0, targetScroll),
+            behavior: 'smooth'
+        });
+        
+        // Step 4: Highlight post (backend instruction)
+        setTimeout(function() {
+            postElement.style.transition = 'box-shadow 0.3s ease';
+            postElement.style.boxShadow = '0 0 20px rgba(0, 123, 255, 0.5)';
+            setTimeout(function() {
+                postElement.style.boxShadow = '';
+            }, 2000);
+        }, 600);
+    }
+    
+    // Execute when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', scrollToPostAndHighlight);
+    } else {
+        // DOM already loaded, wait a bit for all content to render
+        setTimeout(scrollToPostAndHighlight, 200);
+    }
+})();
+</script>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add settings-page class to body for CSS targeting -->
+<script>
+// Add settings-page class to body element immediately
+document.body.classList.add('settings-page');
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-10 col-xl-9" id="main-content-area">
+            <div class="p-3">
+                <!-- Header -->
+                <div class="mb-4">
+                    <h4 class="mb-0 fw-bold text-body">Settings</h4>
+                    <p class="text-body-secondary">Manage your account settings and preferences</p>
+                </div>
+                
+                <div class="row">
+                    <!-- Settings Sidebar -->
+                    <div class="col-12 col-md-3 mb-4">
+                        <div class="list-group" id="settingsSidebar">
+                            <button class="list-group-item list-group-item-action active" data-section="account">
+                                <i class="bi bi-person me-2"></i>Account
+                            </button>
+                            <button class="list-group-item list-group-item-action" data-section="privacy">
+                                <i class="bi bi-shield-lock me-2"></i>Privacy
+                            </button>
+                            <button class="list-group-item list-group-item-action" data-section="notifications">
+                                <i class="bi bi-bell me-2"></i>Notifications
+                            </button>
+                            <button class="list-group-item list-group-item-action" data-section="security">
+                                <i class="bi bi-lock me-2"></i>Security
+                            </button>
+                            <button class="list-group-item list-group-item-action" data-section="appearance">
+                                <i class="bi bi-palette me-2"></i>Appearance
+                            </button>
+                            <button class="list-group-item list-group-item-action" data-section="data">
+                                <i class="bi bi-download me-2"></i>Data & Storage
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Settings Content -->
+                    <div class="col-12 col-md-9">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <!-- Account Section -->
+                                <div class="settings-section" id="account-section">
+                                    <h5 class="mb-4 fw-bold">Account Information</h5>
+                                    
+                                    <form id="accountForm">
+                                        <div class="mb-3">
+                                            <label for="username" class="form-label">Username</label>
+                                            <input type="text" class="form-control" id="username" value="{{ settings.account.username }}" readonly>
+                                            <div class="form-text">Your username cannot be changed</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="fullName" class="form-label">Full Name</label>
+                                            <input type="text" class="form-control" id="fullName" value="{{ settings.account.full_name }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" value="{{ settings.account.email }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="phone" class="form-label">Phone</label>
+                                            <input type="tel" class="form-control" id="phone" value="{{ settings.account.phone }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="bio" class="form-label">Bio</label>
+                                            <textarea class="form-control" id="bio" rows="3">{{ settings.account.bio }}</textarea>
+                                            <div class="form-text">Write a short description about yourself</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="website" class="form-label">Website</label>
+                                            <input type="url" class="form-control" id="website" value="{{ settings.account.website }}">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="location" class="form-label">Location</label>
+                                            <input type="text" class="form-control" id="location" value="{{ settings.account.location }}">
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Privacy Section -->
+                                <div class="settings-section d-none" id="privacy-section">
+                                    <h5 class="mb-4 fw-bold">Privacy Settings</h5>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Account Privacy</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="accountPrivacy" id="publicAccount" 
+                                                   value="public" {% if settings.privacy.account_privacy == 'public' %}checked{% endif %}>
+                                            <label class="form-check-label" for="publicAccount">
+                                                <strong>Public Account</strong>
+                                                <div class="text-body-secondary small">Anyone can see your profile and posts</div>
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="accountPrivacy" id="privateAccount" 
+                                                   value="private" {% if settings.privacy.account_privacy == 'private' %}checked{% endif %}>
+                                            <label class="form-check-label" for="privateAccount">
+                                                <strong>Private Account</strong>
+                                                <div class="text-body-secondary small">Only approved followers can see your content</div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Activity Status</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="showActivityStatus" 
+                                                   {% if settings.privacy.show_activity_status %}checked{% endif %}>
+                                            <label class="form-check-label" for="showActivityStatus">
+                                                Show Activity Status
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="showLastSeen" 
+                                                   {% if settings.privacy.show_last_seen %}checked{% endif %}>
+                                            <label class="form-check-label" for="showLastSeen">
+                                                Show Last Seen
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Interactions</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="allowMentions" 
+                                                   {% if settings.privacy.allow_mentions %}checked{% endif %}>
+                                            <label class="form-check-label" for="allowMentions">
+                                                Allow people to mention you
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="allowTags" 
+                                                   {% if settings.privacy.allow_tags %}checked{% endif %}>
+                                            <label class="form-check-label" for="allowTags">
+                                                Allow people to tag you in photos
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" id="savePrivacyBtn">Save Changes</button>
+                                </div>
+                                
+                                <!-- Notifications Section -->
+                                <div class="settings-section d-none" id="notifications-section">
+                                    <h5 class="mb-4 fw-bold">Notification Preferences</h5>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">General</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="pushNotifications" 
+                                                   {% if settings.notifications.push_notifications %}checked{% endif %}>
+                                            <label class="form-check-label" for="pushNotifications">
+                                                Push Notifications
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications" 
+                                                   {% if settings.notifications.email_notifications %}checked{% endif %}>
+                                            <label class="form-check-label" for="emailNotifications">
+                                                Email Notifications
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Activity</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notifyLikes" 
+                                                   {% if settings.notifications.likes %}checked{% endif %}>
+                                            <label class="form-check-label" for="notifyLikes">
+                                                Likes on your posts
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notifyComments" 
+                                                   {% if settings.notifications.comments %}checked{% endif %}>
+                                            <label class="form-check-label" for="notifyComments">
+                                                Comments on your posts
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notifyNewFollowers" 
+                                                   {% if settings.notifications.new_followers %}checked{% endif %}>
+                                            <label class="form-check-label" for="notifyNewFollowers">
+                                                New followers
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notifyMentions" 
+                                                   {% if settings.notifications.mentions %}checked{% endif %}>
+                                            <label class="form-check-label" for="notifyMentions">
+                                                Mentions
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notifyMessages" 
+                                                   {% if settings.notifications.direct_messages %}checked{% endif %}>
+                                            <label class="form-check-label" for="notifyMessages">
+                                                Direct messages
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notifyGroupActivity" 
+                                                   {% if settings.notifications.group_activity %}checked{% endif %}>
+                                            <label class="form-check-label" for="notifyGroupActivity">
+                                                Group activity
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="notifyEventReminders" 
+                                                   {% if settings.notifications.event_reminders %}checked{% endif %}>
+                                            <label class="form-check-label" for="notifyEventReminders">
+                                                Event reminders
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" id="saveNotificationsBtn">Save Changes</button>
+                                </div>
+                                
+                                <!-- Security Section -->
+                                <div class="settings-section d-none" id="security-section">
+                                    <h5 class="mb-4 fw-bold">Security Settings</h5>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Password</h6>
+                                        <button type="button" class="btn btn-outline-primary">Change Password</button>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Two-Factor Authentication</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="twoFactorAuth" 
+                                                   {% if settings.security.two_factor_auth %}checked{% endif %}>
+                                            <label class="form-check-label" for="twoFactorAuth">
+                                                Enable Two-Factor Authentication
+                                            </label>
+                                        </div>
+                                        <div class="text-body-secondary small">Add an extra layer of security to your account</div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Login Activity</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="loginAlerts" 
+                                                   {% if settings.security.login_alerts %}checked{% endif %}>
+                                            <label class="form-check-label" for="loginAlerts">
+                                                Get alerts about unrecognized logins
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="saveLoginInfo" 
+                                                   {% if settings.security.save_login_info %}checked{% endif %}>
+                                            <label class="form-check-label" for="saveLoginInfo">
+                                                Save login information
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" id="saveSecurityBtn">Save Changes</button>
+                                </div>
+                                
+                                <!-- Appearance Section -->
+                                <div class="settings-section d-none" id="appearance-section">
+                                    <h5 class="mb-4 fw-bold">Appearance</h5>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Theme</h6>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="theme" id="lightTheme" value="light" 
+                                                   {% if settings.appearance.theme == 'light' %}checked{% endif %}>
+                                            <label class="form-check-label" for="lightTheme">
+                                                Light Mode
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="theme" id="darkTheme" value="dark" 
+                                                   {% if settings.appearance.theme == 'dark' %}checked{% endif %}>
+                                            <label class="form-check-label" for="darkTheme">
+                                                Dark Mode
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="theme" id="autoTheme" value="auto" 
+                                                   {% if settings.appearance.theme == 'auto' %}checked{% endif %}>
+                                            <label class="form-check-label" for="autoTheme">
+                                                Auto (Follows system settings)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Language</h6>
+                                        <select class="form-select" id="language">
+                                            <option value="en" {% if settings.appearance.language == 'en' %}selected{% endif %}>English</option>
+                                            <option value="es">Español</option>
+                                            <option value="fr">Français</option>
+                                            <option value="de">Deutsch</option>
+                                            <option value="ja">日本語</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-primary" id="saveAppearanceBtn">Save Changes</button>
+                                </div>
+                                
+                                <!-- Data & Storage Section -->
+                                <div class="settings-section d-none" id="data-section">
+                                    <h5 class="mb-4 fw-bold">Data & Storage</h5>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3">Download Your Data</h6>
+                                        <p class="text-body-secondary">Download a copy of your data including posts, comments, and profile information.</p>
+                                        <button type="button" class="btn btn-outline-primary" id="downloadDataBtn">
+                                            <i class="bi bi-download me-2"></i>Request Data Download
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h6 class="fw-semibold mb-3 text-danger">Danger Zone</h6>
+                                        <div class="alert alert-danger">
+                                            <h6 class="alert-heading">Delete Account</h6>
+                                            <p class="mb-2">Once you delete your account, there is no going back. Please be certain.</p>
+                                            <button type="button" class="btn btn-danger btn-sm">Delete My Account</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Settings Page Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebarButtons = document.querySelectorAll('#settingsSidebar button');
+    const sections = document.querySelectorAll('.settings-section');
+    
+    // Section switching
+    sidebarButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            
+            // Remove active class from all buttons
+            sidebarButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Hide all sections
+            sections.forEach(sec => sec.classList.add('d-none'));
+            
+            // Show selected section
+            document.getElementById(section + '-section').classList.remove('d-none');
+        });
+    });
+    
+    // Save buttons functionality
+    document.getElementById('accountForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        showSuccessMessage('Account settings saved successfully!');
+    });
+    
+    document.getElementById('savePrivacyBtn')?.addEventListener('click', function() {
+        showSuccessMessage('Privacy settings saved successfully!');
+    });
+    
+    document.getElementById('saveNotificationsBtn')?.addEventListener('click', function() {
+        showSuccessMessage('Notification preferences saved successfully!');
+    });
+    
+    document.getElementById('saveSecurityBtn')?.addEventListener('click', function() {
+        showSuccessMessage('Security settings saved successfully!');
+    });
+    
+    document.getElementById('saveAppearanceBtn')?.addEventListener('click', function() {
+        const theme = document.querySelector('input[name="theme"]:checked').value;
+        // Apply theme
+        if (theme === 'light') {
+            document.documentElement.setAttribute('data-bs-theme', 'light');
+        } else if (theme === 'dark') {
+            document.documentElement.setAttribute('data-bs-theme', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-bs-theme', 'auto');
+        }
+        showSuccessMessage('Appearance settings saved successfully!');
+    });
+    
+    document.getElementById('downloadDataBtn')?.addEventListener('click', function() {
+        showSuccessMessage('Data download requested! You will receive an email when your data is ready.');
+    });
+    
+    function showSuccessMessage(message) {
+        // Create toast notification
+        const toast = document.createElement('div');
+        toast.className = 'position-fixed top-0 end-0 p-3';
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `
+            <div class="toast show" role="alert">
+                <div class="toast-header bg-success text-white">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong class="me-auto">Success</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add notifications-page class to body for CSS targeting -->
+<script>
+// Add notifications-page class to body element immediately
+document.body.classList.add('notifications-page');
+
+// Modify mobile header for notifications page
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add notifications title
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'flex-grow-1 d-flex justify-content-center mobile-notifications-title';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Notifications</h5>';
+        mobileHeader.appendChild(titleDiv);
+        
+        // Add mark all read button
+        const markAllReadButton = document.createElement('button');
+        markAllReadButton.className = 'btn btn-link text-body p-1 mobile-mark-all-read-btn';
+        markAllReadButton.innerHTML = '<i class="bi bi-check-all fs-5"></i>';
+        markAllReadButton.id = 'mobile-mark-all-read-btn';
+        mobileHeader.appendChild(markAllReadButton);
+        
+        // Add click handler for mark all read button
+        markAllReadButton.addEventListener('click', function() {
+            markAllAsRead();
+        });
+    }
+});
+
+// Mark all notifications as read function
+function markAllAsRead() {
+    const unreadNotifications = document.querySelectorAll('.notification-item.unread');
+    
+    // Optimistic UI update
+    unreadNotifications.forEach(function(item) {
+        item.classList.remove('unread');
+        const unreadIndicator = item.querySelector('.unread-indicator');
+        if (unreadIndicator) {
+            unreadIndicator.remove();
+        }
+        const markReadBtn = item.querySelector('.mark-read-btn');
+        if (markReadBtn) {
+            markReadBtn.remove();
+        }
+    });
+    
+    // API call
+    fetch('/api/notifications/read-all', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Failed to mark all notifications as read:', data.error);
+            // Rollback UI changes on error
+            unreadNotifications.forEach(function(item) {
+                item.classList.add('unread');
+                // Restore indicators and buttons
+            });
+        } else {
+            console.log(`Marked ${data.read_count} notifications as read`);
+            // Update notification badges in header
+            if (typeof updateNotificationBadges === 'function') {
+                updateNotificationBadges();
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error marking all notifications as read:', error);
+        // Rollback UI changes on error
+        unreadNotifications.forEach(function(item) {
+            item.classList.add('unread');
+        });
+    });
+}
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header -->
+                <div class="d-none d-lg-block mb-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0 fw-bold text-body">Notifications</h4>
+                        <button class="btn btn-outline-secondary btn-sm" id="desktop-mark-all-read-btn">
+                            <i class="bi bi-check-all me-2"></i>Mark All Read
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Notifications Container -->
+                <div class="notifications-container">
+                    {% if notifications %}
+                        {% for notification in notifications %}
+                            <div class="notification-item d-flex align-items-center py-3 px-3 border-bottom {% if not notification.is_read %}unread{% endif %}" data-notification-id="{{ notification.id }}">
+                                <!-- Avatar -->
+                                <div class="notification-avatar me-3">
+                                    <img src="{{ url_for('serve_avatar', filename=(notification.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                                         alt="{{ notification.user }}" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                </div>
+                                
+                                <!-- Notification Content -->
+                                <div class="notification-content flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="notification-text">
+                                            <span class="fw-semibold text-body">{{ notification.user }}</span>
+                                            <span class="text-body-secondary ms-1">{{ notification.action_text }}</span>
+                                        </div>
+                                        
+                                        <!-- Unread Indicator -->
+                                        {% if not notification.is_read %}
+                                            <div class="unread-indicator me-2">
+                                                <div class="bg-primary rounded-circle" style="width: 8px; height: 8px;"></div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Time Row -->
+                                    <div class="mt-1">
+                                        <small class="text-body-secondary">{{ notification.time_ago }}</small>
+                                    </div>
+                                    
+                                    <!-- Comment Preview (if exists) -->
+                                    {% if notification.type == 'comment' %}
+                                        <div class="mt-1">
+                                            <small class="text-body-secondary">{{ notification.comment_preview }}</small>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-5">
+                            <i class="bi bi-bell fs-1 text-body-secondary mb-3"></i>
+                            <h5 class="text-body-secondary">No notifications yet</h5>
+                            <p class="text-body-secondary">When people interact with your posts, you'll see notifications here.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Management Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    
+    // Desktop mark all read button
+    const desktopMarkAllBtn = document.getElementById('desktop-mark-all-read-btn');
+    if (desktopMarkAllBtn) {
+        desktopMarkAllBtn.addEventListener('click', markAllAsRead);
+    }
+    
+    // Mobile mark all read button
+    const mobileMarkAllBtn = document.getElementById('mobile-mark-all-read-btn');
+    if (mobileMarkAllBtn) {
+        mobileMarkAllBtn.addEventListener('click', markAllAsRead);
+    }
+    
+});
+</script>
+{% endblock %}

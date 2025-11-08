@@ -1,0 +1,839 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Product - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add upload-product-page class to body for CSS targeting -->
+<script>
+// Add upload-product-page class to body element immediately
+document.body.classList.add('upload-product-page');
+
+// Modify mobile header for upload product page
+let mobileBackButton = null;
+let mobileHeaderTitleElement = null;
+let isInPreviewMode = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        mobileBackButton = document.createElement('a');
+        mobileBackButton.href = '/shop';
+        mobileBackButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        mobileBackButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileBackButton.addEventListener('click', function(e) {
+            if (isInPreviewMode) {
+                e.preventDefault();
+                // Trigger back to form if in preview mode
+                if (typeof window.goBackToForm === 'function') {
+                    window.goBackToForm();
+                } else if (typeof goBackToForm === 'function') {
+                    goBackToForm();
+                }
+            }
+        });
+        mobileHeader.appendChild(mobileBackButton);
+        
+        // Add list product title
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'flex-grow-1 d-flex justify-content-center mobile-list-product-title';
+        const titleH5 = document.createElement('h5');
+        titleH5.className = 'mb-0 fw-bold text-body';
+        titleH5.textContent = 'List Product';
+        titleDiv.appendChild(titleH5);
+        mobileHeaderTitleElement = titleH5;
+        mobileHeader.appendChild(titleDiv);
+        
+        // Add spacer for alignment
+        const spacer = document.createElement('div');
+        spacer.style.width = '45px';
+        mobileHeader.appendChild(spacer);
+    }
+    
+    // Hide mobile bottom nav
+    const mobileNav = document.getElementById('mobile-bottom-nav');
+    if (mobileNav) {
+        mobileNav.style.display = 'none';
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header -->
+                <div class="d-none d-lg-block mb-4" id="desktopHeader">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0 fw-bold text-body" id="desktopHeaderTitle">List New Product</h4>
+                        <a href="/shop" class="btn btn-outline-secondary btn-sm" id="desktopHeaderBackBtn">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Shop
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="step-indicator-container mb-4 px-3">
+                    <div class="step-indicator">
+                        <div class="step active" id="step1">
+                            <div class="step-circle">1</div>
+                            <span>Details</span>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step" id="step2">
+                            <div class="step-circle">2</div>
+                            <span>Preview</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Form View -->
+                <div id="productFormView" class="product-form-view">
+                    <div class="px-3 pb-4">
+                        <form id="productForm" enctype="multipart/form-data">
+                            <!-- Product Image Upload -->
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold mb-3">Product Image *</label>
+                                <div class="product-image-upload-container">
+                                    <div id="imageUploadArea" class="image-upload-area">
+                                        <input type="file" id="productImage" name="image" accept="image/*" class="d-none" required>
+                                        <div class="upload-placeholder" id="uploadPlaceholder">
+                                            <i class="bi bi-camera-fill fs-1 text-body-secondary mb-2"></i>
+                                            <p class="text-body-secondary mb-2">Click to upload product image</p>
+                                            <small class="text-body-secondary">PNG, JPG up to 10MB</small>
+                                        </div>
+                                        <img id="imagePreview" class="uploaded-image d-none" alt="Product preview">
+                                        <button type="button" class="btn-remove-image d-none" id="removeImageBtn">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Product Name -->
+                            <div class="mb-3">
+                                <label for="productName" class="form-label fw-semibold">Product Name *</label>
+                                <input type="text" class="form-control form-control-lg" id="productName" name="name" placeholder="Enter product name" required>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <label for="productDescription" class="form-label fw-semibold">Description *</label>
+                                <textarea class="form-control" id="productDescription" name="description" rows="4" placeholder="Describe your product..." required></textarea>
+                                <small class="text-body-secondary">Help buyers understand what makes your product special</small>
+                            </div>
+
+                            <!-- Price and Stock -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="productPrice" class="form-label fw-semibold">Price ($) *</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="0" class="form-control" id="productPrice" name="price" placeholder="0.00" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="productStock" class="form-label fw-semibold">Stock Quantity *</label>
+                                    <input type="number" min="0" class="form-control form-control-lg" id="productStock" name="stock" placeholder="0" required>
+                                </div>
+                            </div>
+
+                            <!-- Category and Seller -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="productCategory" class="form-label fw-semibold">Category *</label>
+                                    <select class="form-select form-select-lg" id="productCategory" name="category" required>
+                                        <option value="">Select category</option>
+                                        <option value="electronics">Electronics</option>
+                                        <option value="fashion">Fashion</option>
+                                        <option value="home">Home</option>
+                                        <option value="sports">Sports</option>
+                                        <option value="food">Food</option>
+                                        <option value="books">Books</option>
+                                        <option value="toys">Toys</option>
+                                        <option value="beauty">Beauty</option>
+                                        <option value="automotive">Automotive</option>
+                                        <option value="garden">Garden</option>
+                                        <option value="jewelry">Jewelry</option>
+                                        <option value="pets">Pets</option>
+                                        <option value="music">Music</option>
+                                        <option value="games">Games</option>
+                                        <option value="office">Office</option>
+                                        <option value="health">Health</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="productSeller" class="form-label fw-semibold">Seller/Store Name *</label>
+                                    <input type="text" class="form-control form-control-lg" id="productSeller" name="seller" placeholder="Your store name" required>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="created_at" id="productCreatedAt">
+                        </form>
+
+                        <!-- Continue Button -->
+                        <div class="mt-4">
+                            <button type="button" class="btn btn-primary btn-lg w-100" id="continueToPreviewBtn">
+                                Continue to Preview <i class="bi bi-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview View -->
+                <div id="previewView" class="preview-view d-none">
+                    <div class="preview-container">
+                        <!-- Product Preview Card -->
+                        <div class="product-preview-card px-3 pt-3 pb-4">
+                            <div class="product-preview-image-container">
+                                <img id="previewProductImage" alt="Product preview">
+                            </div>
+                            
+                            <!-- Product Info Preview -->
+                            <div class="product-preview-info mt-3">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge bg-primary text-white" id="previewCategory">
+                                        <i class="bi bi-shop me-1"></i>Category
+                                    </span>
+                                </div>
+                                <h3 class="mb-2 fw-bold d-flex align-items-center gap-2" id="previewName">
+                                    <span>Product Name</span>
+                                    <img src="/static/images/new.png" alt="New" class="new-product-badge" style="height: 20px; width: auto;" id="previewNewIcon">
+                                </h3>
+                                <p class="text-body-secondary mb-2" id="previewSeller">Sold by Seller</p>
+                                <h2 class="text-primary fw-bold mb-3" id="previewPrice">$0.00</h2>
+                                
+                                <div class="product-details-grid mb-3">
+                                    <div class="detail-item">
+                                        <i class="bi bi-box-seam text-primary fs-5"></i>
+                                        <div>
+                                            <small class="text-body-secondary d-block">Stock</small>
+                                            <span class="fw-semibold" id="previewStock">0 available</span>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
+                                        <i class="bi bi-shop text-primary fs-5"></i>
+                                        <div>
+                                            <small class="text-body-secondary d-block">Category</small>
+                                            <span class="fw-semibold" id="previewCategoryText">Category</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="preview-description">
+                                    <h6 class="fw-semibold mb-2">Description</h6>
+                                    <p class="text-body" id="previewDescription">Product description will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Publish Button -->
+                        <div class="preview-bottom-bar px-3">
+                            <button class="btn btn-primary btn-lg w-100" id="publishProductBtn">
+                                <span id="publishBtnText">List Product</span>
+                                <span id="publishBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Change blue to red on upload product page */
+.btn-primary {
+    background-color: #dc3545 !important;
+    border-color: #dc3545 !important;
+}
+
+.btn-primary:hover {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+}
+
+.btn-primary:focus {
+    background-color: #c82333 !important;
+    border-color: #bd2130 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.5) !important;
+}
+
+.text-primary {
+    color: #dc3545 !important;
+}
+
+.text-primary:hover {
+    color: #c82333 !important;
+}
+
+.bg-primary {
+    background-color: #dc3545 !important;
+}
+
+.badge-new-verification {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-radius: 50px !important;
+    padding: 0.25em 0.6em !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    border: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 45px !important;
+    height: 24px !important;
+}
+
+[data-bs-theme="dark"] .badge-new-verification {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+.upload-product-page {
+    background: var(--bs-body-bg);
+    min-height: 100vh;
+}
+
+.step-indicator-container {
+    display: flex;
+    justify-content: center;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 400px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #999;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.step.active {
+    color: #000;
+}
+
+[data-bs-theme="dark"] .step {
+    color: #666;
+}
+
+[data-bs-theme="dark"] .step.active {
+    color: #fff;
+}
+
+.step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: #999;
+    transition: all 0.3s;
+}
+
+[data-bs-theme="dark"] .step-circle {
+    border-color: #666;
+    color: #666;
+}
+
+.step.active .step-circle {
+    background: transparent;
+    border-color: #000;
+    color: #000;
+    box-shadow: none;
+}
+
+[data-bs-theme="dark"] .step.active .step-circle {
+    border-color: #fff;
+    color: #fff;
+}
+
+.step-line {
+    width: 40px;
+    height: 2px;
+    background: #ccc;
+    transition: all 0.3s;
+}
+
+[data-bs-theme="dark"] .step-line {
+    background: #666;
+}
+
+.step.active + .step-line {
+    background: #000;
+}
+
+[data-bs-theme="dark"] .step.active + .step-line {
+    background: #fff;
+}
+
+.product-form-view {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.preview-view {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.product-image-upload-container {
+    width: 100%;
+}
+
+.image-upload-area {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    border: 2px dashed var(--bs-border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: var(--bs-secondary-bg);
+}
+
+.image-upload-area:hover {
+    border-color: #667eea;
+    background: var(--bs-body-bg);
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    text-align: center;
+    padding: 20px;
+}
+
+.uploaded-image {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
+}
+
+.btn-remove-image {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+}
+
+.btn-remove-image:hover {
+    background: rgba(220, 53, 69, 0.9);
+    transform: scale(1.1);
+}
+
+.form-control-lg, .form-select-lg {
+    padding: 12px 16px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--bs-border-color);
+    transition: all 0.3s;
+}
+
+.form-control-lg:focus, .form-select-lg:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.preview-container {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.product-preview-card {
+    padding-bottom: 20px;
+}
+
+.product-preview-image-container {
+    width: 100%;
+    min-height: 300px;
+    max-height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bs-secondary-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.product-preview-image-container img {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    object-fit: contain;
+    display: block;
+}
+
+.product-preview-info {
+    background: var(--bs-body-bg);
+}
+
+.product-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 15px;
+    background: var(--bs-secondary-bg);
+    border-radius: 12px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.preview-description {
+    padding: 15px;
+    background: var(--bs-secondary-bg);
+    border-radius: 12px;
+}
+
+.preview-bottom-bar {
+    padding: 20px 0;
+    border-top: 1px solid var(--bs-border-color);
+    position: sticky;
+    bottom: 0;
+    background: var(--bs-body-bg);
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .step span {
+        display: none;
+    }
+    
+    .step-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+    
+    .step-line {
+        width: 30px;
+    }
+    
+    .image-upload-area {
+        min-height: 250px;
+    }
+    
+    .upload-placeholder {
+        height: 250px;
+    }
+    
+    .product-preview-image-container {
+        min-height: 250px;
+        max-height: 400px;
+    }
+    
+    .product-preview-image-container img {
+        max-height: 400px;
+    }
+}
+</style>
+
+<script>
+// Make goBackToForm globally accessible for mobile header
+let goBackToForm = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const productImage = document.getElementById('productImage');
+    const imageUploadArea = document.getElementById('imageUploadArea');
+    const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    const continueToPreviewBtn = document.getElementById('continueToPreviewBtn');
+    const productFormView = document.getElementById('productFormView');
+    const previewView = document.getElementById('previewView');
+    const publishProductBtn = document.getElementById('publishProductBtn');
+    const productForm = document.getElementById('productForm');
+    const desktopHeaderTitle = document.getElementById('desktopHeaderTitle');
+    const desktopHeaderBackBtn = document.getElementById('desktopHeaderBackBtn');
+
+    let selectedImageFile = null;
+    let imagePreviewUrl = null;
+
+    // Image upload functionality
+    imageUploadArea.addEventListener('click', function() {
+        if (!imagePreview.classList.contains('d-none')) {
+            return; // Don't open file picker if image is already uploaded
+        }
+        productImage.click();
+    });
+
+    productImage.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file');
+                return;
+            }
+            
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Image size should be less than 10MB');
+                return;
+            }
+
+            selectedImageFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreviewUrl = e.target.result;
+                imagePreview.src = imagePreviewUrl;
+                imagePreview.classList.remove('d-none');
+                uploadPlaceholder.classList.add('d-none');
+                removeImageBtn.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    removeImageBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        selectedImageFile = null;
+        imagePreviewUrl = null;
+        imagePreview.src = '';
+        imagePreview.classList.add('d-none');
+        uploadPlaceholder.classList.remove('d-none');
+        removeImageBtn.classList.add('d-none');
+        productImage.value = '';
+    });
+
+    // Continue to preview
+    continueToPreviewBtn.addEventListener('click', function() {
+        if (!productForm.checkValidity()) {
+            productForm.reportValidity();
+            return;
+        }
+
+        // Validate image
+        if (!selectedImageFile) {
+            alert('Please upload a product image');
+            productImage.focus();
+            return;
+        }
+
+        // Update preview
+        updatePreview();
+
+        // Switch views
+        productFormView.classList.add('d-none');
+        previewView.classList.remove('d-none');
+
+        // Update step indicator
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step2').classList.add('active');
+
+        // Update header to "Preview Product"
+        updateHeaderToPreview();
+    });
+
+    // Function to update header to preview mode
+    function updateHeaderToPreview() {
+        isInPreviewMode = true;
+        
+        // Update desktop header
+        if (desktopHeaderTitle) {
+            desktopHeaderTitle.textContent = 'Preview Product';
+        }
+        if (desktopHeaderBackBtn) {
+            desktopHeaderBackBtn.innerHTML = '<i class="bi bi-arrow-left me-2"></i>Back';
+            desktopHeaderBackBtn.href = '#';
+            desktopHeaderBackBtn.onclick = function(e) {
+                e.preventDefault();
+                goBackToForm();
+            };
+        }
+        
+        // Update mobile header
+        if (mobileHeaderTitleElement) {
+            mobileHeaderTitleElement.textContent = 'Preview Product';
+        }
+    }
+
+    // Function to update header to form mode
+    function updateHeaderToForm() {
+        isInPreviewMode = false;
+        
+        // Update desktop header
+        if (desktopHeaderTitle) {
+            desktopHeaderTitle.textContent = 'List New Product';
+        }
+        if (desktopHeaderBackBtn) {
+            desktopHeaderBackBtn.innerHTML = '<i class="bi bi-arrow-left me-2"></i>Back to Shop';
+            desktopHeaderBackBtn.href = '/shop';
+            desktopHeaderBackBtn.onclick = null;
+        }
+        
+        // Update mobile header
+        if (mobileHeaderTitleElement) {
+            mobileHeaderTitleElement.textContent = 'List Product';
+        }
+    }
+
+    // Function to go back to form (make it globally accessible)
+    goBackToForm = function() {
+        previewView.classList.add('d-none');
+        productFormView.classList.remove('d-none');
+
+        // Update step indicator
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step1').classList.add('active');
+
+        // Update header back to form mode
+        updateHeaderToForm();
+    };
+    
+    // Make it globally accessible
+    window.goBackToForm = goBackToForm;
+
+    // Update preview function
+    function updatePreview() {
+        const name = document.getElementById('productName').value;
+        const description = document.getElementById('productDescription').value;
+        const price = parseFloat(document.getElementById('productPrice').value);
+        const stock = parseInt(document.getElementById('productStock').value);
+        const category = document.getElementById('productCategory').value;
+        const seller = document.getElementById('productSeller').value;
+
+        // Category icon mapping
+        const categoryIcons = {
+            'electronics': 'bi-laptop',
+            'fashion': 'bi-bag',
+            'home': 'bi-house',
+            'sports': 'bi-trophy',
+            'food': 'bi-cup-hot',
+            'books': 'bi-book',
+            'toys': 'bi-balloon',
+            'beauty': 'bi-star',
+            'automotive': 'bi-car-front',
+            'garden': 'bi-flower1',
+            'jewelry': 'bi-gem',
+            'pets': 'bi-heart',
+            'music': 'bi-music-note',
+            'games': 'bi-controller',
+            'office': 'bi-briefcase',
+            'health': 'bi-heart-pulse'
+        };
+
+        const categoryIcon = categoryIcons[category] || 'bi-shop';
+        const categoryText = category ? category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Category';
+
+        document.getElementById('previewProductImage').src = imagePreviewUrl;
+        const previewNameElement = document.getElementById('previewName');
+        const nameSpan = previewNameElement.querySelector('span');
+        if (nameSpan) {
+            nameSpan.textContent = name;
+        } else {
+            previewNameElement.innerHTML = `<span>${name}</span><img src="/static/images/new.png" alt="New" class="new-product-badge" style="height: 20px; width: auto;" id="previewNewIcon">`;
+        }
+        document.getElementById('previewSeller').textContent = 'Sold by ' + seller;
+        document.getElementById('previewPrice').textContent = '$' + price.toFixed(2);
+        document.getElementById('previewStock').textContent = stock + ' available';
+        document.getElementById('previewCategoryText').textContent = categoryText;
+        document.getElementById('previewDescription').textContent = description;
+        
+        const categoryBadge = document.getElementById('previewCategory');
+        categoryBadge.innerHTML = `<i class="bi ${categoryIcon} me-1"></i>${categoryText}`;
+    }
+
+    // Publish product
+    publishProductBtn.addEventListener('click', function() {
+        if (!productForm.checkValidity()) {
+            productForm.reportValidity();
+            return;
+        }
+
+        // Show loading state
+        const publishBtnText = document.getElementById('publishBtnText');
+        const publishBtnSpinner = document.getElementById('publishBtnSpinner');
+        publishBtnText.textContent = 'Listing...';
+        publishBtnSpinner.classList.remove('d-none');
+        publishProductBtn.disabled = true;
+
+        // Set created_at to current date
+        document.getElementById('productCreatedAt').value = new Date().toISOString().split('T')[0];
+
+        // Create FormData from form
+        const formData = new FormData(productForm);
+
+        // Submit form
+        fetch('/api/shop', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Product listed successfully!');
+                window.location.href = '/shop/' + data.product.id;
+            } else {
+                alert('Error listing product: ' + (data.error || 'Unknown error'));
+                publishBtnText.textContent = 'List Product';
+                publishBtnSpinner.classList.add('d-none');
+                publishProductBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error listing product:', error);
+            alert('Error listing product. Please try again.');
+            publishBtnText.textContent = 'List Product';
+            publishBtnSpinner.classList.add('d-none');
+            publishProductBtn.disabled = false;
+        });
+    });
+
+    // Real-time preview update on input change
+    ['productName', 'productDescription', 'productPrice', 'productStock', 'productCategory', 'productSeller'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', function() {
+                if (!previewView.classList.contains('d-none')) {
+                    updatePreview();
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
+

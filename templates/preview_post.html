@@ -1,0 +1,1059 @@
+{% extends "base.html" %}
+
+{% block title %}New Post - Social Media App{% endblock %}
+
+{% block content %}
+<style>
+.preview-container {
+    max-width: 600px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bs-body-bg);
+    padding-bottom: 80px;
+}
+
+.preview-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bs-body-bg);
+    border-bottom: 1px solid var(--bs-border-color);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.preview-header .back-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--bs-body-color);
+    padding: 0;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.preview-header h5 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.preview-header .share-text-btn {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.preview-media-container {
+    width: 100%;
+    min-height: 400px;
+    max-height: 600px;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.preview-media-container img,
+.preview-media-container video {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: contain;
+}
+
+/* Filters */
+.filter-none { filter: none; }
+.filter-clarendon { filter: contrast(1.2) saturate(1.35); }
+.filter-gingham { filter: contrast(1.1) brightness(1.05); }
+.filter-moon { filter: grayscale(1) contrast(1.1) brightness(1.1); }
+.filter-lark { filter: contrast(0.9) sepia(0.25); }
+.filter-reyes { filter: sepia(0.22) brightness(1.1) contrast(0.85); }
+.filter-juno { filter: sepia(0.35) contrast(1.15) brightness(1.15) saturate(1.8); }
+.filter-slumber { filter: sepia(0.35) contrast(1.25) saturate(1.25); }
+.filter-crema { filter: sepia(0.5) contrast(1.25) brightness(1.15) saturate(0.9); }
+.filter-ludwig { filter: contrast(1.15) brightness(1.05) saturate(2); }
+.filter-aden { filter: sepia(0.2) brightness(1.15) saturate(0.85) hue-rotate(-20deg); }
+.filter-perpetua { filter: contrast(1.1) brightness(1.25) saturate(1.1); }
+
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+}
+
+.caption-section {
+    padding: 0;
+}
+
+.post-option {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.post-option:hover {
+    background: var(--bs-secondary-bg);
+}
+
+.post-option i {
+    font-size: 20px;
+    color: var(--bs-body-color);
+    width: 24px;
+}
+
+.post-option-content {
+    flex: 1;
+}
+
+.post-option-label {
+    font-size: 14px;
+    color: var(--bs-body-color);
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.post-option-value {
+    font-size: 13px;
+    color: var(--bs-text-muted);
+}
+
+.caption-input-area {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--bs-border-color);
+    position: relative;
+}
+
+.caption-textarea {
+    width: 100%;
+    border: none;
+    padding: 0;
+    resize: none;
+    min-height: 100px;
+    font-size: 14px;
+    background: transparent;
+    color: var(--bs-body-color);
+    margin-bottom: 10px;
+}
+
+.caption-textarea:focus {
+    outline: none;
+}
+
+.caption-tools {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.caption-tool-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--bs-text-muted);
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.2s;
+}
+
+.caption-tool-btn:hover {
+    color: var(--bs-body-color);
+}
+
+.caption-counter {
+    font-size: 12px;
+    color: var(--bs-text-muted);
+    margin-left: auto;
+}
+
+/* Modal Styles */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1040;
+    display: none;
+}
+
+.modal-backdrop.show {
+    display: block;
+}
+
+.custom-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bs-body-bg);
+    border-radius: 15px;
+    max-width: 90%;
+    width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    z-index: 1050;
+    display: none;
+}
+
+.custom-modal.show {
+    display: block;
+}
+
+.modal-header-custom {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--bs-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-header-custom h6 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.modal-body-custom {
+    padding: 20px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.close-modal-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--bs-body-color);
+    cursor: pointer;
+    padding: 0;
+}
+
+/* Filter Grid */
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.filter-item {
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.filter-item img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid transparent;
+}
+
+.filter-item.active img {
+    border-color: #667eea;
+}
+
+.filter-item-label {
+    font-size: 12px;
+    margin-top: 5px;
+    color: var(--bs-body-color);
+}
+
+/* Sticker Picker */
+.sticker-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+}
+
+.sticker-item {
+    font-size: 32px;
+    text-align: center;
+    cursor: pointer;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.sticker-item:hover {
+    background: var(--bs-secondary-bg);
+}
+
+/* Location Search */
+.location-search {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    margin-bottom: 15px;
+}
+
+.location-search:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.location-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.location-item {
+    padding: 12px;
+    border-bottom: 1px solid var(--bs-border-color);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.location-item:hover {
+    background: var(--bs-secondary-bg);
+}
+
+.location-item:last-child {
+    border-bottom: none;
+}
+
+.location-name {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.location-address {
+    font-size: 12px;
+    color: var(--bs-text-muted);
+}
+
+/* Tag People */
+.tag-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    margin-bottom: 15px;
+}
+
+.tag-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.tagged-users {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.tagged-user {
+    background: var(--bs-secondary-bg);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.remove-tag {
+    cursor: pointer;
+    color: var(--bs-text-muted);
+}
+
+/* Advanced Settings */
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.setting-label {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.setting-desc {
+    font-size: 12px;
+    color: var(--bs-text-muted);
+    margin-top: 2px;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 28px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bs-border-color);
+    transition: .4s;
+    border-radius: 28px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #667eea;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(22px);
+}
+
+.error-message {
+    padding: 20px;
+    text-align: center;
+    color: var(--bs-danger);
+}
+</style>
+
+<div class="preview-container">
+    <!-- Header -->
+    <div class="preview-header">
+        <button class="back-btn" onclick="goBack()">
+            <i class="bi bi-arrow-left"></i>
+        </button>
+        <h5>New Post</h5>
+        <button class="share-text-btn" id="shareButton" onclick="sharePost()">
+            Share
+        </button>
+    </div>
+
+    <!-- Media Display -->
+    <div class="preview-media-container" id="mediaContainer">
+        <div class="loading-spinner">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Caption and Options Section -->
+    <div class="caption-section">
+        <!-- Caption Input -->
+        <div class="caption-input-area">
+            <textarea 
+                class="caption-textarea" 
+                id="captionInput" 
+                placeholder="Write a caption..." 
+                maxlength="2200"></textarea>
+            <div class="caption-tools">
+                <button class="caption-tool-btn" onclick="showStickerPicker()" title="Add sticker">
+                    <i class="bi bi-emoji-smile"></i>
+                </button>
+                <button class="caption-tool-btn" onclick="showHashtagSuggestions()" title="Add hashtag">
+                    <i class="bi bi-hash"></i>
+                </button>
+                <div class="caption-counter">
+                    <span id="captionCount">0</span>/2200
+                </div>
+            </div>
+        </div>
+
+        <!-- Tag People -->
+        <div class="post-option" onclick="showTagPeople()">
+            <i class="bi bi-person-plus"></i>
+            <div class="post-option-content">
+                <div class="post-option-label">Tag People</div>
+                <div class="post-option-value" id="taggedPeopleLabel">Add tags</div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </div>
+
+        <!-- Add Location -->
+        <div class="post-option" onclick="showAddLocation()">
+            <i class="bi bi-geo-alt"></i>
+            <div class="post-option-content">
+                <div class="post-option-label">Add Location</div>
+                <div class="post-option-value" id="locationLabel">Where was this?</div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </div>
+
+        <!-- Apply Filter -->
+        <div class="post-option" onclick="showFilterPicker()">
+            <i class="bi bi-stars"></i>
+            <div class="post-option-content">
+                <div class="post-option-label">Filter</div>
+                <div class="post-option-value" id="filterLabel">Normal</div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </div>
+
+        <!-- Advanced Settings -->
+        <div class="post-option" onclick="showAdvancedSettings()">
+            <i class="bi bi-sliders"></i>
+            <div class="post-option-content">
+                <div class="post-option-label">Advanced Settings</div>
+                <div class="post-option-value">Manage post options</div>
+            </div>
+            <i class="bi bi-chevron-right"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Filter Modal -->
+<div class="modal-backdrop" id="filterBackdrop"></div>
+<div class="custom-modal" id="filterModal">
+    <div class="modal-header-custom">
+        <h6>Choose Filter</h6>
+        <button class="close-modal-btn" onclick="closeModal('filterModal')">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div class="modal-body-custom">
+        <div class="filter-grid" id="filterGrid"></div>
+    </div>
+</div>
+
+<!-- Sticker Picker Modal -->
+<div class="custom-modal" id="stickerModal">
+    <div class="modal-header-custom">
+        <h6>Add Sticker</h6>
+        <button class="close-modal-btn" onclick="closeModal('stickerModal')">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div class="modal-body-custom">
+        <div class="sticker-grid" id="stickerGrid"></div>
+    </div>
+</div>
+
+<!-- Location Modal -->
+<div class="custom-modal" id="locationModal">
+    <div class="modal-header-custom">
+        <h6>Add Location</h6>
+        <button class="close-modal-btn" onclick="closeModal('locationModal')">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div class="modal-body-custom">
+        <input type="text" class="location-search" id="locationSearch" placeholder="Search locations...">
+        <div class="location-list" id="locationList"></div>
+    </div>
+</div>
+
+<!-- Tag People Modal -->
+<div class="custom-modal" id="tagModal">
+    <div class="modal-header-custom">
+        <h6>Tag People</h6>
+        <button class="close-modal-btn" onclick="closeModal('tagModal')">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div class="modal-body-custom">
+        <input type="text" class="tag-input" id="tagSearch" placeholder="Search people...">
+        <div class="tagged-users" id="taggedUsers"></div>
+        <div class="location-list" id="peopleList"></div>
+    </div>
+</div>
+
+<!-- Advanced Settings Modal -->
+<div class="custom-modal" id="settingsModal">
+    <div class="modal-header-custom">
+        <h6>Advanced Settings</h6>
+        <button class="close-modal-btn" onclick="closeModal('settingsModal')">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+    <div class="modal-body-custom">
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">Hide Like Count</div>
+                <div class="setting-desc">Only you will see the total likes</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="hideLikes">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="setting-item">
+            <div>
+                <div class="setting-label">Turn Off Commenting</div>
+                <div class="setting-desc">You won't be able to change this later</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="disableComments">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+</div>
+
+<script>
+let tempMediaData = null;
+let timerInterval = null;
+let currentFilter = 'none';
+let selectedLocation = null;
+let taggedPeople = [];
+let postSettings = {
+    hideLikes: false,
+    disableComments: false
+};
+
+// Get media info from URL parameters
+const urlParams = new URLSearchParams(window.location.search);
+const filename = urlParams.get('file');
+
+// Instagram-like filters
+const filters = [
+    { name: 'Normal', class: 'filter-none' },
+    { name: 'Clarendon', class: 'filter-clarendon' },
+    { name: 'Gingham', class: 'filter-gingham' },
+    { name: 'Moon', class: 'filter-moon' },
+    { name: 'Lark', class: 'filter-lark' },
+    { name: 'Reyes', class: 'filter-reyes' },
+    { name: 'Juno', class: 'filter-juno' },
+    { name: 'Slumber', class: 'filter-slumber' },
+    { name: 'Crema', class: 'filter-crema' },
+    { name: 'Ludwig', class: 'filter-ludwig' },
+    { name: 'Aden', class: 'filter-aden' },
+    { name: 'Perpetua', class: 'filter-perpetua' }
+];
+
+// Popular stickers/emojis
+const stickers = [
+    '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃', '😉', '😊',
+    '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙', '😋', '😛', '😜', '🤪',
+    '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕',
+    '🔥', '✨', '💫', '⭐', '🌟', '💥', '💯', '🎉', '🎊', '🎈', '🎁', '🏆',
+    '👍', '👎', '👌', '✌️', '🤞', '🤟', '🤘', '👏', '🙌', '👐', '🤲', '🤝'
+];
+
+// Sample locations
+const locations = [
+    { name: 'Central Park', address: 'New York, NY' },
+    { name: 'Times Square', address: 'Manhattan, NY' },
+    { name: 'Brooklyn Bridge', address: 'Brooklyn, NY' },
+    { name: 'Golden Gate Bridge', address: 'San Francisco, CA' },
+    { name: 'Hollywood Sign', address: 'Los Angeles, CA' },
+    { name: 'Venice Beach', address: 'Los Angeles, CA' },
+    { name: 'Statue of Liberty', address: 'New York Harbor, NY' },
+    { name: 'Empire State Building', address: 'New York, NY' }
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (filename) {
+        loadMediaFromServer(filename);
+    } else {
+        showError('No media file specified');
+    }
+    
+    // Setup caption counter
+    const captionInput = document.getElementById('captionInput');
+    const captionCount = document.getElementById('captionCount');
+    captionInput.addEventListener('input', function() {
+        captionCount.textContent = this.value.length;
+    });
+    
+    // Initialize sticker grid
+    initializeStickers();
+    
+    // Initialize locations
+    initializeLocations();
+    
+    // Setup modal backdrop click
+    document.getElementById('filterBackdrop').addEventListener('click', closeAllModals);
+});
+
+async function loadMediaFromServer(filename) {
+    try {
+        console.log('Loading media:', filename);
+        
+        // Get media info from server
+        const infoResponse = await fetch('/api/temp-media-info');
+        const infoData = await infoResponse.json();
+        
+        if (infoData.success) {
+            // Find our file
+            const fileInfo = infoData.temp_files.find(f => f.filename === filename);
+            
+            if (fileInfo) {
+                console.log('File info:', fileInfo);
+                tempMediaData = fileInfo;
+                
+                // Display the media
+                displayMedia(fileInfo);
+                
+                // Start silent timer (just track, don't show to user)
+                startSilentTimer(fileInfo.expiry_time);
+            } else {
+                showError('Media file not found or expired');
+            }
+        } else {
+            showError('Failed to load media information');
+        }
+    } catch (error) {
+        console.error('Error loading media:', error);
+        showError('Error loading media: ' + error.message);
+    }
+}
+
+function displayMedia(fileInfo) {
+    const container = document.getElementById('mediaContainer');
+    const mediaUrl = `/api/temp-media/${fileInfo.filename}`;
+    
+    console.log('Displaying media from:', mediaUrl);
+    
+    // Clear loading spinner
+    container.innerHTML = '';
+    
+    if (fileInfo.file_type === 'image') {
+        const img = document.createElement('img');
+        img.src = mediaUrl;
+        img.alt = 'Preview';
+        img.id = 'previewMedia';
+        img.onload = function() {
+            console.log('Image loaded successfully');
+            // Initialize filters after image loads
+            initializeFilters();
+        };
+        img.onerror = function() {
+            console.error('Failed to load image');
+            showError('Failed to load image from server');
+        };
+        container.appendChild(img);
+    } else if (fileInfo.file_type === 'video') {
+        const video = document.createElement('video');
+        video.src = mediaUrl;
+        video.id = 'previewMedia';
+        video.controls = true;
+        video.onloadeddata = function() {
+            console.log('Video loaded successfully');
+            // Initialize filters after video loads
+            initializeFilters();
+        };
+        video.onerror = function() {
+            console.error('Failed to load video');
+            showError('Failed to load video from server');
+        };
+        container.appendChild(video);
+    }
+}
+
+function startSilentTimer(expiryTime) {
+    const expiryDate = new Date(expiryTime);
+    
+    function checkExpiry() {
+        const now = new Date();
+        const remaining = expiryDate - now;
+        
+        if (remaining <= 0) {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            alert('Media file has expired. Please upload again.');
+            window.location.href = '/create';
+            return;
+        }
+    }
+    
+    // Check every minute
+    timerInterval = setInterval(checkExpiry, 60000);
+}
+
+async function sharePost() {
+    const caption = document.getElementById('captionInput').value.trim();
+    const shareButton = document.getElementById('shareButton');
+    
+    if (!caption) {
+        alert('Please add a caption');
+        return;
+    }
+    
+    if (!tempMediaData) {
+        alert('No media loaded');
+        return;
+    }
+    
+    // Disable button
+    shareButton.disabled = true;
+    shareButton.textContent = 'Sharing...';
+    
+    try {
+        // Fetch the media file from server
+        const mediaUrl = `/api/temp-media/${tempMediaData.filename}`;
+        const mediaResponse = await fetch(mediaUrl);
+        const mediaBlob = await mediaResponse.blob();
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('image', mediaBlob, tempMediaData.filename);
+        formData.append('caption', caption);
+        formData.append('filter', currentFilter);
+        if (selectedLocation) {
+            formData.append('location', JSON.stringify(selectedLocation));
+        }
+        if (taggedPeople.length > 0) {
+            formData.append('tagged_people', JSON.stringify(taggedPeople));
+        }
+        formData.append('hide_likes', postSettings.hideLikes);
+        formData.append('disable_comments', postSettings.disableComments);
+        
+        // Upload to posts
+        const response = await fetch('/api/posts/create', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Clear timer
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            // Show success and redirect
+            alert('Post shared successfully!');
+            window.location.href = '/';
+        } else {
+            throw new Error(data.error || 'Failed to share post');
+        }
+    } catch (error) {
+        console.error('Error sharing post:', error);
+        alert('Error sharing post: ' + error.message);
+        
+        // Re-enable button
+        shareButton.disabled = false;
+        shareButton.textContent = 'Share';
+    }
+}
+
+// Filter Functions
+function initializeFilters() {
+    const filterGrid = document.getElementById('filterGrid');
+    const mediaUrl = tempMediaData ? `/api/temp-media/${tempMediaData.filename}` : '';
+    
+    filters.forEach((filter, index) => {
+        const filterItem = document.createElement('div');
+        filterItem.className = 'filter-item';
+        if (index === 0) filterItem.classList.add('active');
+        
+        filterItem.innerHTML = `
+            <img src="${mediaUrl}" alt="${filter.name}" class="${filter.class}">
+            <div class="filter-item-label">${filter.name}</div>
+        `;
+        
+        filterItem.addEventListener('click', () => selectFilter(filter, filterItem));
+        filterGrid.appendChild(filterItem);
+    });
+}
+
+function selectFilter(filter, element) {
+    // Remove active class from all items
+    document.querySelectorAll('.filter-item').forEach(item => item.classList.remove('active'));
+    element.classList.add('active');
+    
+    // Apply filter to main media
+    const media = document.getElementById('previewMedia');
+    if (media) {
+        filters.forEach(f => media.classList.remove(f.class));
+        media.classList.add(filter.class);
+    }
+    
+    currentFilter = filter.name;
+    document.getElementById('filterLabel').textContent = filter.name;
+    
+    // Close modal after a short delay
+    setTimeout(() => closeModal('filterModal'), 300);
+}
+
+// Sticker Functions
+function initializeStickers() {
+    const stickerGrid = document.getElementById('stickerGrid');
+    
+    stickers.forEach(sticker => {
+        const stickerItem = document.createElement('div');
+        stickerItem.className = 'sticker-item';
+        stickerItem.textContent = sticker;
+        stickerItem.addEventListener('click', () => addStickerToCaption(sticker));
+        stickerGrid.appendChild(stickerItem);
+    });
+}
+
+function addStickerToCaption(sticker) {
+    const captionInput = document.getElementById('captionInput');
+    const cursorPos = captionInput.selectionStart;
+    const textBefore = captionInput.value.substring(0, cursorPos);
+    const textAfter = captionInput.value.substring(cursorPos);
+    
+    captionInput.value = textBefore + sticker + textAfter;
+    captionInput.focus();
+    captionInput.selectionStart = captionInput.selectionEnd = cursorPos + sticker.length;
+    
+    // Update counter
+    document.getElementById('captionCount').textContent = captionInput.value.length;
+    
+    closeModal('stickerModal');
+}
+
+// Location Functions
+function initializeLocations() {
+    const locationList = document.getElementById('locationList');
+    const locationSearch = document.getElementById('locationSearch');
+    
+    function renderLocations(filteredLocations) {
+        locationList.innerHTML = '';
+        filteredLocations.forEach(location => {
+            const locationItem = document.createElement('div');
+            locationItem.className = 'location-item';
+            locationItem.innerHTML = `
+                <div class="location-name">${location.name}</div>
+                <div class="location-address">${location.address}</div>
+            `;
+            locationItem.addEventListener('click', () => selectLocation(location));
+            locationList.appendChild(locationItem);
+        });
+    }
+    
+    renderLocations(locations);
+    
+    locationSearch.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = locations.filter(loc => 
+            loc.name.toLowerCase().includes(query) || 
+            loc.address.toLowerCase().includes(query)
+        );
+        renderLocations(filtered);
+    });
+}
+
+function selectLocation(location) {
+    selectedLocation = location;
+    document.getElementById('locationLabel').textContent = location.name;
+    closeModal('locationModal');
+}
+
+// Tag People Functions
+function showTagPeople() {
+    openModal('tagModal');
+    // In a real app, you would fetch actual users here
+}
+
+function showHashtagSuggestions() {
+    // Add # to caption
+    const captionInput = document.getElementById('captionInput');
+    const cursorPos = captionInput.selectionStart;
+    const textBefore = captionInput.value.substring(0, cursorPos);
+    const textAfter = captionInput.value.substring(cursorPos);
+    
+    captionInput.value = textBefore + '#' + textAfter;
+    captionInput.focus();
+    captionInput.selectionStart = captionInput.selectionEnd = cursorPos + 1;
+}
+
+// Modal Functions
+function openModal(modalId) {
+    document.getElementById('filterBackdrop').classList.add('show');
+    document.getElementById(modalId).classList.add('show');
+}
+
+function closeModal(modalId) {
+    document.getElementById('filterBackdrop').classList.remove('show');
+    document.getElementById(modalId).classList.remove('show');
+}
+
+function closeAllModals() {
+    document.querySelectorAll('.custom-modal').forEach(modal => {
+        modal.classList.remove('show');
+    });
+    document.getElementById('filterBackdrop').classList.remove('show');
+}
+
+function showFilterPicker() {
+    openModal('filterModal');
+}
+
+function showStickerPicker() {
+    openModal('stickerModal');
+}
+
+function showAddLocation() {
+    openModal('locationModal');
+}
+
+function showAdvancedSettings() {
+    // Update checkboxes based on current settings
+    document.getElementById('hideLikes').checked = postSettings.hideLikes;
+    document.getElementById('disableComments').checked = postSettings.disableComments;
+    
+    openModal('settingsModal');
+    
+    // Setup event listeners
+    document.getElementById('hideLikes').addEventListener('change', function() {
+        postSettings.hideLikes = this.checked;
+    });
+    
+    document.getElementById('disableComments').addEventListener('change', function() {
+        postSettings.disableComments = this.checked;
+    });
+}
+
+function goBack() {
+    if (confirm('Discard this post?')) {
+        window.location.href = '/create';
+    }
+}
+
+function showError(message) {
+    const container = document.getElementById('mediaContainer');
+    container.innerHTML = `<div class="error-message">${message}</div>`;
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,2212 @@
+/* Load Pacifico font from local file */
+@font-face {
+    font-family: 'Pacifico';
+    src: url('../fonts/Pacifico-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Custom Theme Colors */
+/* Dark Mode Background */
+[data-bs-theme="dark"] {
+  --bs-body-bg: #000000;
+  --bs-body-color: #ffffff;
+  --bs-body-secondary-bg: #1a1a1a;
+  --bs-body-secondary-color: #ffffff;
+}
+
+/* Light Mode Background */
+[data-bs-theme="light"] {
+  --bs-body-bg: #ffffff;
+  --bs-body-color: #000000;
+  --bs-body-secondary-bg: #f8f9fa;
+  --bs-body-secondary-color: #000000;
+}
+
+/* Custom background classes for specific elements */
+[data-bs-theme="dark"] .custom-bg {
+  background-color: #000000 !important;
+}
+
+[data-bs-theme="light"] .custom-bg {
+  background-color: #ffffff !important;
+}
+
+/* Sidebar specific styling */
+[data-bs-theme="dark"] .custom-sidebar {
+  background-color: #000000 !important;
+  border-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-sidebar {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+  color: #000000 !important;
+}
+
+/* Override any Bootstrap sidebar defaults */
+[data-bs-theme="dark"] .custom-sidebar * {
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-sidebar * {
+  color: #000000 !important;
+}
+
+/* Ensure navbar-brand text is visible */
+[data-bs-theme="dark"] .navbar-brand,
+[data-bs-theme="dark"] .navbar-brand.text-body,
+[data-bs-theme="dark"] #sidebar-brand-logo,
+[data-bs-theme="dark"] #sidebar-brand-logo.text-body {
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .navbar-brand,
+[data-bs-theme="light"] .navbar-brand.text-body,
+[data-bs-theme="light"] #sidebar-brand-logo,
+[data-bs-theme="light"] #sidebar-brand-logo.text-body {
+  color: #000000 !important;
+}
+
+/* Header specific styling */
+[data-bs-theme="dark"] .custom-header {
+  background-color: #000000 !important;
+  border-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-header {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+  color: #000000 !important;
+}
+
+/* Override navbar defaults */
+[data-bs-theme="dark"] .custom-header.navbar {
+  background-color: #000000 !important;
+}
+
+[data-bs-theme="light"] .custom-header.navbar {
+  background-color: #ffffff !important;
+}
+
+/* Logo visibility in dark mode */
+[data-bs-theme="dark"] .navbar-brand img,
+[data-bs-theme="dark"] #mobile-brand-logo img,
+[data-bs-theme="dark"] #desktop-brand-logo img,
+[data-bs-theme="dark"] #sidebar-brand-logo img {
+  filter: brightness(0) invert(1) !important;
+}
+
+[data-bs-theme="light"] .navbar-brand img,
+[data-bs-theme="light"] #mobile-brand-logo img,
+[data-bs-theme="light"] #desktop-brand-logo img,
+[data-bs-theme="light"] #sidebar-brand-logo img {
+  filter: none !important;
+}
+
+/* Hallor Logo Styling - White, Black, Red only */
+.hallor-logo {
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.hallor-text {
+  display: inline-block !important;
+  line-height: 1 !important;
+  font-family: 'Pacifico', cursive !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+.hallor-hand {
+  display: inline-block !important;
+  line-height: 1 !important;
+  height: 1em !important;
+  width: auto !important;
+  vertical-align: middle !important;
+}
+
+/* Light mode: text is black, hand image as-is */
+[data-bs-theme="light"] .hallor-text {
+  color: #000000 !important; /* Black */
+}
+
+[data-bs-theme="light"] .hallor-hand {
+  /* Image displays as-is */
+}
+
+/* Dark mode: text is white, hand image as-is */
+[data-bs-theme="dark"] .hallor-text {
+  color: #ffffff !important; /* White */
+}
+
+[data-bs-theme="dark"] .hallor-hand {
+  /* Image displays as-is */
+}
+
+/* Form elements */
+[data-bs-theme="dark"] .custom-form-control {
+  background-color: #1a1a1a !important;
+  border-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-form-control {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+  color: #000000 !important;
+}
+
+/* Input group styling */
+[data-bs-theme="dark"] .custom-input-group {
+  background-color: #1a1a1a !important;
+  border-color: #333333 !important;
+}
+
+[data-bs-theme="light"] .custom-input-group {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+}
+
+/* Mobile Bottom Navigation Styling */
+[data-bs-theme="dark"] .custom-bottom-nav {
+  background-color: #000000 !important;
+  border-color: #333333 !important;
+  color: #ffffff !important;
+  z-index: 1000;
+}
+
+[data-bs-theme="light"] .custom-bottom-nav {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+  color: #000000 !important;
+  z-index: 1000;
+}
+
+/* Elevated Create Button in Bottom Navigation */
+.elevated-create-btn {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 50% !important;
+  background-color: var(--bs-body-bg) !important;
+  color: var(--bs-body-color) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+  border: 2px solid var(--bs-border-color) !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+  z-index: 1001 !important;
+}
+
+.elevated-create-btn:hover {
+  transform: scale(1.1) translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  background-color: var(--bs-body-secondary-bg) !important;
+}
+
+.elevated-create-btn:active {
+  transform: scale(0.95) translateY(-2px) !important;
+}
+
+.elevated-create-btn i {
+  color: var(--bs-body-color) !important;
+  font-weight: bold !important;
+}
+
+[data-bs-theme="dark"] .elevated-create-btn {
+  background-color: #000000 !important;
+  border-color: #333333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-bs-theme="dark"] .elevated-create-btn:hover {
+  background-color: #1a1a1a !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-bs-theme="dark"] .elevated-create-btn i {
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .elevated-create-btn {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-bs-theme="light"] .elevated-create-btn:hover {
+  background-color: #f8f9fa !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-bs-theme="light"] .elevated-create-btn i {
+  color: #000000 !important;
+}
+
+/* Override any Bootstrap bottom nav defaults */
+[data-bs-theme="dark"] .custom-bottom-nav *:not(.elevated-create-btn):not(.elevated-create-btn *) {
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-bottom-nav *:not(.elevated-create-btn):not(.elevated-create-btn *) {
+  color: #000000 !important;
+}
+
+/* Mobile bottom navigation hover and active states */
+[data-bs-theme="dark"] .custom-bottom-nav .nav-link:not(.elevated-create-btn):hover {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-bottom-nav .nav-link:not(.elevated-create-btn):hover {
+  background-color: #f8f9fa !important;
+  color: #000000 !important;
+}
+
+[data-bs-theme="dark"] .custom-bottom-nav .nav-link:not(.elevated-create-btn).active {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-bottom-nav .nav-link:not(.elevated-create-btn).active {
+  background-color: #f8f9fa !important;
+  color: #000000 !important;
+}
+
+/* Prevent message button from changing color on click/active */
+#mobile-messages-icon,
+#desktop-messages-icon {
+  transition: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+#mobile-messages-icon:active,
+#desktop-messages-icon:active,
+#mobile-messages-icon:focus,
+#desktop-messages-icon:focus,
+#mobile-messages-icon:focus-visible,
+#desktop-messages-icon:focus-visible,
+#mobile-messages-icon:visited,
+#desktop-messages-icon:visited {
+  color: inherit !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+}
+
+#mobile-messages-icon:active i,
+#desktop-messages-icon:active i,
+#mobile-messages-icon:focus i,
+#desktop-messages-icon:focus i {
+  color: inherit !important;
+}
+
+/* Prevent any Bootstrap default link/button border colors */
+#mobile-messages-icon.btn-link:active,
+#desktop-messages-icon.btn-link:active,
+#mobile-messages-icon.btn-link:focus,
+#desktop-messages-icon.btn-link:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Main content positioning for desktop with sidebars */
+@media (min-width: 992px) {
+  #main-content {
+    margin-left: 250px !important;
+    margin-right: 250px !important;
+    padding-top: 25px !important;
+  }
+  
+  /* Center the main content area between sidebars */
+  #main-content-area {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+}
+
+/* Hide mobile bottom navigation on notifications page */
+@media (max-width: 991.98px) {
+  body.notifications-page #mobile-bottom-nav {
+    display: none !important;
+  }
+  
+  /* Hide mobile header icons on notifications page */
+  body.notifications-page #mobile-notifications-icon,
+  body.notifications-page #mobile-events-icon,
+  body.notifications-page #mobile-shop-icon,
+  body.notifications-page #mobile-messages-icon {
+    display: none !important;
+  }
+  
+  /* Hide the logo and show notifications title */
+  body.notifications-page #mobile-brand-logo {
+    display: none !important;
+  }
+  
+  /* Style for notifications page mobile header elements */
+  body.notifications-page .mobile-back-btn,
+  body.notifications-page .mobile-notifications-title,
+  body.notifications-page .mobile-mark-all-read-btn {
+    display: flex !important;
+  }
+}
+
+/* Post view page mobile header styling */
+@media (max-width: 991.98px) {
+  /* Hide mobile header icons on post view page */
+  body.post-view-page #mobile-notifications-icon,
+  body.post-view-page #mobile-events-icon,
+  body.post-view-page #mobile-shop-icon,
+  body.post-view-page #mobile-messages-icon {
+    display: none !important;
+  }
+  
+  /* Hide the logo and show post title */
+  body.post-view-page #mobile-brand-logo {
+    display: none !important;
+  }
+  
+  /* Style for post view page mobile header elements */
+  body.post-view-page .mobile-back-btn,
+  body.post-view-page .mobile-post-title {
+    display: flex !important;
+  }
+  
+  /* Mobile bottom navigation is now visible on post view page */
+  /* Removed: body.post-view-page #mobile-bottom-nav { display: none !important; } */
+}
+
+/* Hide mobile bottom navigation on events page - match notifications page exactly */
+@media (max-width: 991.98px) {
+  body.events-page #mobile-bottom-nav {
+    display: none !important;
+  }
+  
+  /* Hide mobile header icons on events page - match notifications page exactly */
+  body.events-page #mobile-notifications-icon,
+  body.events-page #mobile-events-icon,
+  body.events-page #mobile-shop-icon,
+  body.events-page #mobile-messages-icon {
+    display: none !important;
+  }
+  
+  /* Hide the logo and show events title - match notifications page exactly */
+  body.events-page #mobile-brand-logo {
+    display: none !important;
+  }
+  
+  /* Style for events page mobile header elements - match notifications page exactly */
+  body.events-page .mobile-back-btn,
+  body.events-page .mobile-events-title,
+  body.events-page .mobile-create-event-btn {
+    display: flex !important;
+  }
+}
+
+/* Hide mobile bottom navigation on messages page - match notifications page exactly */
+@media (max-width: 991.98px) {
+  body.messages-page #mobile-bottom-nav {
+    display: none !important;
+  }
+  
+  /* Hide mobile header icons on messages page - match notifications page exactly */
+  body.messages-page #mobile-notifications-icon,
+  body.messages-page #mobile-events-icon,
+  body.messages-page #mobile-shop-icon,
+  body.messages-page #mobile-messages-icon {
+    display: none !important;
+  }
+  
+  /* Hide the logo and show messages title - match notifications page exactly */
+  body.messages-page #mobile-brand-logo {
+    display: none !important;
+  }
+  
+  /* Style for messages page mobile header elements - match notifications page exactly */
+  body.messages-page .mobile-back-btn,
+  body.messages-page .mobile-messages-title,
+  body.messages-page .mobile-new-message-btn,
+  body.messages-page .mobile-group-btn {
+    display: flex !important;
+  }
+}
+
+
+/* Mobile content padding to account for bottom navigation */
+@media (max-width: 991.98px) {
+  #main-content {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-top: 25px !important;
+    padding-bottom: 65px !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Override bottom padding for events, notifications, and messages pages */
+  body.events-page #main-content,
+  body.notifications-page #main-content,
+  body.messages-page #main-content {
+    padding-bottom: 0 !important;
+  }
+  
+  #main-content-area {
+    max-width: 100%;
+    width: 100%;
+    overflow-x: hidden;
+    padding: 0 !important;
+  }
+  
+  /* Prevent horizontal scrolling on mobile */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Events container mobile fixes */
+  .events-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .event-item {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Ensure mobile layouts are not affected by desktop sidebar changes */
+  #desktop-sidebar,
+  #desktop-right-sidebar {
+    display: none !important;
+  }
+}
+
+/* Desktop sidebar styling - ensure both sidebars are equal */
+@media (min-width: 992px) {
+  #desktop-sidebar,
+  #desktop-right-sidebar {
+    width: 250px !important;
+    min-width: 250px !important;
+    max-width: 250px !important;
+  }
+  
+  /* Ensure both sidebars have identical padding and spacing */
+  #desktop-sidebar .p-3,
+  #desktop-right-sidebar .p-3 {
+    padding: 1rem !important;
+  }
+  
+  /* Hide right sidebar on all pages except homepage - DESKTOP ONLY */
+  body:not(.homepage) #desktop-right-sidebar {
+    display: none !important;
+  }
+  
+  /* Adjust main content margin when right sidebar is hidden - DESKTOP ONLY */
+  body:not(.homepage) #main-content {
+    margin-right: 0 !important;
+  }
+}
+
+/* Post card wrapper for desktop centering and width control */
+@media (min-width: 992px) {
+  .post-card-wrapper {
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  /* Make post cards wider on larger screens */
+  @media (min-width: 1200px) {
+    .post-card-wrapper {
+      max-width: 100%;
+    }
+  }
+}
+
+/* Mobile post card wrapper */
+@media (max-width: 991.98px) {
+  .post-card-wrapper {
+    width: 100%;
+  }
+}
+
+/* Post card interaction icons color scheme */
+.post-card-wrapper .btn-link {
+  color: inherit !important;
+}
+
+.post-card-wrapper .btn-link:hover {
+  color: #dc3545 !important;
+}
+
+.post-card-wrapper .btn-link:focus {
+  color: #dc3545 !important;
+}
+
+/* Ensure icons use proper color scheme */
+.post-card-wrapper .bi-heart,
+.post-card-wrapper .bi-heart-fill,
+.post-card-wrapper .bi-chat,
+.post-card-wrapper .bi-send,
+.post-card-wrapper .bi-bookmark,
+.post-card-wrapper .bi-bookmark-fill {
+  color: inherit !important;
+}
+
+/* Like button specific styling */
+.post-card-wrapper .like-btn .bi-heart,
+.post-card-wrapper .like-btn .bi-heart-fill {
+  color: inherit !important;
+  fill: inherit !important;
+  stroke: inherit !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transform-origin: center !important;
+}
+
+/* Ensure filled hearts don't get black color in light mode */
+[data-bs-theme="light"] .post-card-wrapper .like-btn .bi-heart-fill {
+  color: inherit !important;
+  fill: inherit !important;
+  stroke: inherit !important;
+}
+
+.post-card-wrapper .like-btn:hover .bi-heart,
+.post-card-wrapper .like-btn:hover .bi-heart-fill {
+  color: #dc3545 !important;
+  transform: scale(1.1) !important;
+}
+
+/* Post card corner fixes */
+.post-card-wrapper .card {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--bs-border-color) !important;
+}
+
+.post-card-wrapper .post-image-container {
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: relative !important;
+  width: 100% !important;
+}
+
+/* Portrait images - max-height constraint */
+.post-card-wrapper .post-image-container.portrait {
+  max-height: 600px !important;
+  min-height: 200px !important;
+}
+
+/* Landscape images - max-height constraint */
+.post-card-wrapper .post-image-container.landscape {
+  max-height: 500px !important;
+  min-height: 200px !important;
+}
+
+/* Square images - max-height constraint */
+.post-card-wrapper .post-image-container.square {
+  max-height: 600px !important;
+  min-height: 200px !important;
+}
+
+.post-card-wrapper .post-image {
+  display: block !important;
+  object-fit: contain !important;
+  background-color: var(--bs-body-secondary-bg) !important;
+  width: 100% !important;
+  height: auto !important;
+  position: relative !important;
+  max-width: 100% !important;
+}
+
+/* Like button active state for better feedback */
+.post-card-wrapper .like-btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* Smooth like animation */
+.post-card-wrapper .like-btn .bi-heart-fill {
+  animation: likePulse 0.3s ease-out !important;
+}
+
+@keyframes likePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Unlike animation */
+.post-card-wrapper .like-btn .bi-heart.liked {
+  animation: unlikePulse 0.3s ease-out !important;
+}
+
+@keyframes unlikePulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.8);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Double-tap heart animation */
+.heart-animation {
+  animation: heartPop 0.6s ease-out forwards !important;
+  transform-origin: center center !important;
+}
+
+.heart-animation i {
+  display: block;
+  animation: heartScale 0.6s ease-out forwards !important;
+  transform-origin: center center !important;
+  color: #dc3545 !important;
+  fill: #dc3545 !important;
+  stroke: #dc3545 !important;
+}
+
+@keyframes heartPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+@keyframes heartScale {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Classic font style for usernames */
+.username-classic {
+  font-family: 'Georgia', 'Times New Roman', 'Times', serif !important;
+  font-style: italic !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* Save button specific styling */
+.post-card-wrapper .save-btn .bi-bookmark,
+.post-card-wrapper .save-btn .bi-bookmark-fill {
+  color: inherit !important;
+}
+
+.post-card-wrapper .save-btn:hover .bi-bookmark,
+.post-card-wrapper .save-btn:hover .bi-bookmark-fill {
+  color: #dc3545 !important;
+}
+
+/* Comment and share buttons */
+.post-card-wrapper .bi-chat,
+.post-card-wrapper .bi-send {
+  color: inherit !important;
+}
+
+/* Prevent comment button from changing color on hover/click */
+.post-card-wrapper .comment-btn,
+.post-card-wrapper .comment-btn:hover,
+.post-card-wrapper .comment-btn:active,
+.post-card-wrapper .comment-btn:focus,
+.post-card-wrapper .comment-btn:focus-visible {
+  color: inherit !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+}
+
+.post-card-wrapper .comment-btn:hover .bi-chat,
+.post-card-wrapper .comment-btn:active .bi-chat,
+.post-card-wrapper .comment-btn:focus .bi-chat {
+  color: inherit !important;
+}
+
+/* Prevent AI button from changing color on hover/click */
+.post-card-wrapper .ai-btn,
+.post-card-wrapper .ai-btn:hover,
+.post-card-wrapper .ai-btn:active,
+.post-card-wrapper .ai-btn:focus,
+.post-card-wrapper .ai-btn:focus-visible {
+  color: inherit !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+}
+
+.post-card-wrapper .ai-btn img,
+.post-card-wrapper .ai-btn .ai-icon {
+  opacity: 1 !important;
+  filter: none !important;
+  transition: none !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+}
+
+.post-card-wrapper .ai-btn:hover img,
+.post-card-wrapper .ai-btn:active img,
+.post-card-wrapper .ai-btn:focus img,
+.post-card-wrapper .ai-btn:hover .ai-icon,
+.post-card-wrapper .ai-btn:active .ai-icon,
+.post-card-wrapper .ai-btn:focus .ai-icon {
+  opacity: 1 !important;
+  filter: none !important;
+}
+
+/* Make AI icon visible in dark mode (similar to handlogo.png) */
+[data-bs-theme="dark"] .post-card-wrapper .ai-btn img,
+[data-bs-theme="dark"] .post-card-wrapper .ai-btn .ai-icon,
+html[data-bs-theme="dark"] .post-card-wrapper .ai-btn img,
+html[data-bs-theme="dark"] .post-card-wrapper .ai-btn .ai-icon {
+  filter: brightness(0) invert(1) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-bs-theme="auto"] .post-card-wrapper .ai-btn img,
+  html[data-bs-theme="auto"] .post-card-wrapper .ai-btn .ai-icon {
+    filter: brightness(0) invert(1) !important;
+  }
+}
+
+/* Make new.png badge icon visible in dark mode */
+[data-bs-theme="dark"] .new-product-badge,
+[data-bs-theme="dark"] img[src*="new.png"],
+[data-bs-theme="dark"] img[src*="/static/images/new.png"],
+html[data-bs-theme="dark"] .new-product-badge,
+html[data-bs-theme="dark"] img[src*="new.png"],
+html[data-bs-theme="dark"] img[src*="/static/images/new.png"] {
+  filter: brightness(0) invert(1) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-bs-theme="auto"] .new-product-badge,
+  html[data-bs-theme="auto"] img[src*="new.png"],
+  html[data-bs-theme="auto"] img[src*="/static/images/new.png"] {
+    filter: brightness(0) invert(1) !important;
+  }
+}
+
+/* Ensure new.png icon is visible in light mode (no filter) */
+[data-bs-theme="light"] .new-product-badge,
+[data-bs-theme="light"] img[src*="new.png"],
+[data-bs-theme="light"] img[src*="/static/images/new.png"],
+html[data-bs-theme="light"] .new-product-badge,
+html[data-bs-theme="light"] img[src*="new.png"],
+html[data-bs-theme="light"] img[src*="/static/images/new.png"] {
+  filter: none !important;
+}
+
+/* New product badge styling */
+.new-product-badge {
+  display: inline-block;
+  vertical-align: middle;
+  object-fit: contain;
+}
+
+/* Prevent share button from changing color on hover/click */
+.post-card-wrapper .share-btn,
+.post-card-wrapper .share-btn:hover,
+.post-card-wrapper .share-btn:active,
+.post-card-wrapper .share-btn:focus,
+.post-card-wrapper .share-btn:focus-visible {
+  color: inherit !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  text-decoration: none !important;
+}
+
+.post-card-wrapper .share-btn:hover .bi-share,
+.post-card-wrapper .share-btn:active .bi-share,
+.post-card-wrapper .share-btn:focus .bi-share {
+  color: inherit !important;
+}
+
+/* Theme-specific icon colors */
+[data-bs-theme="dark"] .post-card-wrapper .bi-heart,
+[data-bs-theme="dark"] .post-card-wrapper .bi-heart-fill,
+[data-bs-theme="dark"] .post-card-wrapper .bi-chat,
+[data-bs-theme="dark"] .post-card-wrapper .bi-send,
+[data-bs-theme="dark"] .post-card-wrapper .bi-bookmark,
+[data-bs-theme="dark"] .post-card-wrapper .bi-bookmark-fill {
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .post-card-wrapper .bi-heart,
+[data-bs-theme="light"] .post-card-wrapper .bi-chat,
+[data-bs-theme="light"] .post-card-wrapper .bi-send,
+[data-bs-theme="light"] .post-card-wrapper .bi-bookmark,
+[data-bs-theme="light"] .post-card-wrapper .bi-bookmark-fill {
+  color: #000000 !important;
+}
+
+/* Don't apply black to filled hearts - they should be red when liked */
+[data-bs-theme="light"] .post-card-wrapper .bi-heart-fill {
+  color: inherit !important;
+}
+
+/* Notification Page Styles */
+
+/* Hide main header on mobile/tablet for notifications page */
+@media (max-width: 991.98px) {
+  body:has(#mobile-notifications-header) #main-header {
+    display: none !important;
+  }
+}
+
+/* Mobile header for notifications page */
+.custom-mobile-header {
+  background-color: var(--bs-body-bg) !important;
+  border-color: var(--bs-border-color) !important;
+  color: var(--bs-body-color) !important;
+  z-index: 1001;
+}
+
+[data-bs-theme="dark"] .custom-mobile-header {
+  background-color: #000000 !important;
+  border-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="light"] .custom-mobile-header {
+  background-color: #ffffff !important;
+  border-color: #dee2e6 !important;
+  color: #000000 !important;
+}
+
+/* Notification item styling */
+.notification-item {
+  border-radius: 12px !important;
+  border: 1px solid var(--bs-border-color) !important;
+  background-color: var(--bs-body-bg) !important;
+  transition: all 0.3s ease !important;
+}
+
+.notification-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-bs-theme="dark"] .notification-item:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Unread notification styling - removed border and background styling */
+.notification-item.unread {
+  /* Removed background-color and border-left styling to match read notifications */
+}
+
+/* Notification avatar styling */
+.notification-avatar img {
+  border: 2px solid var(--bs-border-color) !important;
+}
+
+/* Notification content styling */
+.notification-text {
+  color: var(--bs-body-color) !important;
+}
+
+.notification-text .fw-semibold {
+  color: var(--bs-body-color) !important;
+}
+
+.notification-text .text-body-secondary {
+  color: var(--bs-secondary-color) !important;
+}
+
+/* Notification action buttons */
+.notification-actions .btn {
+  border-radius: 8px !important;
+  font-size: 0.875rem !important;
+  padding: 0.375rem 0.75rem !important;
+}
+
+.notification-actions .btn-outline-primary {
+  color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.notification-actions .btn-outline-primary:hover {
+  background-color: var(--bs-primary) !important;
+  color: white !important;
+}
+
+.notification-actions .btn-outline-secondary {
+  color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+}
+
+.notification-actions .btn-outline-secondary:hover {
+  background-color: var(--bs-secondary) !important;
+  color: white !important;
+}
+
+.notification-actions .btn-outline-success {
+  color: var(--bs-success) !important;
+  border-color: var(--bs-success) !important;
+}
+
+.notification-actions .btn-outline-success:hover {
+  background-color: var(--bs-success) !important;
+  color: white !important;
+}
+
+/* Unread indicator */
+.unread-indicator {
+  margin-top: 0.25rem;
+}
+
+/* Mobile-specific notification styles */
+@media (max-width: 991.98px) {
+  .notification-item {
+    margin-bottom: 1rem !important;
+  }
+  
+  .notification-actions {
+    flex-wrap: wrap !important;
+  }
+  
+  .notification-actions .btn {
+    margin-bottom: 0.5rem !important;
+    font-size: 0.8rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .notification-text {
+    font-size: 0.9rem !important;
+  }
+}
+
+/* Desktop-specific notification styles */
+@media (min-width: 992px) {
+  .notifications-container {
+    max-width: 100%;
+  }
+  
+  .notification-item {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .notification-actions .btn {
+    margin-right: 0.5rem !important;
+  }
+}
+
+/* Empty state styling */
+.notifications-container .text-center {
+  padding: 3rem 1rem !important;
+}
+
+.notifications-container .bi-bell {
+  opacity: 0.5 !important;
+}
+
+/* Mobile header button styling */
+.custom-mobile-header .btn-link {
+  color: var(--bs-body-color) !important;
+  text-decoration: none !important;
+}
+
+.custom-mobile-header .btn-link:hover {
+  color: var(--bs-primary) !important;
+}
+
+/* Desktop header button styling */
+#desktop-mark-all-read-btn {
+  border-radius: 8px !important;
+}
+
+#desktop-mark-all-read-btn:hover {
+  background-color: var(--bs-secondary) !important;
+  border-color: var(--bs-secondary) !important;
+  color: white !important;
+}
+
+/* Event Categories Scrollable Section */
+.event-categories-container {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.event-categories-scroll {
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  gap: 12px;
+  padding: 8px 15px 16px 15px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.event-categories-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.event-category-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: var(--bs-body-secondary-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 25px;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.event-category-item:hover {
+  background-color: var(--bs-body-color);
+  color: var(--bs-body-bg);
+  border-color: var(--bs-body-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.event-category-item.active {
+  background-color: var(--bs-body-color);
+  color: var(--bs-body-bg);
+  border-color: var(--bs-body-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.event-category-item i {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.event-category-item:hover i {
+  transform: scale(1.1);
+}
+
+/* Dark mode specific styling for event categories */
+[data-bs-theme="dark"] .event-category-item {
+  background-color: #1a1a1a;
+  border-color: #333333;
+  color: #ffffff;
+}
+
+[data-bs-theme="dark"] .event-category-item:hover {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .event-category-item.active {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+}
+
+/* Light mode specific styling for event categories */
+[data-bs-theme="light"] .event-category-item {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #000000;
+}
+
+[data-bs-theme="light"] .event-category-item:hover {
+  background-color: #000000;
+  color: #ffffff;
+  border-color: #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-bs-theme="light"] .event-category-item.active {
+  background-color: #000000;
+  color: #ffffff;
+  border-color: #000000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .event-category-item {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+  
+  .event-category-item i {
+    font-size: 0.9rem;
+  }
+  
+  .event-categories-scroll {
+    gap: 8px;
+    padding: 6px 15px 12px 15px;
+  }
+  
+  .event-categories-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+}
+
+/* Desktop responsive adjustments */
+@media (min-width: 992px) {
+  .event-categories-container {
+    margin: 0;
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+  
+  .event-category-item {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .event-category-item i {
+    font-size: 1.1rem;
+  }
+  
+  .event-categories-scroll {
+    gap: 16px;
+    padding: 15px 0 25px 0;
+  }
+  
+  /* Global desktop improvements for all pages */
+  #main-content-area {
+    padding: 2rem 3rem;
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  /* Global desktop spacing improvements */
+  .container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .row.justify-content-center {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .col-12.col-lg-8.col-xl-7 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* Events page specific improvements */
+  .events-page .events-container {
+    margin-top: 1rem;
+  }
+  
+  .events-page .event-item {
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+  }
+  
+  .events-page .event-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  [data-bs-theme="dark"] .events-page .event-item:hover {
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+  }
+  
+  .events-page .event-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Enhanced event item design for desktop */
+  .events-page .event-image {
+    margin-right: 2rem;
+  }
+  
+  .events-page .event-image .bg-primary {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+  }
+  
+  .events-page .event-image .bi-calendar-week {
+    font-size: 1.5rem;
+  }
+  
+  .events-page .event-content h6 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .events-page .event-content .text-body-secondary {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  
+  .events-page .event-date {
+    text-align: right;
+    min-width: 120px;
+  }
+  
+  .events-page .event-date .fw-semibold {
+    font-size: 1rem;
+  }
+  
+  .events-page .event-date small {
+    font-size: 0.85rem;
+  }
+  
+  /* Desktop header improvements - match notifications page exactly */
+  .events-page .d-none.d-lg-block {
+    margin-bottom: 1rem;
+    padding: 0;
+  }
+  
+  .events-page .d-none.d-lg-block h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .events-page .d-none.d-lg-block .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 6px;
+  }
+  
+  /* Empty state improvements for desktop - match notifications page exactly */
+  .events-page .text-center {
+    padding: 3rem 1rem;
+  }
+  
+  .events-page .text-center .bi-calendar-week {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .events-page .text-center h5 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .events-page .text-center p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Better visual hierarchy for desktop */
+  .events-page .event-text h6 {
+    color: var(--bs-body-color);
+    font-weight: 600;
+  }
+  
+  .events-page .event-text small {
+    color: var(--bs-body-secondary-color);
+    font-weight: 500;
+  }
+  
+  .events-page .event-content p {
+    color: var(--bs-body-secondary-color);
+    margin-bottom: 0.75rem;
+  }
+  
+  .events-page .event-content .mt-2 {
+    margin-top: 1rem !important;
+  }
+  
+  .events-page .event-content .mt-2 small {
+    font-weight: 500;
+  }
+  
+  /* Improved spacing for event details */
+  .events-page .event-content .d-flex.align-items-center.justify-content-between {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Horizontal Scrolling Event Cards */
+.events-cards-container {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.events-cards-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.events-cards-container::-webkit-scrollbar-track {
+  background: var(--bs-border-color);
+  border-radius: 3px;
+}
+
+.events-cards-container::-webkit-scrollbar-thumb {
+  background: var(--bs-primary);
+  border-radius: 3px;
+}
+
+.events-cards-container::-webkit-scrollbar-thumb:hover {
+  background: var(--bs-primary);
+  opacity: 0.8;
+}
+
+.event-card {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+[data-bs-theme="dark"] .event-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+[data-bs-theme="dark"] .event-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.event-card-image {
+  position: relative;
+  height: 160px;
+  overflow: hidden;
+}
+
+.event-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.event-card:hover .event-image {
+  transform: scale(1.05);
+}
+
+.event-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+}
+
+.event-card-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.event-date-badge {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 8px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.event-day {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.event-month {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.event-card-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.event-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--bs-body-color);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-description {
+  font-size: 0.85rem;
+  color: var(--bs-body-secondary);
+  margin-bottom: 12px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-details {
+  margin-bottom: 16px;
+}
+
+.event-details > div {
+  display: flex;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  color: var(--bs-body-secondary);
+}
+
+.event-details i {
+  margin-right: 6px;
+  width: 14px;
+  text-align: center;
+}
+
+.event-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.event-attendees {
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--bs-body-secondary);
+}
+
+.event-attendees i {
+  margin-right: 4px;
+}
+
+.attend-btn {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.attend-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Mobile responsive adjustments for event cards */
+@media (max-width: 991.98px) {
+  .events-cards-container {
+    padding: 0;
+    gap: 12px;
+  }
+  
+  .event-card {
+    flex: 0 0 260px;
+  }
+  
+  .event-card-image {
+    height: 140px;
+  }
+  
+  .event-card-content {
+    padding: 12px;
+  }
+  
+  .event-title {
+    font-size: 0.95rem;
+  }
+  
+  .event-description {
+    font-size: 0.8rem;
+  }
+  
+  .event-details > div {
+    font-size: 0.75rem;
+  }
+  
+  .attend-btn {
+    font-size: 0.75rem;
+    padding: 5px 10px;
+  }
+  
+  /* Events page bottom padding is now handled by body.events-page rules above */
+}
+
+/* ==================== Event Notification-Style Cards ==================== */
+
+/* Event item styling - 100% matching notification cards */
+.event-item {
+  border-radius: 12px !important;
+  border: 1px solid var(--bs-border-color) !important;
+  background-color: var(--bs-body-bg) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  padding: 0.75rem !important; /* Match notification padding exactly */
+}
+
+.event-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-bs-theme="dark"] .event-item:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Event avatar styling - match notification exactly */
+.event-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.event-avatar img {
+  border: 2px solid var(--bs-border-color) !important;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+/* Event content styling - match notification exactly */
+.event-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-text {
+  flex: 1 !important;
+  min-width: 0;
+}
+
+.event-text span {
+  word-break: break-word !important;
+}
+
+.event-text .fw-semibold {
+  font-weight: 600; /* Match notification font weight */
+}
+
+/* Event unread styling */
+.event-item.unread {
+  /* Removed background-color and border-left styling to match read events */
+}
+
+/* Unread indicator for events - match notification exactly */
+.event-item .unread-indicator {
+  margin-top: 0.25rem;
+}
+
+/* Search page search box - remove border and make wider */
+.search-page .search-bar-container {
+  border: none !important;
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+.search-page .search-bar-container .input-group {
+  width: 100% !important;
+}
+
+/* Desktop: make search bar extra wide */
+@media (min-width: 992px) {
+  .search-page .px-3.mb-3:has(.search-bar-container) {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .search-page .search-bar-container {
+    padding: 1.5rem 2rem !important;
+  }
+  
+  .search-page #searchInput {
+    font-size: 1.1rem !important;
+    padding: 0.75rem 1rem !important;
+  }
+  
+  .search-page .search-bar-container .input-group-text {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  .search-page .search-bar-container .bi-search {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Category tabs styling */
+#categoryTabs {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+#categoryTabs::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+#categoryTabs .nav-link {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  background-color: transparent !important;
+  color: var(--bs-body-color) !important;
+  border: 1px solid var(--bs-border-color) !important;
+  border-radius: 0.375rem !important;
+}
+
+#categoryTabs .nav-link:hover {
+  background-color: var(--bs-body-secondary-bg) !important;
+  color: var(--bs-body-color) !important;
+  border-color: var(--bs-border-color) !important;
+}
+
+#categoryTabs .nav-link.active {
+  background-color: var(--bs-body-color) !important;
+  color: var(--bs-body-bg) !important;
+  border-color: var(--bs-body-color) !important;
+}
+
+/* Light mode specific */
+[data-bs-theme="light"] #categoryTabs .nav-link {
+  color: #000000 !important;
+  border-color: #dee2e6 !important;
+}
+
+[data-bs-theme="light"] #categoryTabs .nav-link:hover {
+  background-color: #f8f9fa !important;
+  color: #000000 !important;
+}
+
+[data-bs-theme="light"] #categoryTabs .nav-link.active {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* Dark mode specific */
+[data-bs-theme="dark"] #categoryTabs .nav-link {
+  color: #ffffff !important;
+  border-color: #333333 !important;
+}
+
+[data-bs-theme="dark"] #categoryTabs .nav-link:hover {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+[data-bs-theme="dark"] #categoryTabs .nav-link.active {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-color: #ffffff !important;
+}
+
+/* Events container styling - match notifications exactly */
+.events-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.events-container a {
+  text-decoration: none !important;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.events-container a:last-child {
+  margin-bottom: 0;
+}
+
+.events-container a:hover {
+  text-decoration: none !important;
+}
+
+/* ==================== Event Detail Page Styles ==================== */
+/* These styles apply to ALL event detail pages, current and future */
+
+/* Event detail card - universal styling */
+.event-detail-card,
+body.event-detail-page .event-detail-card {
+  background-color: var(--bs-body-bg) !important;
+}
+
+/* Desktop event detail card styling - applies to all event cards */
+@media (min-width: 992px) {
+  .event-detail-card,
+  body.event-detail-page .event-detail-card {
+    border: 1px solid var(--bs-border-color) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  [data-bs-theme="dark"] .event-detail-card,
+  [data-bs-theme="dark"] body.event-detail-page .event-detail-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  }
+  
+  .event-detail-image img,
+  body.event-detail-page .event-detail-image img {
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+  }
+}
+
+/* Mobile event detail card styling - applies to all event cards */
+@media (max-width: 991.98px) {
+  .event-detail-card,
+  body.event-detail-page .event-detail-card {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  
+  .event-detail-image img,
+  body.event-detail-page .event-detail-image img {
+    border-radius: 0 !important;
+  }
+}
+
+/* Event details grid - universal for all event pages */
+.event-details-grid,
+body.event-detail-page .event-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--bs-body-secondary-bg);
+  border-radius: 0.5rem;
+}
+
+.detail-item,
+body.event-detail-page .detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.detail-item i,
+body.event-detail-page .detail-item i {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .event-details-grid,
+  body.event-detail-page .event-details-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* Event actions - universal for all event pages */
+.event-actions,
+body.event-detail-page .event-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.event-actions .btn,
+body.event-detail-page .event-actions .btn {
+  flex: 1;
+  min-width: 100px;
+}
+
+@media (max-width: 576px) {
+  .event-actions .btn,
+  body.event-detail-page .event-actions .btn {
+    min-width: 80px;
+    font-size: 0.875rem;
+  }
+}
+
+/* Attendees section - universal for all event pages */
+.attendees-section,
+body.event-detail-page .attendees-section {
+  margin-bottom: 2rem;
+}
+
+.attendees-grid,
+body.event-detail-page .attendees-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.attendee-item,
+body.event-detail-page .attendee-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: var(--bs-body-secondary-bg);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.attendee-item:hover,
+body.event-detail-page .attendee-item:hover {
+  background-color: var(--bs-border-color);
+  transform: translateX(5px);
+}
+
+.attendee-item img,
+body.event-detail-page .attendee-item img {
+  flex-shrink: 0;
+  border: 2px solid var(--bs-border-color);
+}
+
+@media (max-width: 576px) {
+  .attendees-grid,
+  body.event-detail-page .attendees-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Comments section - universal for all event pages */
+.comments-section,
+body.event-detail-page .comments-section {
+  margin-top: 2rem;
+}
+
+.add-comment-form,
+body.event-detail-page .add-comment-form {
+  background-color: var(--bs-body-secondary-bg);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.add-comment-form textarea,
+body.event-detail-page .add-comment-form textarea {
+  resize: none;
+  border: 1px solid var(--bs-border-color);
+}
+
+.add-comment-form textarea:focus,
+body.event-detail-page .add-comment-form textarea:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+.comment-item,
+body.event-detail-page .comment-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: var(--bs-body-secondary-bg);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+}
+
+.comment-item:hover,
+body.event-detail-page .comment-item:hover {
+  background-color: var(--bs-border-color);
+}
+
+.comment-item img,
+body.event-detail-page .comment-item img {
+  flex-shrink: 0;
+  border: 2px solid var(--bs-border-color);
+}
+
+.comment-header,
+body.event-detail-page .comment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.comment-text,
+body.event-detail-page .comment-text {
+  color: var(--bs-body-color);
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.comment-actions,
+body.event-detail-page .comment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.comment-actions .btn-link,
+body.event-detail-page .comment-actions .btn-link {
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.comment-actions .btn-link:hover,
+body.event-detail-page .comment-actions .btn-link:hover {
+  text-decoration: underline;
+}
+
+/* Hide mobile bottom navigation on event detail page */
+@media (max-width: 991.98px) {
+  body.event-detail-page #mobile-bottom-nav {
+    display: none !important;
+  }
+  
+  /* Hide mobile header icons on event detail page */
+  body.event-detail-page #mobile-notifications-icon,
+  body.event-detail-page #mobile-events-icon,
+  body.event-detail-page #mobile-shop-icon,
+  body.event-detail-page #mobile-messages-icon {
+    display: none !important;
+  }
+  
+  /* Hide the logo and show event detail title */
+  body.event-detail-page #mobile-brand-logo {
+    display: none !important;
+  }
+  
+  /* Style for event detail page mobile header elements */
+  body.event-detail-page .mobile-back-btn,
+  body.event-detail-page .mobile-event-detail-title,
+  body.event-detail-page .mobile-bookmark-btn {
+    display: flex !important;
+  }
+}
+
+/* Event detail page responsive styles */
+@media (max-width: 768px) {
+  .event-actions {
+    flex-direction: column;
+  }
+  
+  .event-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Empty states */
+.events-container .text-center,
+.attendees-section .text-center,
+.comments-section .text-center {
+  padding: 3rem 1rem !important;
+}
+
+.events-container .bi-calendar-week,
+.attendees-section .bi-people,
+.comments-section .bi-chat-dots {
+  opacity: 0.5 !important;
+}
+
+/* ==================== Messages Page Styles ==================== */
+
+/* Messages page conversation items - match notification card styling */
+.messages-page .conversation-item {
+  border-radius: 12px !important;
+  border: none !important;
+  border-bottom: none !important;
+  background-color: var(--bs-body-bg) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Override notification-item default border for messages */
+.messages-page .notification-item {
+  border: none !important;
+}
+
+.messages-page .conversation-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+[data-bs-theme="dark"] .messages-page .conversation-item {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-bs-theme="dark"] .messages-page .conversation-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Active conversation styling */
+.messages-page .conversation-item.active {
+  background-color: var(--bs-body-secondary-bg) !important;
+  border: none !important;
+}
+
+/* Search card styling */
+.messages-page .message-search-card {
+  margin-bottom: 1rem !important;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-bs-theme="dark"] .messages-page .message-search-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Messages container styling */
+.messages-main-container {
+  width: 100%;
+}
+
+/* Mobile-specific messages styles */
+@media (max-width: 991.98px) {
+  .messages-page .conversation-item {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Remove margin from last conversation item */
+  .messages-page .conversation-item:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  .messages-page .notification-text {
+    font-size: 0.9rem !important;
+  }
+  
+  /* Remove extra bottom padding on mobile */
+  .messages-page .messages-main-container {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .messages-page #main-content-area {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  body.messages-page #main-content {
+    padding: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .messages-page .container-fluid {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+  }
+  
+  .messages-page .row {
+    margin-bottom: 0 !important;
+  }
+  
+  .messages-page .p-0 {
+    padding-bottom: 0 !important;
+  }
+}
+
+/* Desktop-specific messages styles */
+@media (min-width: 992px) {
+  .messages-main-container {
+    max-width: 100%;
+  }
+  
+  .messages-page .conversation-item {
+    margin-bottom: 1.5rem !important;
+  }
+}
+
+/* Hide right sidebar on messages page - DESKTOP ONLY */
+@media (min-width: 992px) {
+  body.messages-page #desktop-right-sidebar {
+    display: none !important;
+  }
+  
+  /* Adjust main content margin when right sidebar is hidden - DESKTOP ONLY */
+  body.messages-page #main-content {
+    margin-right: 0 !important;
+  }
+}

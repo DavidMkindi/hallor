@@ -1,0 +1,1865 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add messages-page class to body for CSS targeting -->
+<script>
+// Add messages-page class to body element immediately
+document.body.classList.add('messages-page');
+
+// Modify mobile header for messages page
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add messages title
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'flex-grow-1 d-flex justify-content-center mobile-messages-title';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Messages</h5>';
+        mobileHeader.appendChild(titleDiv);
+        
+        // Store reference for mode switching
+        window.mobileTitleElement = titleDiv.querySelector('h5');
+        
+        // Add new message button
+        const newMessageButton = document.createElement('button');
+        newMessageButton.className = 'btn btn-link text-body p-1 mobile-new-message-btn';
+        newMessageButton.innerHTML = '<i class="bi bi-pencil-square fs-5"></i>';
+        mobileHeader.appendChild(newMessageButton);
+        
+        // Add group icon button (navigate to groups page)
+        const groupButton = document.createElement('a');
+        groupButton.href = '/groups';
+        groupButton.className = 'btn btn-link text-body p-1 mobile-group-btn';
+        groupButton.innerHTML = '<i class="bi bi-people fs-5"></i>';
+        groupButton.setAttribute('title', 'Go to Groups');
+        mobileHeader.appendChild(groupButton);
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header -->
+                <div class="d-none d-lg-block mb-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0 fw-bold text-body" id="pageTitle">Messages</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil-square me-2"></i>New Message
+                            </button>
+                            <a href="/groups" class="btn btn-outline-secondary btn-sm" title="Go to Groups">
+                                <i class="bi bi-people"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Messages Container -->
+                <div class="messages-main-container">
+                    <!-- Search Bar -->
+                    <div class="message-search-card notification-item mb-3 p-3">
+                        <div class="input-group">
+                            <span class="input-group-text custom-input-group border-0">
+                                <i class="bi bi-search text-body"></i>
+                            </span>
+                            <input type="text" class="form-control border-0 custom-form-control text-body" 
+                                   placeholder="Search messages" id="searchMessages">
+                        </div>
+                    </div>
+                    
+                    <!-- Conversations List -->
+                    {% if conversations %}
+                        {% for conversation in conversations %}
+                            <div class="notification-item conversation-item d-flex align-items-center py-3 px-3 {% if not loop.last %}mb-3{% endif %}" 
+                                 style="cursor: pointer;" 
+                                 data-conversation-id="{{ conversation.id }}">
+                                <!-- Avatar -->
+                                <div class="notification-avatar me-3">
+                                    <img src="{{ url_for('serve_avatar', filename=(conversation.user.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                                         alt="{{ conversation.user.username }}"
+                                         class="rounded-circle"
+                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                </div>
+                                
+                                <!-- Conversation Content -->
+                                <div class="notification-content flex-grow-1" style="min-width: 0; overflow: hidden;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="notification-text flex-grow-1" style="min-width: 0; overflow: hidden;">
+                                            <span class="fw-semibold text-body d-block text-truncate">{{ conversation.user.full_name }}</span>
+                                            <span class="text-body-secondary small d-block text-truncate">
+                                                {% if conversation.last_message and conversation.last_message.text %}{{ conversation.last_message.text }}{% elif conversation.messages and conversation.messages|length > 0 %}{{ conversation.messages[-1].text }}{% endif %}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="d-flex flex-column align-items-end ms-2 flex-shrink-0">
+                                            <small class="text-body-secondary">{% if conversation.last_message and conversation.last_message.timestamp %}{{ conversation.last_message.timestamp }}{% elif conversation.messages and conversation.messages|length > 0 %}{{ conversation.messages[-1].timestamp }}{% endif %}</small>
+                                            {% if conversation.unread_count > 0 %}
+                                                <span class="unread-dot" style="width: 8px; height: 8px; background-color: #dc3545; border-radius: 50%; display: inline-block; margin-top: 4px;"></span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Empty State -->
+                        <div class="text-center py-5" id="emptyState">
+                            <i class="bi bi-chat fs-1 text-body-secondary mb-3"></i>
+                            <h5 class="text-body-secondary">No messages yet</h5>
+                            <p class="text-body-secondary">Start a conversation with your friends!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <!-- Chat Header -->
+            <div class="modal-header border-bottom">
+                <!-- Back Button (Left) -->
+                <button type="button" class="btn btn-link text-body p-1" data-bs-dismiss="modal" aria-label="Back" title="Back" style="position: absolute; left: 1rem;">
+                    <i class="bi bi-arrow-left fs-5"></i>
+                </button>
+                
+                <!-- User Info (Center) -->
+                <div class="d-flex align-items-center justify-content-center" style="flex: 1; margin: 0 auto;">
+                    <img src="" 
+                         alt=""
+                         class="rounded-circle me-2"
+                         style="width: 36px; height: 36px; object-fit: cover;"
+                         id="chatModalAvatar">
+                    <h6 class="mb-0 fw-semibold text-body" id="chatModalName"></h6>
+                </div>
+                
+                <!-- Info Button (Right) -->
+                <button type="button" class="btn btn-link text-body p-1" title="Info" id="chatModalInfoBtn" style="position: absolute; right: 1rem;">
+                    <i class="bi bi-info-circle fs-5"></i>
+                </button>
+            </div>
+            
+            <!-- Messages Area -->
+            <div class="modal-body p-3" id="chatModalBody" style="height: 400px; overflow-y: auto; background: var(--bs-body-bg);">
+                <div id="chatModalMessages"></div>
+            </div>
+            
+            <!-- Message Input -->
+            <div class="modal-footer">
+                <!-- Reply Preview -->
+                <div id="replyPreview" class="w-100 mb-2" style="display: none;">
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background-color: var(--bs-body-secondary-bg); border: 1px solid var(--bs-border-color);">
+                        <div class="flex-grow-1">
+                            <div class="small fw-semibold text-body" id="replyPreviewSender"></div>
+                            <div class="small text-body-secondary text-truncate" id="replyPreviewText" style="max-width: 250px;"></div>
+                        </div>
+                        <button type="button" class="btn btn-link text-body p-1" id="cancelReplyBtn" style="color: var(--bs-body-color) !important;">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <form id="chatModalForm" class="d-flex gap-2 w-100">
+                    <button type="button" class="btn btn-link text-body p-2">
+                        <i class="bi bi-plus-circle fs-5"></i>
+                    </button>
+                    <input type="text" class="form-control form-control-sm" placeholder="Type a message..." id="chatModalInput" autocomplete="off">
+                    <button type="submit" class="btn btn-link p-2" style="color: #FF0000; border: none; background: none;">
+                        <i class="bi bi-send-fill fs-5"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Messages Page Styles -->
+<style>
+/* Modal styling */
+#chatModalBody {
+    scroll-behavior: smooth;
+}
+
+/* Chat modal header improvements */
+#chatModal .modal-header {
+    padding: 1rem 3rem;
+    background-color: var(--bs-body-bg);
+    display: flex;
+    align-items: center;
+    position: relative;
+    min-height: 60px;
+}
+
+/* Ensure user info is centered */
+#chatModal .modal-header .d-flex.justify-content-center {
+    width: 100%;
+}
+
+#chatModal .modal-content {
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+}
+
+#chatModal .modal-body {
+    padding: 1.5rem;
+}
+
+#chatModal .modal-footer {
+    padding: 1rem 1.5rem;
+    background-color: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+}
+
+/* Chat modal buttons */
+#chatModal .btn-link {
+    text-decoration: none;
+}
+
+#chatModal .btn-link:hover {
+    background-color: var(--bs-body-secondary-bg);
+    border-radius: 50%;
+}
+
+/* Keep normal border on input focus - adapts to theme */
+#chatModalInput:focus {
+    outline: none !important;
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Dark mode: white border */
+@media (prefers-color-scheme: dark) {
+    #chatModalInput:focus {
+        border-color: #ffffff !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1) !important;
+    }
+}
+
+/* Light mode: black border (explicit) */
+@media (prefers-color-scheme: light) {
+    #chatModalInput:focus {
+        border-color: #000000 !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1) !important;
+    }
+}
+
+/* Search input focus border - adapts to theme */
+#searchMessages:focus {
+    outline: none !important;
+    border-color: #000000 !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Dark mode: white border for search */
+@media (prefers-color-scheme: dark) {
+    #searchMessages:focus {
+        border-color: #ffffff !important;
+        box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1) !important;
+    }
+}
+
+/* Light mode: black border for search */
+@media (prefers-color-scheme: light) {
+    #searchMessages:focus {
+        border-color: #000000 !important;
+        box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1) !important;
+    }
+}
+
+
+/* Smooth transitions */
+.conversation-item {
+    transition: all 0.3s ease;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.conversation-item:hover {
+    background-color: var(--bs-body-secondary-bg);
+}
+
+.conversation-item.active {
+    background-color: var(--bs-primary-bg-subtle);
+}
+
+/* Prevent horizontal overflow in conversation items */
+.conversation-item .notification-content {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.conversation-item .notification-text {
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Message avatars styling */
+#chatModalMessages img.rounded-circle {
+    border: 2px solid var(--bs-border-color);
+    transition: transform 0.2s ease;
+}
+
+#chatModalMessages img.rounded-circle:hover {
+    transform: scale(1.05);
+}
+
+/* Message bubble improvements */
+#chatModalMessages .notification-item {
+    border-radius: 8px !important;
+    max-width: fit-content;
+    border: 2px solid var(--bs-border-color) !important;
+}
+
+/* Ensure proper spacing for messages with avatars */
+#chatModalMessages > div {
+    margin-bottom: 0.5rem;
+}
+
+/* Mobile fullscreen modal */
+@media (max-width: 576px) {
+    #chatModalBody {
+        height: calc(100vh - 250px) !important;
+    }
+    
+    #chatModal .modal-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    #chatModal .modal-footer {
+        padding: 0.75rem 1rem;
+    }
+    
+    /* Smaller avatars on mobile */
+    #chatModalMessages img.rounded-circle {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    /* Prevent horizontal overflow on mobile */
+    .conversation-item {
+        max-width: 100% !important;
+        overflow: hidden !important;
+    }
+    
+    .messages-main-container {
+        overflow-x: hidden !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Swipe to reply styles */
+.message-item {
+    position: relative;
+    touch-action: pan-y;
+    user-select: none;
+}
+
+.message-bubble {
+    transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
+.message-item.swiping {
+    z-index: 10;
+}
+
+.message-item.swiping-left .message-bubble {
+    transform: translateX(-60px);
+    opacity: 0.8;
+}
+
+.message-item.swiping-right .message-bubble {
+    transform: translateX(60px);
+    opacity: 0.8;
+}
+
+/* Reply indicator */
+.reply-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.message-item.swiping-left .reply-indicator {
+    right: -50px;
+    opacity: 1;
+    color: #28a745;
+}
+
+.message-item.swiping-right .reply-indicator {
+    left: -50px;
+    opacity: 1;
+    color: #007bff;
+}
+
+/* Reply preview animation */
+#replyPreview {
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Reply preview hover effect */
+.reply-preview-clickable:hover {
+    background-color: var(--bs-body-secondary-bg) !important;
+}
+
+/* Ensure reply preview is visible */
+.reply-preview-clickable {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 0.7 !important;
+}
+
+.reply-preview-clickable > div {
+    display: block !important;
+}
+
+/* Message highlight animation */
+.message-item.highlighted {
+    animation: highlightMessage 2s ease-out;
+}
+
+@keyframes highlightMessage {
+    0% {
+        background-color: rgba(0, 123, 255, 0.3);
+        transform: scale(1.02);
+    }
+    100% {
+        background-color: transparent;
+        transform: scale(1);
+    }
+}
+</style>
+
+<!-- Messages Page Script -->
+<script>
+let conversationsData = {{ conversations | tojson | safe }};
+let currentUsername = '{{ current_username }}';
+let currentUserAvatar = null;
+let currentConversationId = null;
+let pollingInterval = null;
+let conversationListPollingInterval = null; // Polling for conversation list updates
+let lastMessageId = 0;
+let currentConversation = null;
+let currentReply = null; // Store current reply state { id, sender, text }
+
+// Fetch current user's avatar information
+fetch(`/api/users/${currentUsername}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.avatar) {
+            currentUserAvatar = data.avatar;
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching current user info:', error);
+    });
+
+document.addEventListener('DOMContentLoaded', function() {
+    let conversationItems = document.querySelectorAll('.conversation-item');
+    const chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+    const chatModalMessages = document.getElementById('chatModalMessages');
+    const chatModalForm = document.getElementById('chatModalForm');
+    const chatModalInput = document.getElementById('chatModalInput');
+    const chatModalBody = document.getElementById('chatModalBody');
+    
+    // Check if we need to open a specific conversation from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const conversationParam = urlParams.get('conversation'); // Legacy support
+    const usernameParam = urlParams.get('username'); // Legacy support
+    const tokenParam = urlParams.get('token'); // Encrypted username token
+    const convTokenParam = urlParams.get('conv_token'); // Encrypted conversation token
+    
+    // Function to open conversation by ID
+    function openConversationById(conversationId) {
+        // First, refresh the conversation list to ensure we have the latest data
+        updateConversationList().then(() => {
+            // Find and click the conversation item
+            const targetItem = document.querySelector(`[data-conversation-id="${conversationId}"]`);
+            if (targetItem) {
+                setTimeout(() => {
+                    targetItem.click();
+                }, 100);
+            } else {
+                // Conversation might not be in the list yet, try loading it directly
+                currentConversationId = conversationId;
+                loadConversationFromBackend(conversationId);
+                chatModal.show();
+            }
+        });
+    }
+    
+    // Function to open conversation by encrypted token
+    function openConversationByToken(token) {
+        fetch(`/api/messages/token/${encodeURIComponent(token)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                if (response.status === 403) {
+                    alert('Invalid or expired link. Please try again.');
+                    return null;
+                }
+                throw new Error('Failed to load conversation');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            if (data.conversation) {
+                currentConversation = data.conversation;
+                currentConversationId = data.conversation.id || currentConversationId;
+                loadConversationInModal(data.conversation);
+                lastMessageId = data.messages && data.messages.length > 0 
+                    ? Math.max(...data.messages.map(m => m.id || 0))
+                    : 0;
+                startPolling(currentConversationId);
+                chatModal.show();
+            }
+        })
+        .catch(error => {
+            console.error('Error opening conversation by token:', error);
+            chatModalMessages.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="bi bi-exclamation-triangle fs-1 text-danger mb-3"></i>
+                    <p class="text-danger mb-2">Failed to load conversation.</p>
+                    <p class="text-body-secondary small">${error.message || 'Please try again.'}</p>
+                    <button class="btn btn-primary mt-3" onclick="location.reload()">Reload Page</button>
+                </div>
+            `;
+            chatModal.show();
+        });
+    }
+    
+    // Function to open conversation by encrypted username token
+    function openConversationByUsernameToken(token) {
+        fetch(`/api/messages/username-token/${encodeURIComponent(token)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                if (response.status === 403) {
+                    alert('Invalid or expired link. Please try again.');
+                    return null;
+                }
+                throw new Error('Failed to load conversation');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            if (data.success && data.conversation) {
+                currentConversation = data.conversation;
+                currentConversationId = data.conversation_id || data.conversation.id;
+                loadConversationInModal(data.conversation);
+                lastMessageId = data.conversation.messages && data.conversation.messages.length > 0 
+                    ? Math.max(...data.conversation.messages.map(m => m.id || 0))
+                    : 0;
+                startPolling(currentConversationId);
+                chatModal.show();
+                
+                // Update URL with conversation token if available
+                if (data.token) {
+                    const newUrl = `/messages?conv_token=${encodeURIComponent(data.token)}`;
+                    window.history.replaceState({}, '', newUrl);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error opening conversation by username token:', error);
+            chatModalMessages.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="bi bi-exclamation-triangle fs-1 text-danger mb-3"></i>
+                    <p class="text-danger mb-2">Failed to load conversation.</p>
+                    <p class="text-body-secondary small">${error.message || 'Please try again.'}</p>
+                    <button class="btn btn-primary mt-3" onclick="location.reload()">Reload Page</button>
+                </div>
+            `;
+            chatModal.show();
+        });
+    }
+    
+    // Function to open conversation by username (legacy support)
+    function openConversationByUsername(username) {
+        // First try to find existing conversation
+        fetch(`/api/messages/find/${username}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                if (response.status === 404) {
+                    // No conversation found, start a new one
+                    return fetch(`/api/messages/start/${username}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(startResponse => {
+                        if (!startResponse.ok) {
+                            throw new Error('Failed to start conversation');
+                        }
+                        return startResponse.json();
+                    });
+                }
+                throw new Error('Failed to find conversation');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            // Handle response from either find or start endpoint
+            if (data.success) {
+                // Use encrypted token if available
+                if (data.username_token) {
+                    openConversationByUsernameToken(data.username_token);
+                } else if (data.token) {
+                    openConversationByToken(data.token);
+                } else {
+                    const conversationId = data.conversation_id;
+                    if (conversationId) {
+                        updateConversationList().then(() => {
+                            openConversationById(conversationId);
+                        });
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error opening conversation:', error);
+            alert('Failed to open conversation. Please try again.');
+        });
+    }
+    
+    // Handle URL parameters (prioritize encrypted tokens for security)
+    if (tokenParam) {
+        // Open conversation by encrypted username token (most secure)
+        openConversationByUsernameToken(tokenParam);
+    } else if (convTokenParam) {
+        // Open conversation by encrypted conversation token
+        openConversationByToken(convTokenParam);
+    } else if (usernameParam) {
+        // Open conversation by username (legacy support, less secure)
+        openConversationByUsername(usernameParam);
+    } else if (conversationParam) {
+        // Open conversation by ID (legacy support, least secure)
+        const conversationId = parseInt(conversationParam);
+        if (conversationId) {
+            openConversationById(conversationId);
+        }
+    }
+    
+    // Scroll to bottom of messages
+    function scrollToBottom() {
+        if (chatModalBody) {
+            setTimeout(() => {
+                chatModalBody.scrollTop = chatModalBody.scrollHeight;
+            }, 100);
+        }
+    }
+    
+    // Stop polling when modal is closed
+    chatModal._element.addEventListener('hidden.bs.modal', function() {
+        stopPolling();
+        currentConversationId = null;
+        lastMessageId = 0;
+        currentConversation = null;
+        hideReplyPreview();
+    });
+    
+    // Scroll to bottom when modal is fully shown
+    chatModal._element.addEventListener('shown.bs.modal', function() {
+        setTimeout(() => {
+            scrollToBottom();
+        }, 100);
+    });
+    
+    // Start polling for conversation list updates (every 0.5 seconds)
+    function startConversationListPolling() {
+        stopConversationListPolling();
+        conversationListPollingInterval = setInterval(function() {
+            updateConversationList();
+        }, 500); // Poll every 0.5 seconds
+    }
+    
+    // Stop polling for conversation list updates
+    function stopConversationListPolling() {
+        if (conversationListPollingInterval) {
+            clearInterval(conversationListPollingInterval);
+            conversationListPollingInterval = null;
+        }
+    }
+    
+    // Start conversation list polling on page load
+    startConversationListPolling();
+    
+    // Stop polling function
+    function stopPolling() {
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
+    }
+    
+    // Start polling for new messages
+    function startPolling(itemId) {
+        stopPolling();
+        pollingInterval = setInterval(function() {
+            if (currentConversationId === itemId) {
+                pollForNewMessages(itemId);
+            }
+        }, 2000); // Poll every 2 seconds for real-time updates
+    }
+    
+    // Poll for new messages from backend
+    function pollForNewMessages(itemId) {
+        if (!itemId) return;
+        
+        const url = `/api/messages/${itemId}/poll${lastMessageId ? '?last_message_id=' + lastMessageId : ''}`;
+        
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                throw new Error('Failed to poll messages');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.new_messages && data.new_messages.length > 0) {
+                // Add new messages to the chat
+                data.new_messages.forEach(message => {
+                    const isCurrentUser = message.sender === currentUsername;
+                    addMessageToChat(message, isCurrentUser);
+                });
+                lastMessageId = data.last_message_id;
+                scrollToBottom();
+                
+                // Update conversation list if needed
+                updateConversationList();
+            } else if (data) {
+                lastMessageId = data.last_message_id;
+            }
+        })
+        .catch(error => {
+            console.error('Error polling messages:', error);
+        });
+    }
+    
+    // Load conversation from backend
+    function loadConversationFromBackend(itemId, retryCount = 0) {
+        if (!itemId) {
+            console.error('No item ID provided');
+            return;
+        }
+        
+        const MAX_RETRIES = 5;
+        let isLoaded = false;
+        
+        const apiEndpoint = `/api/messages/${itemId}`;
+        
+        // Show loading state
+        chatModalMessages.innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="text-body-secondary">Loading conversation...</p>
+            </div>
+        `;
+        
+        const processData = (data) => {
+            if (isLoaded) return;
+            isLoaded = true;
+            
+            if (!data) return;
+            
+            const conversation = data.conversation;
+            if (conversation) {
+                // Merge messages into conversation object if they're separate
+                if (data.messages && data.messages.length > 0) {
+                    conversation.messages = data.messages;
+                }
+                
+                currentConversation = conversation;
+                currentConversationId = itemId;
+                loadConversationInModal(conversation);
+                
+                lastMessageId = conversation.messages && conversation.messages.length > 0 
+                    ? Math.max(...conversation.messages.map(m => m.id || 0))
+                    : 0;
+                
+                // Mark messages as read (async, don't block)
+                markConversationAsRead(itemId);
+                
+                startPolling(itemId);
+                chatModal.show();
+            } else {
+                // Retry loading instead of showing error (max 5 retries)
+                if (retryCount < MAX_RETRIES) {
+                    setTimeout(() => {
+                        if (!isLoaded) {
+                            loadConversationFromBackend(itemId, retryCount + 1);
+                        }
+                    }, 1000);
+                }
+            }
+        };
+        
+        // Fetch without timeout - let it complete naturally
+        fetch(apiEndpoint, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/login';
+                    return null;
+                }
+                // For other errors, retry instead of showing error message (max 5 retries)
+                if ((response.status === 403 || response.status === 404 || response.status >= 500) && retryCount < MAX_RETRIES) {
+                    setTimeout(() => {
+                        if (!isLoaded) {
+                            loadConversationFromBackend(itemId, retryCount + 1);
+                        }
+                    }, 1000);
+                }
+                return null;
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data) {
+                processData(data);
+            }
+        })
+        .catch(error => {
+            // Retry on network errors instead of showing error (max 5 retries)
+            if (!isLoaded && retryCount < MAX_RETRIES) {
+                console.error('Error loading conversation, retrying...', error);
+                setTimeout(() => {
+                    if (!isLoaded) {
+                        loadConversationFromBackend(itemId, retryCount + 1);
+                    }
+                }, 1000);
+            }
+        });
+    }
+    
+    // Add message to chat UI
+    function addMessageToChat(message, isCurrentUser) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `mb-2 d-flex align-items-end ${isCurrentUser ? 'justify-content-end' : 'justify-content-start'} message-item`;
+        messageDiv.setAttribute('data-message-id', message.id);
+        messageDiv.setAttribute('data-sender', message.sender || '');
+        
+        const bubbleClass = 'notification-item';
+        const textClass = 'text-body';
+        const timeClass = 'text-body-secondary';
+        
+        // Escape HTML to prevent XSS
+        const messageText = escapeHtml(message.text);
+        
+        // Get avatar information
+        let senderAvatar = message.sender_avatar;
+        if (!senderAvatar) {
+            // If sender is current user, use cached avatar, otherwise default
+            if (isCurrentUser && currentUserAvatar) {
+                senderAvatar = currentUserAvatar;
+            } else {
+                senderAvatar = 'avatar-1.jpg';
+            }
+        }
+        const senderName = message.sender_full_name || message.sender || 'User';
+        const senderUsername = message.sender || 'User';
+        // Always use /database/avatars/ for user avatars
+        const avatarUrl = `/database/avatars/${senderAvatar}`;
+        const profileUrl = `/profile/${senderUsername}`;
+        
+        // Check if this is a reply - handle both object and parsed string formats
+        let replyToData = message.reply_to;
+        if (typeof replyToData === 'string' && replyToData.trim()) {
+            try {
+                replyToData = JSON.parse(replyToData);
+            } catch (e) {
+                // If parsing fails, check if it's just an ID
+                if (!isNaN(replyToData)) {
+                    replyToData = { id: parseInt(replyToData) };
+                } else {
+                    replyToData = null;
+                }
+            }
+        }
+        const isReply = replyToData && (replyToData.id || replyToData.message_id || replyToData.reply_to_id);
+        let replyPreview = '';
+        if (isReply) {
+            const replyId = replyToData.id || replyToData.message_id || replyToData.reply_to_id;
+            const replyText = escapeHtml(replyToData.text || replyToData.message_text || replyToData.content || 'Message');
+            const replySender = replyToData.sender || replyToData.sender_username || replyToData.username || 'User';
+            const truncatedReply = replyText && replyText !== 'Message' 
+                ? (replyText.length > 30 ? replyText.substring(0, 30) + '...' : replyText)
+                : 'Click to view original message';
+            replyPreview = `
+                <div class="border-start border-2 ps-2 mb-1 reply-preview-clickable" 
+                     data-reply-id="${replyId}" 
+                     style="border-color: var(--bs-border-color) !important; opacity: 0.7; cursor: pointer; transition: background-color 0.2s; border-radius: 4px; padding: 4px 8px; margin-bottom: 4px; display: block;"
+                     onmouseover="this.style.backgroundColor='var(--bs-body-secondary-bg)'"
+                     onmouseout="this.style.backgroundColor='transparent'">
+                    <div class="small fw-semibold text-body" style="display: block; margin-bottom: 2px;">${escapeHtml('@' + replySender)}</div>
+                    <div class="small text-body-secondary" style="font-size: 0.8rem; display: block; word-wrap: break-word;">${truncatedReply}</div>
+                </div>
+            `;
+        }
+        
+        // Create message HTML with avatar
+        const isRead = message.is_read || false;
+        const tickIcon = isRead ? '✓✓' : '✓';
+        const tickColor = '#FF0000';
+        
+        if (isCurrentUser) {
+            // Current user's message: avatar on the right
+            messageDiv.innerHTML = `
+                <div class="d-flex align-items-end" style="max-width: 90%;">
+                    <div class="${bubbleClass} rounded-3 px-2 py-2 me-2 message-bubble" style="word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; position: relative;">
+                        ${replyPreview}
+                        <p class="mb-0 ${textClass}" style="font-size: 0.9rem; white-space: pre-wrap; word-wrap: break-word;">${messageText}</p>
+                        <div class="d-flex align-items-center justify-content-end gap-1 mt-1">
+                            <small class="${timeClass}" style="font-size: 0.65rem;">${message.timestamp}</small>
+                            <span style="color: ${tickColor}; font-size: 0.7rem;">${tickIcon}</span>
+                        </div>
+                    </div>
+                    <a href="${profileUrl}" class="text-decoration-none">
+                        <img src="${avatarUrl}" 
+                             alt="${escapeHtml(senderName)}"
+                             class="rounded-circle flex-shrink-0"
+                             style="width: 28px; height: 28px; object-fit: cover; cursor: pointer;"
+                             title="${escapeHtml(senderName)}">
+                    </a>
+                </div>
+            `;
+        } else {
+            // Other user's message: avatar on the left
+            messageDiv.innerHTML = `
+                <div class="d-flex align-items-end" style="max-width: 90%;">
+                    <a href="${profileUrl}" class="text-decoration-none me-2">
+                        <img src="${avatarUrl}" 
+                             alt="${escapeHtml(senderName)}"
+                             class="rounded-circle flex-shrink-0"
+                             style="width: 28px; height: 28px; object-fit: cover; cursor: pointer;"
+                             title="${escapeHtml(senderName)}">
+                    </a>
+                    <div class="${bubbleClass} rounded-3 px-2 py-2 message-bubble" style="word-wrap: break-word; word-break: break-word; overflow-wrap: break-word; position: relative;">
+                        ${replyPreview}
+                        <p class="mb-0 ${textClass}" style="font-size: 0.9rem; white-space: pre-wrap; word-wrap: break-word;">${messageText}</p>
+                        <small class="${timeClass} d-block mt-1" style="font-size: 0.65rem;">${message.timestamp}</small>
+                    </div>
+                </div>
+            `;
+        }
+        
+        chatModalMessages.appendChild(messageDiv);
+        
+        // Add swipe detection to message
+        addSwipeDetection(messageDiv, message, isCurrentUser);
+        
+        // Add click handler for reply preview to scroll to original message
+        if (isReply && replyPreview) {
+            // Use setTimeout to ensure DOM is ready
+            setTimeout(() => {
+                const replyPreviewElement = messageDiv.querySelector('.reply-preview-clickable');
+                if (replyPreviewElement) {
+                    replyPreviewElement.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const replyId = parseInt(this.getAttribute('data-reply-id'));
+                        if (replyId) {
+                            scrollToMessage(replyId);
+                        }
+                    });
+                }
+            }, 0);
+        }
+    }
+    
+    // Scroll to and highlight a specific message by ID
+    function scrollToMessage(messageId) {
+        const messageElement = chatModalMessages.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageElement) {
+            // Remove any existing highlights
+            chatModalMessages.querySelectorAll('.message-item.highlighted').forEach(el => {
+                el.classList.remove('highlighted');
+            });
+            
+            // Add highlight class
+            messageElement.classList.add('highlighted');
+            
+            // Scroll to message
+            const chatModalBody = document.getElementById('chatModalBody');
+            if (chatModalBody) {
+                const elementTop = messageElement.offsetTop;
+                const elementHeight = messageElement.offsetHeight;
+                const containerHeight = chatModalBody.clientHeight;
+                const scrollTop = elementTop - (containerHeight / 2) + (elementHeight / 2);
+                
+                chatModalBody.scrollTo({
+                    top: scrollTop,
+                    behavior: 'smooth'
+                });
+            }
+            
+            // Remove highlight after animation
+            setTimeout(() => {
+                messageElement.classList.remove('highlighted');
+            }, 2000);
+        }
+    }
+    
+    // Swipe detection for reply functionality
+    function addSwipeDetection(messageElement, message, isCurrentUser) {
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let isSwiping = false;
+        let swipeThreshold = 60; // Minimum distance to trigger reply
+        let swipeDirection = null;
+        let hasMoved = false;
+        
+        // Touch events for mobile
+        messageElement.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isSwiping = false;
+            swipeDirection = null;
+            hasMoved = false;
+        }, { passive: true });
+        
+        messageElement.addEventListener('touchmove', function(e) {
+            if (!startX || !startY) return;
+            
+            currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const diffX = currentX - startX;
+            const diffY = Math.abs(currentY - startY);
+            
+            // Only trigger swipe if horizontal movement is significantly greater than vertical (2:1 ratio)
+            if (Math.abs(diffX) > 15 && Math.abs(diffX) > diffY * 1.5) {
+                hasMoved = true;
+                
+                // Determine swipe direction based on message type
+                // Received messages: swipe right to reply
+                // Sent messages: swipe left to reply
+                if (!isCurrentUser && diffX > 0) {
+                    isSwiping = true;
+                    swipeDirection = 'right';
+                    messageElement.classList.add('swiping', 'swiping-right');
+                    e.preventDefault(); // Prevent scrolling when swiping horizontally
+                } else if (isCurrentUser && diffX < 0) {
+                    isSwiping = true;
+                    swipeDirection = 'left';
+                    messageElement.classList.add('swiping', 'swiping-left');
+                    e.preventDefault(); // Prevent scrolling when swiping horizontally
+                }
+            } else if (hasMoved && diffY > Math.abs(diffX)) {
+                // Vertical scrolling detected, cancel swipe
+                messageElement.classList.remove('swiping', 'swiping-left', 'swiping-right');
+                isSwiping = false;
+                swipeDirection = null;
+            }
+        }, { passive: false }); // Changed to false to allow preventDefault
+        
+        messageElement.addEventListener('touchend', function(e) {
+            if (isSwiping && swipeDirection) {
+                const diffX = currentX - startX;
+                if (Math.abs(diffX) > swipeThreshold) {
+                    // Trigger reply
+                    setReplyToMessage(message);
+                }
+            }
+            
+            // Reset with animation
+            setTimeout(() => {
+                messageElement.classList.remove('swiping', 'swiping-left', 'swiping-right');
+            }, 150);
+            
+            startX = 0;
+            startY = 0;
+            currentX = 0;
+            isSwiping = false;
+            swipeDirection = null;
+            hasMoved = false;
+        }, { passive: true });
+        
+        // Mouse events for desktop (for testing)
+        let mouseDown = false;
+        messageElement.addEventListener('mousedown', function(e) {
+            if (e.button !== 0) return; // Only left mouse button
+            mouseDown = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            isSwiping = false;
+            swipeDirection = null;
+            hasMoved = false;
+        });
+        
+        messageElement.addEventListener('mousemove', function(e) {
+            if (!mouseDown || !startX || !startY) return;
+            
+            currentX = e.clientX;
+            const currentY = e.clientY;
+            const diffX = currentX - startX;
+            const diffY = Math.abs(currentY - startY);
+            
+            if (Math.abs(diffX) > 15 && Math.abs(diffX) > diffY * 1.5) {
+                hasMoved = true;
+                
+                if (!isCurrentUser && diffX > 0) {
+                    isSwiping = true;
+                    swipeDirection = 'right';
+                    messageElement.classList.add('swiping', 'swiping-right');
+                } else if (isCurrentUser && diffX < 0) {
+                    isSwiping = true;
+                    swipeDirection = 'left';
+                    messageElement.classList.add('swiping', 'swiping-left');
+                }
+            }
+        });
+        
+        messageElement.addEventListener('mouseup', function(e) {
+            if (!mouseDown) return;
+            mouseDown = false;
+            
+            if (isSwiping && swipeDirection) {
+                const diffX = currentX - startX;
+                if (Math.abs(diffX) > swipeThreshold) {
+                    setReplyToMessage(message);
+                }
+            }
+            
+            setTimeout(() => {
+                messageElement.classList.remove('swiping', 'swiping-left', 'swiping-right');
+            }, 150);
+            
+            startX = 0;
+            startY = 0;
+            currentX = 0;
+            isSwiping = false;
+            swipeDirection = null;
+            hasMoved = false;
+        });
+        
+        messageElement.addEventListener('mouseleave', function(e) {
+            if (mouseDown) {
+                mouseDown = false;
+                messageElement.classList.remove('swiping', 'swiping-left', 'swiping-right');
+                startX = 0;
+                startY = 0;
+                currentX = 0;
+                isSwiping = false;
+                swipeDirection = null;
+                hasMoved = false;
+            }
+        });
+        
+        // Also allow double-click to reply (alternative for desktop)
+        messageElement.addEventListener('dblclick', function(e) {
+            // Prevent double-click from selecting text
+            e.preventDefault();
+            setReplyToMessage(message);
+        });
+    }
+    
+    // Set reply to a message
+    function setReplyToMessage(message) {
+        currentReply = {
+            id: message.id,
+            sender: message.sender || 'User',
+            text: message.text || ''
+        };
+        showReplyPreview();
+    }
+    
+    // Show reply preview in input area
+    function showReplyPreview() {
+        if (!currentReply) return;
+        
+        const replyPreview = document.getElementById('replyPreview');
+        const replyPreviewSender = document.getElementById('replyPreviewSender');
+        const replyPreviewText = document.getElementById('replyPreviewText');
+        
+        if (replyPreview && replyPreviewSender && replyPreviewText) {
+            replyPreviewSender.textContent = '@' + currentReply.sender;
+            const truncatedText = currentReply.text.length > 50 
+                ? currentReply.text.substring(0, 50) + '...' 
+                : currentReply.text;
+            replyPreviewText.textContent = truncatedText;
+            replyPreview.style.display = 'block';
+            
+            // Focus input
+            const chatModalInput = document.getElementById('chatModalInput');
+            if (chatModalInput) {
+                chatModalInput.focus();
+            }
+        }
+    }
+    
+    // Hide reply preview
+    function hideReplyPreview() {
+        currentReply = null;
+        const replyPreview = document.getElementById('replyPreview');
+        if (replyPreview) {
+            replyPreview.style.display = 'none';
+        }
+    }
+    
+    // Escape HTML to prevent XSS attacks
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Open conversation in modal
+    conversationItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Don't open if clicking on action buttons
+            if (e.target.closest('button')) return;
+            
+            const itemId = parseInt(this.getAttribute('data-conversation-id'));
+            
+            // Remove active class from all
+            conversationItems.forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            currentConversationId = itemId;
+            loadConversationFromBackend(itemId);
+            chatModal.show();
+        });
+    });
+    
+    // Store current chat user username for profile navigation
+    let currentChatUserUsername = null;
+    
+    // Handle info button click - navigate to user profile
+    const chatModalInfoBtn = document.getElementById('chatModalInfoBtn');
+    if (chatModalInfoBtn) {
+        chatModalInfoBtn.addEventListener('click', function() {
+            if (currentChatUserUsername) {
+                chatModal.hide();
+                window.location.href = `/profile/${currentChatUserUsername}`;
+            }
+        });
+    }
+    
+    // Load conversation into modal
+    function loadConversationInModal(conversation) {
+        // Get display user - ensure we show the other user (receiver), never the current user
+        let displayUser = conversation.user;
+        
+        if (displayUser.username === currentUsername) {
+            // Find the other user from messages
+            if (conversation.messages && conversation.messages.length > 0) {
+                for (let message of conversation.messages) {
+                    if (message.sender && message.sender !== currentUsername) {
+                        displayUser = {
+                            username: message.sender,
+                            full_name: message.sender_full_name || message.sender,
+                            avatar: message.sender_avatar || 'avatar-1.jpg'
+                        };
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Update header with user info
+        const avatarFilename = displayUser.avatar ? (displayUser.avatar.includes('/') ? displayUser.avatar.split('/').pop() : displayUser.avatar) : 'avatar-1.jpg';
+        const avatarPath = `/database/avatars/${avatarFilename}`;
+        
+        document.getElementById('chatModalAvatar').src = avatarPath;
+        document.getElementById('chatModalAvatar').alt = displayUser.username || displayUser.full_name;
+        document.getElementById('chatModalName').textContent = displayUser.full_name;
+        
+        // Store the username for profile navigation
+        currentChatUserUsername = displayUser.username;
+        
+        // Clear reply when loading new conversation
+        hideReplyPreview();
+        
+        // Clear and update messages
+        chatModalMessages.innerHTML = '';
+        if (conversation.messages && conversation.messages.length > 0) {
+            conversation.messages.forEach(message => {
+                const isCurrentUser = message.sender === currentUsername;
+                addMessageToChat(message, isCurrentUser);
+            });
+            scrollToBottom();
+        } else {
+            chatModalMessages.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="bi bi-chat-text fs-1 text-body-secondary mb-3"></i>
+                    <p class="text-body-secondary">No messages yet. Start the conversation!</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Cancel reply button handler
+    const cancelReplyBtn = document.getElementById('cancelReplyBtn');
+    if (cancelReplyBtn) {
+        cancelReplyBtn.addEventListener('click', function() {
+            hideReplyPreview();
+        });
+    }
+    
+    // Send message via backend API
+    if (chatModalForm) {
+        chatModalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const messageText = chatModalInput.value.trim();
+            if (!messageText || !currentConversationId) return;
+            
+            // Disable input while sending
+            chatModalInput.disabled = true;
+            const submitButton = chatModalForm.querySelector('button[type="submit"]');
+            if (submitButton) submitButton.disabled = true;
+            
+            // Prepare message data
+            const messageData = {
+                text: messageText
+            };
+            
+            // Add reply_to if replying
+            if (currentReply && currentReply.id) {
+                messageData.reply_to = {
+                    id: currentReply.id,
+                    sender: currentReply.sender,
+                    text: currentReply.text
+                };
+            }
+            
+            // Send to backend
+            fetch(`/api/messages/${currentConversationId}/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(messageData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return null;
+                    }
+                    return response.json().then(err => {
+                        throw new Error(err.error || 'Failed to send message');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.success && data.message) {
+                    // Add message to chat immediately
+                    addMessageToChat(data.message, true);
+                    chatModalInput.value = '';
+                    
+                    // Clear reply after sending
+                    hideReplyPreview();
+                    
+                    lastMessageId = data.message.id;
+                    scrollToBottom();
+                    
+                    // Update conversation list
+                    updateConversationList();
+                }
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable input
+                chatModalInput.disabled = false;
+                if (submitButton) submitButton.disabled = false;
+                chatModalInput.focus();
+            });
+        });
+    }
+    
+    // Update conversation list (refresh from backend and update UI)
+    function updateConversationList() {
+        return fetch('/api/messages', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && Array.isArray(data)) {
+                conversationsData = data;
+                
+                // Get the container that holds all conversations
+                const messagesContainer = document.querySelector('.messages-main-container');
+                if (!messagesContainer) return data;
+                
+                // Find all existing conversation items
+                const existingItems = {};
+                const conversationItems = messagesContainer.querySelectorAll('.conversation-item');
+                conversationItems.forEach(item => {
+                    const itemId = parseInt(item.getAttribute('data-conversation-id'));
+                    if (itemId) {
+                        existingItems[itemId] = item;
+                    }
+                });
+                
+                // Find the search bar to know where to insert conversations
+                const searchBar = messagesContainer.querySelector('.message-search-card');
+                
+                // Create a temporary container to hold conversations while we reorder
+                const tempContainer = document.createDocumentFragment();
+                
+                // Track which conversations we've processed
+                const processedIds = new Set();
+                
+                // Update or create conversation items in sorted order (most recent first)
+                data.forEach((item, index) => {
+                    processedIds.add(item.id);
+                    let conversationItem = existingItems[item.id];
+                    
+                    if (conversationItem) {
+                        // Update existing item
+                        updateConversationItem(conversationItem, item);
+                        // Remove from DOM temporarily (but keep reference)
+                        conversationItem.remove();
+                    } else {
+                        // Create new item
+                        conversationItem = createConversationItem(item);
+                        // Add click handler for new items
+                        conversationItem.addEventListener('click', function(e) {
+                            if (e.target.closest('button')) return;
+                            
+                            const itemId = parseInt(this.getAttribute('data-conversation-id'));
+                            
+                            // Remove active class from all
+                            messagesContainer.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
+                            this.classList.add('active');
+                            
+                            currentConversationId = itemId;
+                            loadConversationFromBackend(itemId);
+                            chatModal.show();
+                        });
+                    }
+                    
+                    // Add spacing class
+                    if (index < data.length - 1) {
+                        conversationItem.classList.add('mb-3');
+                    }
+                    
+                    // Add to fragment
+                    tempContainer.appendChild(conversationItem);
+                });
+                
+                // Remove items that no longer exist
+                Object.keys(existingItems).forEach(itemId => {
+                    if (!processedIds.has(parseInt(itemId))) {
+                        existingItems[itemId].remove();
+                    }
+                });
+                
+                // Remove any remaining conversation items that weren't in our map (cleanup)
+                messagesContainer.querySelectorAll('.conversation-item').forEach(item => {
+                    if (item.parentNode === messagesContainer) {
+                        item.remove();
+                    }
+                });
+                
+                // Insert the fragment after search bar
+                if (searchBar && searchBar.nextSibling) {
+                    messagesContainer.insertBefore(tempContainer, searchBar.nextSibling);
+                } else if (searchBar) {
+                    messagesContainer.appendChild(tempContainer);
+                } else {
+                    // No search bar, insert at beginning
+                    if (messagesContainer.firstChild) {
+                        messagesContainer.insertBefore(tempContainer, messagesContainer.firstChild);
+                    } else {
+                        messagesContainer.appendChild(tempContainer);
+                    }
+                }
+                
+                // If no items, show empty state
+                if (data.length === 0) {
+                    const emptyState = document.getElementById('emptyState');
+                    if (!emptyState) {
+                        const emptyDiv = document.createElement('div');
+                        emptyDiv.id = 'emptyState';
+                        emptyDiv.className = 'text-center py-5';
+                        emptyDiv.innerHTML = `
+                            <i class="bi bi-chat fs-1 text-body-secondary mb-3"></i>
+                            <h5 class="text-body-secondary">No messages yet</h5>
+                            <p class="text-body-secondary">Start a conversation with your friends!</p>
+                        `;
+                        messagesContainer.appendChild(emptyDiv);
+                    }
+                } else {
+                    // Remove empty state if it exists
+                    const emptyState = document.getElementById('emptyState');
+                    if (emptyState) {
+                        emptyState.remove();
+                    }
+                }
+                
+                // Update the conversationItems NodeList reference for other functions
+                conversationItems = document.querySelectorAll('.conversation-item');
+            }
+            return data;
+        })
+        .catch(error => {
+            console.error('Error updating conversation list:', error);
+            return null;
+        });
+    }
+    
+    // Mark conversation messages as read
+    function markConversationAsRead(conversationId) {
+        fetch(`/api/messages/${conversationId}/mark-read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Failed to mark conversation as read');
+            }
+            // Update conversation list to reflect read status
+            updateConversationList();
+        })
+        .catch(error => {
+            console.error('Error marking conversation as read:', error);
+        });
+    }
+    
+    // Update a single conversation item element
+    function updateConversationItem(item, conv) {
+        // Update avatar
+        const avatarImg = item.querySelector('.notification-avatar img');
+        if (avatarImg && conv.user && conv.user.avatar) {
+            const avatarFilename = conv.user.avatar.includes('/') ? conv.user.avatar.split('/').pop() : conv.user.avatar;
+            const avatarPath = `/database/avatars/${avatarFilename}`;
+            avatarImg.src = avatarPath;
+            avatarImg.alt = conv.user.username || conv.user.full_name || '';
+        }
+        
+        // Update name (first text-truncate is the name)
+        const nameEl = item.querySelector('.notification-text .fw-semibold');
+        if (nameEl && conv.user) {
+            nameEl.textContent = conv.user.full_name || conv.user.username || '';
+        }
+        
+        // Update last message text (second text-truncate after name)
+        const messageTextEl = item.querySelector('.notification-text .text-body-secondary.small');
+        if (messageTextEl) {
+            // Get last message from last_message field or from messages array
+            let lastMessageText = '';
+            if (conv.last_message && conv.last_message.text) {
+                lastMessageText = conv.last_message.text;
+            } else if (conv.messages && conv.messages.length > 0) {
+                lastMessageText = conv.messages[conv.messages.length - 1].text || '';
+            }
+            messageTextEl.textContent = lastMessageText;
+        }
+        
+        // Update timestamp (first small.text-body-secondary in the time container)
+        const timeContainer = item.querySelector('.d-flex.flex-column.align-items-end');
+        if (timeContainer) {
+            const timestampEl = timeContainer.querySelector('small.text-body-secondary');
+            if (timestampEl) {
+                let lastMessageTime = '';
+                if (conv.last_message && conv.last_message.timestamp) {
+                    lastMessageTime = conv.last_message.timestamp;
+                } else if (conv.messages && conv.messages.length > 0) {
+                    lastMessageTime = conv.messages[conv.messages.length - 1].timestamp || '';
+                }
+                timestampEl.textContent = lastMessageTime;
+            }
+        }
+        
+        // Update unread indicator (red dot instead of badge)
+        const badgeContainer = item.querySelector('.d-flex.flex-column.align-items-end');
+        if (badgeContainer) {
+            let redDot = badgeContainer.querySelector('.unread-dot');
+            
+            if (conv.unread_count > 0) {
+                if (!redDot) {
+                    redDot = document.createElement('span');
+                    redDot.className = 'unread-dot';
+                    redDot.style.cssText = 'width: 8px; height: 8px; background-color: #dc3545; border-radius: 50%; display: inline-block; margin-top: 4px;';
+                    badgeContainer.appendChild(redDot);
+                }
+            } else if (redDot) {
+                redDot.remove();
+            }
+        }
+    }
+    
+    // Create a new conversation item element
+    function createConversationItem(conv) {
+        const item = document.createElement('div');
+        item.className = 'notification-item conversation-item d-flex align-items-center py-3 px-3 mb-3';
+        item.style.cursor = 'pointer';
+        item.setAttribute('data-conversation-id', conv.id);
+        
+        const defaultAvatar = 'avatar-1.jpg';
+        const avatarFilename = conv.user && conv.user.avatar 
+            ? (conv.user.avatar.includes('/') ? conv.user.avatar.split('/').pop() : conv.user.avatar)
+            : defaultAvatar;
+        
+        const avatarPath = `/database/avatars/${avatarFilename}`;
+        
+        // Get last message text from last_message or messages array
+        let lastMessageText = '';
+        let lastMessageTime = '';
+        if (conv.last_message && conv.last_message.text) {
+            lastMessageText = conv.last_message.text;
+            lastMessageTime = conv.last_message.timestamp || '';
+        } else if (conv.messages && conv.messages.length > 0) {
+            const lastMsg = conv.messages[conv.messages.length - 1];
+            lastMessageText = lastMsg.text || '';
+            lastMessageTime = lastMsg.timestamp || '';
+        }
+        
+        item.innerHTML = `
+            <div class="notification-avatar me-3">
+                <img src="${avatarPath}" 
+                     alt="${conv.user ? (conv.user.username || conv.user.full_name || '') : ''}"
+                     class="rounded-circle"
+                     style="width: 50px; height: 50px; object-fit: cover;">
+            </div>
+            
+            <div class="notification-content flex-grow-1" style="min-width: 0; overflow: hidden;">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="notification-text flex-grow-1" style="min-width: 0; overflow: hidden;">
+                        <span class="fw-semibold text-body d-block text-truncate">${conv.user ? (conv.user.full_name || conv.user.username || '') : ''}</span>
+                        <span class="text-body-secondary small d-block text-truncate">${lastMessageText}</span>
+                    </div>
+                    
+                    <div class="d-flex flex-column align-items-end ms-2 flex-shrink-0">
+                        <small class="text-body-secondary">${lastMessageTime}</small>
+                        ${conv.unread_count > 0 ? `<span class="unread-dot" style="width: 8px; height: 8px; background-color: #dc3545; border-radius: 50%; display: inline-block; margin-top: 4px;"></span>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        return item;
+    }
+    
+    // Search messages via backend API
+    let searchTimeout = null;
+    let currentSearchQuery = '';
+    const searchInput = document.getElementById('searchMessages');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            currentSearchQuery = searchTerm;
+            
+            // Clear previous timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            // If empty, reload all conversations
+            if (searchTerm === '') {
+                updateConversationList();
+                return;
+            }
+            
+            // Debounce search - wait 300ms after user stops typing
+            searchTimeout = setTimeout(() => {
+                performBackendSearch(searchTerm);
+            }, 300);
+        });
+    }
+    
+    // Perform backend search
+    function performBackendSearch(query) {
+        const messagesContainer = document.querySelector('.messages-main-container');
+        if (!messagesContainer) return;
+        
+        // Show loading state
+        const existingItems = messagesContainer.querySelectorAll('.conversation-item');
+        existingItems.forEach(item => item.style.display = 'none');
+        
+        let loadingMsg = document.getElementById('searchLoading');
+        if (!loadingMsg) {
+            loadingMsg = document.createElement('div');
+            loadingMsg.id = 'searchLoading';
+            loadingMsg.className = 'text-center py-3';
+            loadingMsg.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"></div>';
+            messagesContainer.appendChild(loadingMsg);
+        }
+        loadingMsg.style.display = 'block';
+        
+        // Remove existing no results message
+        const noResultsMsg = document.getElementById('noResultsMessage');
+        if (noResultsMsg) {
+            noResultsMsg.style.display = 'none';
+        }
+        
+        // Call backend API
+        fetch(`/api/messages/search?q=${encodeURIComponent(query)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingMsg.style.display = 'none';
+            
+            const items = data.conversations || [];
+            
+            if (items.length > 0) {
+                // Hide all existing conversations
+                existingItems.forEach(item => item.remove());
+                
+                // Display search results
+                const searchBar = messagesContainer.querySelector('.message-search-card');
+                const fragment = document.createDocumentFragment();
+                
+                items.forEach((item, index) => {
+                    const listItem = createConversationItem(item);
+                    if (index < items.length - 1) {
+                        listItem.classList.add('mb-3');
+                    }
+                    
+                    // Add click handler
+                    listItem.addEventListener('click', function(e) {
+                        if (e.target.closest('button')) return;
+                        const itemId = parseInt(this.getAttribute('data-conversation-id'));
+                        messagesContainer.querySelectorAll('.conversation-item').forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                        currentConversationId = itemId;
+                        loadConversationFromBackend(itemId);
+                        chatModal.show();
+                    });
+                    
+                    fragment.appendChild(listItem);
+                });
+                
+                if (searchBar && searchBar.nextSibling) {
+                    messagesContainer.insertBefore(fragment, searchBar.nextSibling);
+                } else if (searchBar) {
+                    messagesContainer.appendChild(fragment);
+                }
+                
+                // Store search results for message highlighting when opening conversations
+                window.searchResults = data.messages || {};
+            } else {
+                // Show no results message
+                existingItems.forEach(item => item.style.display = 'none');
+                let noResultsMessage = document.getElementById('noResultsMessage');
+                if (!noResultsMessage) {
+                    noResultsMessage = document.createElement('div');
+                    noResultsMessage.id = 'noResultsMessage';
+                    noResultsMessage.className = 'text-center py-5 w-100';
+                    messagesContainer.appendChild(noResultsMessage);
+                }
+                noResultsMessage.innerHTML = `
+                    <i class="bi bi-search fs-1 text-body-secondary mb-3"></i>
+                    <p class="text-body-secondary">No conversations or messages found</p>
+                `;
+                noResultsMessage.style.display = 'block';
+                window.searchResults = {};
+            }
+            
+            // Update conversationItems reference
+            conversationItems = document.querySelectorAll('.conversation-item');
+        })
+        .catch(error => {
+            console.error('Error searching:', error);
+            loadingMsg.style.display = 'none';
+            updateConversationList(); // Fallback to showing all items
+        });
+    }
+});
+</script>
+{% endblock %}

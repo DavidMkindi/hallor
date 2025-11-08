@@ -1,0 +1,626 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add shop-detail-page class to body for CSS targeting -->
+<script>
+// Add shop-detail-page class to body element immediately
+document.body.classList.add('shop-detail-page');
+
+// Modify mobile header for shop detail page
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/shop';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add shop detail title
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'flex-grow-1 d-flex justify-content-center mobile-shop-detail-title';
+        titleDiv.innerHTML = '<h5 class="mb-0 fw-bold text-body">Product Details</h5>';
+        mobileHeader.appendChild(titleDiv);
+    }
+});
+</script>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header -->
+                <div class="d-none d-lg-block mb-4 px-3 pt-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <a href="/shop" class="btn btn-link text-body p-0">
+                            <i class="bi bi-arrow-left fs-5 me-2"></i> Back to Shop
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Product Detail Card -->
+                <div class="product-detail-card p-0 mb-4">
+                    <!-- Product Image -->
+                    {% if product.featured_image %}
+                    <div class="product-detail-image">
+                        <img src="{{ url_for('serve_shop_image_db', filename=product.featured_image) }}" 
+                             class="img-fluid rounded-top" 
+                             alt="{{ product.name }}"
+                             style="width: 100%; max-height: 400px; object-fit: cover;">
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Product Info Section -->
+                    <div class="p-4">
+                        <!-- Product Title & Category Badge -->
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="badge bg-danger text-white">
+                                    <i class="bi {{ get_shop_category_icon(product.category) }} me-1"></i>{{ product.category.replace('_', ' ').title() }}
+                                </span>
+                            </div>
+                            <h3 class="mb-2 fw-bold d-flex align-items-center gap-2">
+                                <span>{{ product.name }}</span>
+                                {% if product.is_new %}
+                                <img src="/static/images/new.png" alt="New" class="new-product-badge" style="height: 24px; width: auto;">
+                                {% endif %}
+                            </h3>
+                            <p class="text-body-secondary mb-0">Sold by {{ product.seller }}</p>
+                        </div>
+                        
+                        <!-- Product Price -->
+                        <div class="mb-4">
+                            <h2 class="text-danger fw-bold mb-0">{{ product.currency }}{{ product.price }}</h2>
+                        </div>
+                        
+                        <!-- Product Description -->
+                        <div class="mb-4">
+                            <p class="text-body">{{ product.description }}</p>
+                        </div>
+                        
+                        <!-- Product Details Grid -->
+                        <div class="product-details-grid mb-4">
+                            <div class="detail-item">
+                                <i class="bi bi-box-seam text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Stock</small>
+                                    <span class="fw-semibold" id="stock-display">{{ product.stock }} available</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="bi bi-eye text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Views</small>
+                                    <span class="fw-semibold">{{ product.views }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="bi bi-star text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Reviews</small>
+                                    <span class="fw-semibold" id="reviews-count-display">{{ product.reviews|length }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="bi bi-shop text-body fs-5"></i>
+                                <div>
+                                    <small class="text-body-secondary d-block">Category</small>
+                                    <span class="fw-semibold">{{ product.category.replace('_', ' ').title() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="product-actions d-flex flex-wrap gap-2 mb-4 pb-4 border-bottom">
+                            <!-- Contact Button -->
+                            <a href="/profile/{{ product.seller_username if product.seller_username else product.seller|lower|replace(' ', '_') }}" 
+                               class="btn btn-outline-danger flex-grow-1" 
+                               id="contact-btn">
+                                <i class="bi bi-telephone me-2"></i>Contact
+                            </a>
+                            
+                            <!-- Share Button -->
+                            <button class="btn btn-outline-dark" id="share-btn" data-product-id="{{ product.id }}">
+                                <i class="bi bi-share me-2"></i>Share
+                            </button>
+                        </div>
+                        
+                        <!-- Reviews Section -->
+                        <div class="reviews-section">
+                            <h5 class="fw-bold mb-3">
+                                <i class="bi bi-star me-2"></i>Reviews (<span id="reviews-count">{{ product.reviews|length }}</span>)
+                            </h5>
+                            
+                            <!-- Add Review Form -->
+                            <div class="add-review-form mb-3">
+                                <div class="d-flex gap-2">
+                                    <img src="{{ url_for('serve_avatar', filename='avatar-1.jpg') }}" 
+                                         alt="Your avatar" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <div class="mb-2">
+                                            <label class="form-label small">Rating</label>
+                                            <div class="rating-input">
+                                                <i class="bi bi-star-fill text-warning rating-star" data-rating="1"></i>
+                                                <i class="bi bi-star-fill text-warning rating-star" data-rating="2"></i>
+                                                <i class="bi bi-star-fill text-warning rating-star" data-rating="3"></i>
+                                                <i class="bi bi-star-fill text-warning rating-star" data-rating="4"></i>
+                                                <i class="bi bi-star-fill text-warning rating-star" data-rating="5"></i>
+                                            </div>
+                                            <input type="hidden" id="rating-value" value="5">
+                                        </div>
+                                        <textarea class="form-control" 
+                                                  id="review-input" 
+                                                  placeholder="Write your review..." 
+                                                  rows="2"></textarea>
+                                        <button class="btn btn-danger btn-sm mt-2" id="post-review-btn" data-product-id="{{ product.id }}">
+                                            Post Review
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Reviews List -->
+                            <div id="reviews-list">
+                                {% if product.reviews %}
+                                    {% for review in product.reviews %}
+                                    <div class="review-item" data-review-id="{{ review.id }}">
+                                        <img src="{{ url_for('serve_avatar', filename=(review.avatar|avatar_filename|default('avatar-1.jpg'))) }}" 
+                                             alt="{{ review.name }}" 
+                                             class="rounded-circle" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="review-header">
+                                                <span class="fw-semibold text-body">{{ review.name }}</span>
+                                                <small class="text-body-secondary ms-2">{{ review.timestamp }}</small>
+                                            </div>
+                                            <div class="review-rating mb-1">
+                                                {% for i in range(review.rating) %}
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                                {% endfor %}
+                                                {% for i in range(5 - review.rating) %}
+                                                <i class="bi bi-star text-warning"></i>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="review-text" id="review-text-{{ review.id }}">{{ review.text }}</div>
+                                            
+                                            <!-- Edit/Delete buttons for own reviews -->
+                                            {% if review.username == 'john_doe' %}
+                                            <div class="review-actions mt-1">
+                                                <button class="btn btn-link btn-sm text-body-secondary p-0 me-2 edit-review-btn" data-review-id="{{ review.id }}">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                                <button class="btn btn-link btn-sm text-danger p-0 delete-review-btn" data-review-id="{{ review.id }}">
+                                                    <i class="bi bi-trash"></i> Delete
+                                                </button>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                <p class="text-body-secondary text-center py-3">No reviews yet. Be the first to review this product!</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Product Modal -->
+{% if is_seller %}
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="editProductModalLabel">Edit Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProductForm">
+                    <!-- Product Name -->
+                    <div class="mb-3">
+                        <label for="editProductName" class="form-label">Product Name *</label>
+                        <input type="text" class="form-control" id="editProductName" name="name" value="{{ product.name }}" required>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="editProductDescription" class="form-label">Description *</label>
+                        <textarea class="form-control" id="editProductDescription" name="description" rows="3" required>{{ product.description }}</textarea>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="mb-3">
+                        <label for="editProductPrice" class="form-label">Price ($) *</label>
+                        <input type="number" step="0.01" class="form-control" id="editProductPrice" name="price" value="{{ product.price }}" required>
+                    </div>
+                    
+                    <!-- Stock and Category -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="editProductStock" class="form-label">Stock Quantity *</label>
+                            <input type="number" class="form-control" id="editProductStock" name="stock" value="{{ product.stock }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editProductCategory" class="form-label">Category *</label>
+                            <select class="form-select" id="editProductCategory" name="category" required>
+                                <option value="electronics" {% if product.category == 'electronics' %}selected{% endif %}>Electronics</option>
+                                <option value="fashion" {% if product.category == 'fashion' %}selected{% endif %}>Fashion</option>
+                                <option value="home" {% if product.category == 'home' %}selected{% endif %}>Home</option>
+                                <option value="sports" {% if product.category == 'sports' %}selected{% endif %}>Sports</option>
+                                <option value="food" {% if product.category == 'food' %}selected{% endif %}>Food</option>
+                                <option value="books" {% if product.category == 'books' %}selected{% endif %}>Books</option>
+                                <option value="toys" {% if product.category == 'toys' %}selected{% endif %}>Toys</option>
+                                <option value="beauty" {% if product.category == 'beauty' %}selected{% endif %}>Beauty</option>
+                                <option value="automotive" {% if product.category == 'automotive' %}selected{% endif %}>Automotive</option>
+                                <option value="garden" {% if product.category == 'garden' %}selected{% endif %}>Garden</option>
+                                <option value="jewelry" {% if product.category == 'jewelry' %}selected{% endif %}>Jewelry</option>
+                                <option value="pets" {% if product.category == 'pets' %}selected{% endif %}>Pets</option>
+                                <option value="music" {% if product.category == 'music' %}selected{% endif %}>Music</option>
+                                <option value="games" {% if product.category == 'games' %}selected{% endif %}>Games</option>
+                                <option value="office" {% if product.category == 'office' %}selected{% endif %}>Office</option>
+                                <option value="health" {% if product.category == 'health' %}selected{% endif %}>Health</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="submitEditBtn" data-product-id="{{ product.id }}">
+                    <span id="submitEditBtnText">Save Changes</span>
+                    <span id="submitEditBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Product Detail Page Styles -->
+<style>
+/* Share button styling for light and dark modes */
+#share-btn {
+    border-color: #000000 !important;
+    color: #000000 !important;
+    background-color: transparent !important;
+}
+
+[data-bs-theme="dark"] #share-btn {
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    background-color: transparent !important;
+}
+
+#share-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1) !important;
+    border-color: #000000 !important;
+    color: #000000 !important;
+}
+
+[data-bs-theme="dark"] #share-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+}
+</style>
+
+<!-- Product Detail Page Scripts -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const productId = {{ product.id }};
+    
+    // Rating input handler
+    const ratingStars = document.querySelectorAll('.rating-star');
+    const ratingValue = document.getElementById('rating-value');
+    
+    ratingStars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            ratingValue.value = rating;
+            
+            // Update star display
+            ratingStars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('bi-star');
+                    s.classList.add('bi-star-fill');
+                } else {
+                    s.classList.remove('bi-star-fill');
+                    s.classList.add('bi-star');
+                }
+            });
+        });
+    });
+    
+    // Contact button is now a link, no handler needed
+    
+    // Share button handler
+    const shareBtn = document.getElementById('share-btn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            const productUrl = window.location.href;
+            if (navigator.share) {
+                navigator.share({
+                    title: '{{ product.name }}',
+                    text: '{{ product.description }}',
+                    url: productUrl
+                }).catch(err => console.log('Error sharing:', err));
+            } else {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(productUrl).then(() => {
+                    alert('Product link copied to clipboard!');
+                });
+            }
+        });
+    }
+    
+    // Delete button handler
+    const deleteBtn = document.getElementById('delete-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+                fetch(`/api/shop/${productId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Product deleted successfully!');
+                        window.location.href = '/shop';
+                    } else {
+                        alert('Error deleting product: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error deleting product');
+                });
+            }
+        });
+    }
+    
+    // Report button handler
+    const reportBtn = document.getElementById('report-btn');
+    if (reportBtn) {
+        reportBtn.addEventListener('click', function() {
+            if (confirm('Report this product as inappropriate?')) {
+                fetch(`/api/shop/${productId}/report`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Product reported. Thank you for helping keep our marketplace safe.');
+                        reportBtn.disabled = true;
+                        reportBtn.innerHTML = '<i class="bi bi-check"></i> Reported';
+                    } else {
+                        alert('Error reporting product: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        });
+    }
+    
+    // Edit product form submission
+    const submitEditBtn = document.getElementById('submitEditBtn');
+    const editProductForm = document.getElementById('editProductForm');
+    
+    if (submitEditBtn && editProductForm) {
+        submitEditBtn.addEventListener('click', function() {
+            if (!editProductForm.checkValidity()) {
+                editProductForm.reportValidity();
+                return;
+            }
+            
+            // Show loading state
+            const submitBtnText = document.getElementById('submitEditBtnText');
+            const submitBtnSpinner = document.getElementById('submitEditBtnSpinner');
+            submitBtnText.textContent = 'Saving...';
+            submitBtnSpinner.classList.remove('d-none');
+            submitEditBtn.disabled = true;
+            
+            // Prepare form data
+            const formData = new FormData(editProductForm);
+            const data = {};
+            formData.forEach((value, key) => data[key] = value);
+            
+            // Submit form
+            fetch(`/api/shop/${productId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Product updated successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error updating product: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating product');
+            })
+            .finally(() => {
+                submitBtnText.textContent = 'Save Changes';
+                submitBtnSpinner.classList.add('d-none');
+                submitEditBtn.disabled = false;
+            });
+        });
+    }
+    
+    // Post review handler
+    const postReviewBtn = document.getElementById('post-review-btn');
+    const reviewInput = document.getElementById('review-input');
+    
+    if (postReviewBtn && reviewInput) {
+        postReviewBtn.addEventListener('click', function() {
+            const reviewText = reviewInput.value.trim();
+            const rating = parseInt(ratingValue.value);
+            
+            if (!reviewText) {
+                alert('Please enter a review');
+                return;
+            }
+            
+            postReviewBtn.disabled = true;
+            postReviewBtn.textContent = 'Posting...';
+            
+            fetch(`/api/shop/${productId}/reviews`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text: reviewText, rating: rating })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    reviewInput.value = '';
+                    ratingValue.value = '5';
+                    // Reset stars
+                    ratingStars.forEach(s => {
+                        s.classList.remove('bi-star');
+                        s.classList.add('bi-star-fill');
+                    });
+                    loadReviews();
+                } else {
+                    alert('Error posting review: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error posting review');
+            })
+            .finally(() => {
+                postReviewBtn.disabled = false;
+                postReviewBtn.textContent = 'Post Review';
+            });
+        });
+    }
+    
+    // Edit review handlers
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('edit-review-btn') || e.target.parentElement.classList.contains('edit-review-btn')) {
+            const btn = e.target.classList.contains('edit-review-btn') ? e.target : e.target.parentElement;
+            const reviewId = btn.getAttribute('data-review-id');
+            const reviewTextDiv = document.getElementById(`review-text-${reviewId}`);
+            const currentText = reviewTextDiv.textContent;
+            
+            const newText = prompt('Edit your review:', currentText);
+            if (newText && newText.trim() && newText !== currentText) {
+                fetch(`/api/shop/${productId}/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text: newText.trim() })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        reviewTextDiv.textContent = newText.trim();
+                    } else {
+                        alert('Error updating review: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+        
+        // Delete review handlers
+        if (e.target.classList.contains('delete-review-btn') || e.target.parentElement.classList.contains('delete-review-btn')) {
+            const btn = e.target.classList.contains('delete-review-btn') ? e.target : e.target.parentElement;
+            const reviewId = btn.getAttribute('data-review-id');
+            
+            if (confirm('Delete this review?')) {
+                fetch(`/api/shop/${productId}/reviews/${reviewId}`, {
+                    method: 'DELETE',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadReviews();
+                    } else {
+                        alert('Error deleting review: ' + data.error);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            }
+        }
+    });
+    
+    // Load reviews list
+    function loadReviews() {
+        fetch(`/api/shop/${productId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const reviewsList = document.getElementById('reviews-list');
+                    const reviewsCount = document.getElementById('reviews-count');
+                    const reviewsCountDisplay = document.getElementById('reviews-count-display');
+                    reviewsCount.textContent = data.product.reviews.length;
+                    reviewsCountDisplay.textContent = data.product.reviews.length;
+                    
+                    if (data.product.reviews.length > 0) {
+                        let html = '';
+                        data.product.reviews.forEach(review => {
+                            const isOwnReview = review.username === 'john_doe';
+                            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                            html += `
+                                <div class="review-item" data-review-id="${review.id}">
+                                    <img src="/database/avatars/${review.avatar ? (review.avatar.includes('/') ? review.avatar.split('/').pop() : review.avatar) : 'avatar-1.jpg'}" 
+                                         alt="${review.name}" 
+                                         class="rounded-circle" 
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <div class="review-header">
+                                            <span class="fw-semibold text-body">${review.name}</span>
+                                            <small class="text-body-secondary ms-2">${review.timestamp}</small>
+                                        </div>
+                                        <div class="review-rating mb-1">
+                                            ${'<i class="bi bi-star-fill text-warning"></i>'.repeat(review.rating)}
+                                            ${'<i class="bi bi-star text-warning"></i>'.repeat(5 - review.rating)}
+                                        </div>
+                                        <div class="review-text" id="review-text-${review.id}">${review.text}</div>
+                                        ${isOwnReview ? `
+                                        <div class="review-actions mt-1">
+                                            <button class="btn btn-link btn-sm text-body-secondary p-0 me-2 edit-review-btn" data-review-id="${review.id}">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </button>
+                                            <button class="btn btn-link btn-sm text-danger p-0 delete-review-btn" data-review-id="${review.id}">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        reviewsList.innerHTML = html;
+                    } else {
+                        reviewsList.innerHTML = '<p class="text-body-secondary text-center py-3">No reviews yet. Be the first to review this product!</p>';
+                    }
+                }
+            })
+            .catch(error => console.error('Error loading reviews:', error));
+    }
+});
+</script>
+{% endblock %}
+

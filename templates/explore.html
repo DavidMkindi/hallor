@@ -1,0 +1,674 @@
+{% extends "base.html" %}
+
+{% block title %}Search - Social Media App{% endblock %}
+
+{% block content %}
+<!-- Add search-page class to body for CSS targeting -->
+<script>
+// Add search-page class to body element immediately
+document.body.classList.add('search-page');
+
+// Modify mobile header for search page - replace title with search box
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the mobile header container
+    const mobileHeader = document.querySelector('.d-flex.d-sm-none');
+    if (mobileHeader) {
+        // Clear existing content
+        mobileHeader.innerHTML = '';
+        
+        // Add back button
+        const backButton = document.createElement('a');
+        backButton.href = '/';
+        backButton.className = 'btn btn-link text-body p-1 mobile-back-btn';
+        backButton.innerHTML = '<i class="bi bi-arrow-left fs-4"></i>';
+        mobileHeader.appendChild(backButton);
+        
+        // Add search box in center - full width with minimal right padding
+        const searchDiv = document.createElement('div');
+        searchDiv.className = 'flex-grow-1';
+        searchDiv.style.cssText = 'padding: 0 0.5rem 0 0.25rem; min-width: 0;';
+        searchDiv.innerHTML = `
+            <div class="input-group" style="height: 36px;">
+                <span class="input-group-text custom-input-group border-0" style="background-color: var(--bs-body-bg); padding: 0.375rem 0.5rem;">
+                    <i class="bi bi-search text-body" style="font-size: 0.875rem;"></i>
+                </span>
+                <input type="text" 
+                       value="{{ query }}"
+                       class="form-control border-0 custom-form-control text-body" 
+                       placeholder="Search..." 
+                       id="mobileSearchInput"
+                       style="background-color: var(--bs-body-bg); padding: 0.375rem 0.5rem; font-size: 0.875rem; outline: none !important; box-shadow: none !important; border: none !important;"
+                       autocomplete="off">
+            </div>
+        `;
+        mobileHeader.appendChild(searchDiv);
+        
+        // Add minimal placeholder for balance
+        const placeholder = document.createElement('div');
+        placeholder.className = 'p-1';
+        placeholder.style.width = '32px';
+        mobileHeader.appendChild(placeholder);
+        
+        // AJAX search on input (debounced) - updates only results section
+        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        let searchTimeout = null;
+        if (mobileSearchInput) {
+            mobileSearchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const query = this.value.trim();
+                searchTimeout = setTimeout(() => {
+                    performSearch(query, '{{ filter_type }}');
+                }, 300);
+            });
+        }
+    }
+});
+</script>
+
+<style>
+/* Remove focus border from search inputs */
+#searchInput:focus,
+#mobileSearchInput:focus,
+.search-bar-container input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.search-bar-container .input-group:focus-within {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Move search bar to the right on mobile and tablet only */
+@media (max-width: 991.98px) {
+    /* Mobile search bar - push to the right */
+    .d-flex.d-sm-none .flex-grow-1 {
+        margin-left: 2rem !important;
+        padding-left: 1rem !important;
+    }
+    
+    /* Tablet search bar - push to the right */
+    .d-none.d-sm-block .search-bar-container {
+        margin-left: 3rem !important;
+        padding-left: 2rem !important;
+    }
+}
+</style>
+
+<div class="container-fluid p-0">
+    <div class="row justify-content-center g-0">
+        <!-- Main Content Area (Centered) -->
+        <div class="col-12 col-lg-8 col-xl-7" id="main-content-area">
+            <div class="p-0">
+                <!-- Desktop Header -->
+                <div class="d-none d-lg-block mb-4 px-3 pt-3">
+                    <h4 class="mb-0 fw-bold text-body">Search</h4>
+                </div>
+                
+                <!-- Search Bar (Desktop and Tablet) -->
+                <div class="d-none d-sm-block mb-3">
+                    <div class="notification-item p-3 search-bar-container" style="border-radius: 0; margin: 0;">
+                        <div class="input-group" style="width: 100%;">
+                            <span class="input-group-text custom-input-group border-0">
+                                <i class="bi bi-search text-body"></i>
+                            </span>
+                            <input type="text" 
+                                   value="{{ query }}"
+                                   class="form-control border-0 custom-form-control text-body" 
+                                   placeholder="Search for people, posts, events, groups..." 
+                                   id="searchInput"
+                                   style="flex: 1;"
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Category Filter Tabs -->
+                <div class="mb-3 px-3">
+                    <ul class="nav nav-pills flex-nowrap overflow-auto" id="categoryTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if filter_type == 'all' %}active{% endif %}" id="all-tab" data-filter="all" type="button" role="tab">
+                                <i class="bi bi-grid me-2"></i>All
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if filter_type == 'users' %}active{% endif %}" id="people-tab" data-filter="users" type="button" role="tab">
+                                <i class="bi bi-person me-2"></i>People
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if filter_type == 'posts' %}active{% endif %}" id="posts-tab" data-filter="posts" type="button" role="tab">
+                                <i class="bi bi-image me-2"></i>Posts
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if filter_type == 'events' %}active{% endif %}" id="events-tab" data-filter="events" type="button" role="tab">
+                                <i class="bi bi-calendar me-2"></i>Events
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if filter_type == 'groups' %}active{% endif %}" id="groups-tab" data-filter="groups" type="button" role="tab">
+                                <i class="bi bi-people me-2"></i>Groups
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Search Results Container -->
+                <div id="searchResults">
+                    <!-- Initial State -->
+                    <div class="text-center py-5 {% if query %}d-none{% endif %}" id="initialState">
+                        <i class="bi bi-search fs-1 text-body-secondary mb-3 d-block"></i>
+                        <h5 class="text-body-secondary">Start searching</h5>
+                        <p class="text-body-secondary">Type something to search</p>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div class="text-center py-5 d-none" id="loadingState">
+                        <div class="spinner-border text-body mb-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-body-secondary">Searching...</p>
+                    </div>
+                    
+                    <!-- No Results State -->
+                    <div class="text-center py-5 {% if not query or total_results > 0 %}d-none{% endif %}" id="noResultsState">
+                        <i class="bi bi-search fs-1 text-body-secondary mb-3 d-block"></i>
+                        <h5 class="text-body-secondary">No results found</h5>
+                        <p class="text-body-secondary">Try different keywords</p>
+                    </div>
+                    
+                    <!-- Results Container (always present for JavaScript to update) -->
+                    <div id="resultsContainer" {% if not query or total_results == 0 %}class="d-none"{% endif %}>
+                        <!-- People Results -->
+                        <div id="usersResults" {% if filter_type != 'all' and filter_type != 'users' %}style="display: none;"{% endif %}>
+                            {% if query and results.users %}
+                                {% for user in results.users %}
+                                <a href="/profile/{{ user.username }}" class="text-decoration-none">
+                                    <div class="notification-item d-flex align-items-center border-bottom py-3 px-3">
+                                        {% set avatar_filename = user.avatar|avatar_filename|default('avatar-1.jpg') %}
+                                        <img src="{{ url_for('serve_avatar', filename=avatar_filename) }}" 
+                                             alt="{{ user.username }}"
+                                             class="rounded-circle me-3"
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold text-body">{{ user.full_name }}</div>
+                                            <div class="text-body-secondary small">@{{ user.username }}</div>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-body-secondary"></i>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Posts Results -->
+                        <div id="postsResults" {% if filter_type != 'all' and filter_type != 'posts' %}style="display: none;"{% endif %}>
+                            {% if query and results.posts %}
+                                {% for post in results.posts %}
+                                {% set post_username = post.user.username if post.user else post.username %}
+                                {% set clean_username = post_username.replace('@', '') %}
+                                {% set post_id = post.id %}
+                                <a href="/post/{{ post_id }}" class="text-decoration-none">
+                                    <div class="notification-item border-bottom py-3 px-3">
+                                        <div class="d-flex align-items-start">
+                                            {% set post_avatar = post.user.avatar|avatar_filename if post.user else (post.avatar|avatar_filename|default('avatar-1.jpg')) %}
+                                            <img src="{{ url_for('serve_avatar', filename=post_avatar) }}" 
+                                                 alt="{{ post_username }}"
+                                                 class="rounded-circle me-3"
+                                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                            <div class="flex-grow-1">
+                                                <div class="fw-semibold text-body">{{ post_username }}</div>
+                                                <div class="text-body-secondary small mb-2">{{ post.caption }}</div>
+                                                {% set image_filename = post.image.split('/')[-1] if '/' in post.image else post.image %}
+                                                {% set image_filename = image_filename.split('\\')[-1] if '\\' in image_filename else image_filename %}
+                                                <img src="{{ url_for('serve_post_image', filename=image_filename) }}" 
+                                                     class="img-fluid rounded"
+                                                     style="max-height: 200px; object-fit: cover;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Events Results -->
+                        <div id="eventsResults" {% if filter_type != 'all' and filter_type != 'events' %}style="display: none;"{% endif %}>
+                            {% if query and results.events %}
+                                {% for event in results.events %}
+                                <a href="/events/{{ event.id }}" class="text-decoration-none">
+                                    <div class="notification-item d-flex align-items-center border-bottom py-3 px-3">
+                                        {% if event.featured_image %}
+                                            {% set image_filename = event.featured_image.split('/')[-1] if '/' in event.featured_image else event.featured_image %}
+                                            {% set image_filename = image_filename.split('\\')[-1] if '\\' in image_filename else image_filename %}
+                                            <img src="{{ url_for('serve_event_image_db', filename=image_filename) }}" 
+                                                 alt="{{ event.title }}"
+                                                 class="rounded-circle me-3"
+                                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="me-3 bg-body-secondary rounded-circle d-flex align-items-center justify-content-center"
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="bi bi-calendar-event text-body"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold text-body">{{ event.title }}</div>
+                                            <div class="text-body-secondary small">
+                                                {{ event.date }} • {{ event.time }}
+                                            </div>
+                                            <div class="text-body-secondary small">
+                                                <i class="bi bi-geo-alt"></i> {{ event.location }}
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-body-secondary"></i>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Groups Results -->
+                        <div id="groupsResults" {% if filter_type != 'all' and filter_type != 'groups' %}style="display: none;"{% endif %}>
+                            {% if query and results.groups %}
+                                {% for group in results.groups %}
+                                <a href="/groups" class="text-decoration-none">
+                                    <div class="notification-item d-flex align-items-center border-bottom py-3 px-3">
+                                        {% set avatar_filename = group.avatar.split('/')[-1] if '/' in group.avatar else group.avatar %}
+                                        {% set avatar_filename = avatar_filename.split('\\')[-1] if '\\' in avatar_filename else avatar_filename %}
+                                        <img src="{{ url_for('serve_group_image', filename=avatar_filename) }}" 
+                                             alt="{{ group.name }}"
+                                             class="rounded-circle me-3"
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold text-body">{{ group.name }}</div>
+                                            <div class="text-body-secondary small">{{ group.members_count }} members</div>
+                                        </div>
+                                        <i class="bi bi-chevron-right text-body-secondary"></i>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Page Script -->
+<script>
+let currentFilter = '{{ filter_type }}';
+let searchTimeout = null;
+
+// Store last search data globally for filtering
+let lastSearchData = null;
+let lastSearchQuery = '';
+
+// Function to perform AJAX search and update only results section
+function performSearch(query, filter = 'all') {
+    currentFilter = filter;
+    lastSearchQuery = query;
+    
+    const resultsContainer = document.getElementById('searchResults');
+    const initialState = document.getElementById('initialState');
+    const noResultsState = document.getElementById('noResultsState');
+    const loadingState = document.getElementById('loadingState');
+    const resultsDiv = document.getElementById('resultsContainer');
+    
+    // Hide all states
+    if (initialState) initialState.classList.add('d-none');
+    if (noResultsState) noResultsState.classList.add('d-none');
+    if (resultsDiv) resultsDiv.classList.add('d-none');
+    
+    if (!query || query.trim() === '') {
+        // Show initial state
+        if (initialState) {
+            initialState.classList.remove('d-none');
+        }
+        lastSearchData = null;
+        return Promise.resolve();
+    }
+    
+    // Show loading state
+    if (loadingState) {
+        loadingState.classList.remove('d-none');
+    }
+    
+    // Fetch search results from backend
+    return fetch(`/api/search?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            // Store search data for filtering
+            lastSearchData = data;
+            
+            // Hide loading state
+            if (loadingState) loadingState.classList.add('d-none');
+            
+            if (data.total_results === 0) {
+                // Show no results
+                if (noResultsState) {
+                    noResultsState.classList.remove('d-none');
+                }
+            } else {
+                // Display results
+                displayResults(data, filter);
+            }
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            if (loadingState) loadingState.classList.add('d-none');
+            if (noResultsState) {
+                noResultsState.classList.remove('d-none');
+            }
+            return Promise.reject(error);
+        });
+}
+
+// Function to display search results
+function displayResults(data, filter) {
+    const resultsContainer = document.getElementById('resultsContainer');
+    const initialState = document.getElementById('initialState');
+    const noResultsState = document.getElementById('noResultsState');
+    const loadingState = document.getElementById('loadingState');
+    
+    // Hide all states
+    if (initialState) initialState.classList.add('d-none');
+    if (noResultsState) noResultsState.classList.add('d-none');
+    if (loadingState) loadingState.classList.add('d-none');
+    
+    if (!resultsContainer) return;
+    
+    resultsContainer.classList.remove('d-none');
+    
+    // First, hide ALL sections
+    const sections = ['users', 'posts', 'events', 'groups'];
+    sections.forEach(section => {
+        const container = document.getElementById(`${section}Results`);
+        if (container) {
+            container.style.display = 'none';
+        }
+    });
+    
+    // Then show and populate only the filtered sections
+    if (filter === 'all') {
+        // Show all sections and display all data
+        sections.forEach(section => {
+            const container = document.getElementById(`${section}Results`);
+            if (container) {
+                container.style.display = 'block';
+            }
+        });
+        displayUsers(data.results.users || []);
+        displayPosts(data.results.posts || []);
+        displayEvents(data.results.events || []);
+        displayGroups(data.results.groups || []);
+        
+        // Check if no results at all
+        const hasAnyResults = (data.results.users && data.results.users.length > 0) ||
+                             (data.results.posts && data.results.posts.length > 0) ||
+                             (data.results.events && data.results.events.length > 0) ||
+                             (data.results.groups && data.results.groups.length > 0);
+        
+        if (!hasAnyResults && noResultsState) {
+            resultsContainer.classList.add('d-none');
+            noResultsState.classList.remove('d-none');
+        }
+    } else {
+        // Show only the selected filter section
+        const container = document.getElementById(`${filter}Results`);
+        let hasResults = false;
+        
+        if (container) {
+            container.style.display = 'block';
+            
+            // Display only the relevant category
+            if (filter === 'users') {
+                const users = data.results.users || [];
+                displayUsers(users);
+                hasResults = users.length > 0;
+            } else if (filter === 'posts') {
+                const posts = data.results.posts || [];
+                displayPosts(posts);
+                hasResults = posts.length > 0;
+            } else if (filter === 'events') {
+                const events = data.results.events || [];
+                displayEvents(events);
+                hasResults = events.length > 0;
+            } else if (filter === 'groups') {
+                const groups = data.results.groups || [];
+                displayGroups(groups);
+                hasResults = groups.length > 0;
+            }
+        }
+        
+        // Show no results state if filtered category has no results
+        if (!hasResults) {
+            resultsContainer.classList.add('d-none');
+            if (noResultsState) {
+                noResultsState.classList.remove('d-none');
+            }
+        }
+        
+        // Clear other sections to ensure they're empty and hidden
+        sections.forEach(section => {
+            if (section !== filter) {
+                const otherContainer = document.getElementById(`${section}Results`);
+                if (otherContainer) {
+                    otherContainer.style.display = 'none';
+                    otherContainer.innerHTML = '';
+                }
+            }
+        });
+    }
+}
+
+function displayUsers(users) {
+    const container = document.getElementById('usersResults');
+    if (!container) return;
+    
+    if (users.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = users.map(user => {
+        const avatarFilename = user.avatar ? (user.avatar.includes('/') ? user.avatar.split('/').pop() : user.avatar) : 'avatar-1.jpg';
+        return `
+            <a href="/profile/${user.username}" class="text-decoration-none">
+                <div class="notification-item d-flex align-items-center border-bottom py-3 px-3">
+                    <img src="/database/avatars/${avatarFilename}" 
+                         alt="${user.username}"
+                         class="rounded-circle me-3"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-body">${user.full_name || user.name || ''}</div>
+                        <div class="text-body-secondary small">@${user.username}</div>
+                    </div>
+                    <i class="bi bi-chevron-right text-body-secondary"></i>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+function displayPosts(posts) {
+    const container = document.getElementById('postsResults');
+    if (!container) return;
+    
+    if (posts.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = posts.map(post => {
+        const avatarFilename = post.avatar ? (post.avatar.includes('/') ? post.avatar.split('/').pop() : post.avatar) : 
+                          (post.user && post.user.avatar ? (post.user.avatar.includes('/') ? post.user.avatar.split('/').pop() : post.user.avatar) : 'avatar-1.jpg');
+        const username = post.user ? post.user.username : post.username;
+        const cleanUsername = username.replace('@', '');
+        const imageFilename = post.image ? (post.image.includes('/') ? post.image.split('/').pop() : post.image) : 'post-1.jpg';
+        const postId = post.id || post.post_id;
+        // Link to specific post via backend route
+        const postLink = `/post/${postId}`;
+        return `
+            <a href="${postLink}" class="text-decoration-none">
+                <div class="notification-item border-bottom py-3 px-3">
+                    <div class="d-flex align-items-start">
+                        <img src="/database/avatars/${avatarFilename}" 
+                             alt="${username}"
+                             class="rounded-circle me-3"
+                             style="width: 40px; height: 40px; object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold text-body">${username}</div>
+                            <div class="text-body-secondary small mb-2">${post.caption || ''}</div>
+                            <img src="/database/posts/${imageFilename}" 
+                                 class="img-fluid rounded"
+                                 style="max-height: 200px; object-fit: cover;">
+                        </div>
+                    </div>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+function displayEvents(events) {
+    const container = document.getElementById('eventsResults');
+    if (!container) return;
+    
+    if (events.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = events.map(event => {
+        const eventImageFilename = event.featured_image ? (event.featured_image.includes('/') ? event.featured_image.split('/').pop() : event.featured_image) : null;
+        return `
+            <a href="/events/${event.id}" class="text-decoration-none">
+                <div class="notification-item d-flex align-items-center border-bottom py-3 px-3">
+                    ${eventImageFilename ? 
+                        `<img src="/database/events/${eventImageFilename}" 
+                              alt="${event.title || event.name}"
+                              class="rounded-circle me-3"
+                              style="width: 40px; height: 40px; object-fit: cover;">` :
+                        `<div class="me-3 bg-body-secondary rounded-circle d-flex align-items-center justify-content-center"
+                              style="width: 40px; height: 40px;">
+                            <i class="bi bi-calendar-event text-body"></i>
+                         </div>`
+                    }
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-body">${event.title || event.name}</div>
+                        <div class="text-body-secondary small">
+                            ${event.date || ''} • ${event.time || ''}
+                        </div>
+                        <div class="text-body-secondary small">
+                            <i class="bi bi-geo-alt"></i> ${event.location || ''}
+                        </div>
+                    </div>
+                    <i class="bi bi-chevron-right text-body-secondary"></i>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+function displayGroups(groups) {
+    const container = document.getElementById('groupsResults');
+    if (!container) return;
+    
+    if (groups.length === 0) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    container.innerHTML = groups.map(group => {
+        const avatarFilename = group.avatar ? (group.avatar.includes('/') ? group.avatar.split('/').pop() : group.avatar) : 'group-1.jpg';
+        return `
+            <a href="/groups" class="text-decoration-none">
+                <div class="notification-item d-flex align-items-center border-bottom py-3 px-3">
+                    <img src="/database/groups/${avatarFilename}" 
+                         alt="${group.name}"
+                         class="rounded-circle me-3"
+                         style="width: 40px; height: 40px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-body">${group.name}</div>
+                        <div class="text-body-secondary small">${group.members_count || 0} members</div>
+                    </div>
+                    <i class="bi bi-chevron-right text-body-secondary"></i>
+                </div>
+            </a>
+        `;
+    }).join('');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const filterButtons = document.querySelectorAll('#categoryTabs button');
+    
+    // Apply initial filter to server-rendered results if they exist
+    const initialQuery = '{{ query|default("") }}';
+    {% if query and results %}
+    const initialResults = {
+        results: {
+            users: {{ results.users|default([])|tojson|safe }},
+            posts: {{ results.posts|default([])|tojson|safe }},
+            events: {{ results.events|default([])|tojson|safe }},
+            groups: {{ results.groups|default([])|tojson|safe }}
+        },
+        total_results: {{ total_results|default(0) }}
+    };
+    if (initialQuery && initialResults.total_results > 0) {
+        lastSearchData = initialResults;
+        lastSearchQuery = initialQuery;
+        // Apply current filter to initial results
+        displayResults(initialResults, currentFilter);
+    }
+    {% endif %}
+    
+    // Auto-search on input (debounced) - updates only results section
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            searchTimeout = setTimeout(() => {
+                performSearch(query, currentFilter);
+            }, 300);
+        });
+    }
+    
+    // Filter buttons - filter existing results without re-searching
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.getAttribute('data-filter');
+            currentFilter = filter;
+            
+            // If we have stored search data, just filter it without re-searching
+            if (lastSearchData && lastSearchQuery) {
+                displayResults(lastSearchData, filter);
+            } else {
+                // Otherwise, perform new search
+                const query = searchInput ? searchInput.value.trim() : 
+                             (document.getElementById('mobileSearchInput') ? document.getElementById('mobileSearchInput').value.trim() : '');
+                if (query) {
+                    performSearch(query, filter);
+                } else {
+                    // No query, just hide all result sections
+                    const sections = ['users', 'posts', 'events', 'groups'];
+                    sections.forEach(section => {
+                        const container = document.getElementById(`${section}Results`);
+                        if (container) {
+                            container.style.display = 'none';
+                            container.innerHTML = '';
+                        }
+                    });
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
