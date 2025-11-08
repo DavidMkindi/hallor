@@ -1,0 +1,325 @@
+{
+  "events": [
+    {
+      "id": 1,
+      "title": "Summer Music Festival 2025",
+      "description": "Join us for an unforgettable evening of live music featuring local and international artists. Food trucks, craft beer, and great vibes!",
+      "location": "Central Park Amphitheater",
+      "date": "2025-11-15",
+      "time": "18:00",
+      "host": "Music Events Co.",
+      "host_username": "music_events_co",
+      "category": "music",
+      "featured_image": "img-1.jpg",
+      "attendees_count": 235,
+      "created_at": "2025-10-20",
+      "is_attending": true,
+      "is_bookmarked": false,
+      "attendees": [
+        {
+          "username": "sarah_wilson",
+          "avatar": "avatar-2.jpg",
+          "name": "Sarah Wilson"
+        },
+        {
+          "username": "mike_chen",
+          "avatar": "avatar-3.jpg",
+          "name": "Mike Chen"
+        },
+        {
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe"
+        }
+      ],
+      "comments": [
+        {
+          "id": 1,
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe",
+          "text": "Cool boys",
+          "timestamp": "2025-10-28 21:58"
+        }
+      ],
+      "reported_by": [
+        "john_doe"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Tech Conference 2025",
+      "description": "Annual technology conference featuring keynotes from industry leaders, workshops, and networking opportunities. Learn about the latest in AI, cloud computing, and web development.",
+      "location": "Convention Center Hall A",
+      "date": "2025-11-20",
+      "time": "09:00",
+      "host": "Tech Community",
+      "host_username": "tech_community",
+      "category": "tech",
+      "featured_image": "img-2.jpg",
+      "attendees_count": 457,
+      "created_at": "2025-10-28",
+      "is_attending": true,
+      "is_bookmarked": false,
+      "attendees": [
+        {
+          "username": "emma_taylor",
+          "avatar": "avatar-4.jpg",
+          "name": "Emma Taylor"
+        },
+        {
+          "username": "alex_rodriguez",
+          "avatar": "avatar-5.jpg",
+          "name": "Alex Rodriguez"
+        },
+        {
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe"
+        }
+      ],
+      "comments": [
+        {
+          "id": 1,
+          "username": "emma_taylor",
+          "avatar": "avatar-4.jpg",
+          "name": "Emma Taylor",
+          "text": "Looking forward to the AI workshops!",
+          "timestamp": "2025-10-28 10:15"
+        },
+        {
+          "id": 2,
+          "username": "alex_rodriguez",
+          "avatar": "avatar-5.jpg",
+          "name": "Alex Rodriguez",
+          "text": "Will there be networking sessions after the talks?",
+          "timestamp": "2025-10-28 11:20"
+        }
+      ],
+      "reported_by": []
+    },
+    {
+      "id": 3,
+      "title": "Food & Wine Tasting Experience",
+      "description": "Experience the finest cuisines and wines from around the world. Meet renowned chefs and sommeliers in this exclusive tasting event.",
+      "location": "Grand Hotel Ballroom",
+      "date": "2025-11-18",
+      "time": "19:30",
+      "host": "Culinary Arts Society",
+      "host_username": "culinary_arts",
+      "category": "food",
+      "featured_image": "img-3.jpg",
+      "attendees_count": 89,
+      "created_at": "2025-10-22",
+      "is_attending": true,
+      "is_bookmarked": false,
+      "attendees": [
+        {
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe"
+        },
+        {
+          "username": "sarah_wilson",
+          "avatar": "avatar-2.jpg",
+          "name": "Sarah Wilson"
+        }
+      ],
+      "comments": [
+        {
+          "id": 1,
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe",
+          "text": "Cool boys",
+          "timestamp": "2025-10-28 21:58"
+        }
+      ],
+      "reported_by": []
+    },
+    {
+      "id": 4,
+      "title": "Marathon for Charity",
+      "description": "Run for a cause! Join thousands of runners in this annual charity marathon. All proceeds go to local children's hospitals.",
+      "location": "City Sports Complex",
+      "date": "2025-11-25",
+      "time": "07:00",
+      "host": "City Sports Association",
+      "host_username": "city_sports",
+      "category": "sports",
+      "featured_image": "img-4.jpg",
+      "attendees_count": 1250,
+      "created_at": "2025-10-10",
+      "is_attending": false,
+      "is_bookmarked": false,
+      "attendees": [
+        {
+          "username": "mike_chen",
+          "avatar": "avatar-3.jpg",
+          "name": "Mike Chen"
+        }
+      ],
+      "comments": [
+        {
+          "id": 1,
+          "username": "mike_chen",
+          "avatar": "avatar-3.jpg",
+          "name": "Mike Chen",
+          "text": "Training hard for this! Who else is running the full marathon?",
+          "timestamp": "2025-10-12 08:45"
+        }
+      ],
+      "reported_by": []
+    },
+    {
+      "id": 5,
+      "title": "Art Gallery Opening",
+      "description": "Explore contemporary art from emerging local artists. Wine, cheese, and inspiring conversations await you at this exclusive gallery opening.",
+      "location": "Modern Art Gallery",
+      "date": "2025-11-22",
+      "time": "18:00",
+      "host": "Art Collective",
+      "host_username": "art_collective",
+      "category": "art",
+      "featured_image": "listing-1.jpg",
+      "attendees_count": 67,
+      "created_at": "2025-10-25",
+      "is_attending": false,
+      "is_bookmarked": true,
+      "attendees": [],
+      "comments": [],
+      "reported_by": []
+    },
+    {
+      "id": 6,
+      "title": "Business Networking Mixer",
+      "description": "Connect with entrepreneurs, investors, and business professionals. Great opportunity to expand your network and explore new partnerships.",
+      "location": "Downtown Business Hub",
+      "date": "2025-11-17",
+      "time": "18:30",
+      "host": "Business Network Group",
+      "host_username": "biz_network",
+      "category": "business",
+      "featured_image": "listing-2.jpg",
+      "attendees_count": 145,
+      "created_at": "2025-10-18",
+      "is_attending": false,
+      "is_bookmarked": false,
+      "attendees": [],
+      "comments": [],
+      "reported_by": []
+    },
+    {
+      "id": 7,
+      "title": "Yoga & Wellness Retreat",
+      "description": "A full day of yoga, meditation, and wellness workshops. Rejuvenate your mind, body, and soul with expert instructors.",
+      "location": "Serenity Wellness Center",
+      "date": "2025-11-23",
+      "time": "08:00",
+      "host": "Wellness Warriors",
+      "host_username": "wellness_warriors",
+      "category": "health",
+      "featured_image": "listing-3.jpg",
+      "attendees_count": 78,
+      "created_at": "2025-10-23",
+      "is_attending": true,
+      "is_bookmarked": false,
+      "attendees": [
+        {
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe"
+        }
+      ],
+      "comments": [],
+      "reported_by": []
+    },
+    {
+      "id": 8,
+      "title": "Community Social Gathering",
+      "description": "Meet your neighbors and make new friends at our monthly community social. Games, food, and fun activities for all ages.",
+      "location": "Community Center",
+      "date": "2025-11-16",
+      "time": "15:00",
+      "host": "Community Board",
+      "host_username": "community_board",
+      "category": "social",
+      "featured_image": "listing-4.jpg",
+      "attendees_count": 203,
+      "created_at": "2025-10-19",
+      "is_attending": false,
+      "is_bookmarked": false,
+      "attendees": [],
+      "comments": [],
+      "reported_by": []
+    },
+    {
+      "id": 9,
+      "title": "Outdoor Hiking Adventure",
+      "description": "Join fellow nature enthusiasts for a guided hiking trip through scenic mountain trails. All skill levels welcome!",
+      "location": "Mountain Trail Head",
+      "date": "2025-11-24",
+      "time": "06:30",
+      "host": "Adventure Club",
+      "host_username": "adventure_club",
+      "category": "outdoor",
+      "featured_image": "listing-5.jpg",
+      "attendees_count": 34,
+      "created_at": "2025-10-21",
+      "is_attending": false,
+      "is_bookmarked": false,
+      "attendees": [],
+      "comments": [],
+      "reported_by": []
+    },
+    {
+      "id": 10,
+      "title": "Live Comedy Show",
+      "description": "Laugh the night away with top comedians from across the country. Stand-up, improv, and hilarious sketches guaranteed!",
+      "location": "Comedy Club Downtown",
+      "date": "2025-11-19",
+      "time": "20:00",
+      "host": "Laugh Factory",
+      "host_username": "laugh_factory",
+      "category": "entertainment",
+      "featured_image": "img-1.jpg",
+      "attendees_count": 156,
+      "created_at": "2025-10-17",
+      "is_attending": false,
+      "is_bookmarked": false,
+      "attendees": [],
+      "comments": [
+        {
+          "id": 1,
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe",
+          "text": "proposal",
+          "timestamp": "2025-11-06 18:47"
+        }
+      ],
+      "reported_by": []
+    },
+    {
+      "id": 11,
+      "title": "vibes",
+      "description": "the vibe boys",
+      "location": "Arusha",
+      "date": "2025-11-08",
+      "time": "02:49",
+      "host": "Mkindi ",
+      "category": "entertainment",
+      "featured_image": "0f61d3b7940c4e3f82a57a3a74763f33.jpg",
+      "attendees_count": 1,
+      "created_at": "2025-11-07",
+      "is_attending": true,
+      "attendees": [
+        {
+          "username": "john_doe",
+          "avatar": "avatar-1.jpg",
+          "name": "John Doe"
+        }
+      ]
+    }
+  ]
+}

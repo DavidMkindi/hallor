@@ -1,0 +1,70 @@
+{
+  "reels": [
+    {
+      "id": 1,
+      "username": "john_doe",
+      "avatar": "avatar-1.jpg",
+      "video_thumbnail": "img-1.png",
+      "caption": "Amazing sunset timelapse! 🌅 #nature #sunset #timelapse",
+      "likes_count": 1246,
+      "comments_count": 89,
+      "views_count": 12450,
+      "is_liked": true,
+      "is_saved": false,
+      "time_ago": "2 hours ago",
+      "is_following": true
+    },
+    {
+      "id": 2,
+      "username": "sarah_wilson",
+      "avatar": "avatar-2.jpg",
+      "video_thumbnail": "img-2.png",
+      "caption": "Quick coding tutorial: Building a REST API in 60 seconds! ⚡ #coding #tutorial #webdev",
+      "likes_count": 3422,
+      "comments_count": 156,
+      "views_count": 45600,
+      "is_liked": true,
+      "is_saved": false,
+      "time_ago": "5 hours ago"
+    },
+    {
+      "id": 3,
+      "username": "mike_chen",
+      "avatar": "avatar-3.jpg",
+      "video_thumbnail": "img-3.png",
+      "caption": "Food hack you need to try! 🍕 Game changer! #food #cooking #lifehack",
+      "likes_count": 8934,
+      "comments_count": 432,
+      "views_count": 98700,
+      "is_liked": true,
+      "is_saved": false,
+      "time_ago": "1 day ago"
+    },
+    {
+      "id": 4,
+      "username": "emma_taylor",
+      "avatar": "avatar-4.jpg",
+      "video_thumbnail": "img-4.png",
+      "caption": "My 5-minute morning workout routine 💪 #fitness #workout #health",
+      "likes_count": 5678,
+      "comments_count": 234,
+      "views_count": 67800,
+      "is_liked": false,
+      "is_saved": true,
+      "time_ago": "2 days ago"
+    },
+    {
+      "id": 5,
+      "username": "alex_rodriguez",
+      "avatar": "avatar-5.jpg",
+      "video_thumbnail": "img-5.png",
+      "caption": "Travel vlog: Hidden gems in Tokyo! 🇯🇵 ✈️ #travel #tokyo #adventure",
+      "likes_count": 12340,
+      "comments_count": 678,
+      "views_count": 145600,
+      "is_liked": false,
+      "is_saved": false,
+      "time_ago": "3 days ago"
+    }
+  ]
+}

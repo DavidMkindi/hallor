@@ -1,0 +1,242 @@
+{
+  "posts": [
+    {
+      "id": 8,
+      "user_id": 6,
+      "username": "davidmkindi",
+      "user": {
+        "name": "David",
+        "avatar": "/database/avatars/avatar-3.jpg",
+        "username": "davidmkindi"
+      },
+      "image": "/static/images/posts/a05a02f0-8bd4-4c95-9637-56533c5e8020.jpg",
+      "caption": "good work as hell boy",
+      "likes_count": 0,
+      "comments_count": 0,
+      "shares_count": 0,
+      "time": "Just now",
+      "timestamp": "2025-11-07T23:13:53.250626",
+      "is_liked": false,
+      "is_saved": false,
+      "allow_comments": true,
+      "show_like_count": true
+    },
+    {
+      "id": 7,
+      "user": {
+        "name": "Current User",
+        "avatar": "avatar-1.jpg",
+        "username": "@currentuser"
+      },
+      "image": "97643a42-e6d1-43d9-a625-1f58c19f260b.jpg",
+      "caption": "#mkindu",
+      "likes_count": 1,
+      "comments_count": 0,
+      "shares_count": 0,
+      "time": "Just now",
+      "timestamp": "2025-10-29T11:30:09.703405",
+      "is_liked": true,
+      "is_saved": true,
+      "allow_comments": true,
+      "show_like_count": true
+    },
+    {
+      "id": 6,
+      "user": {
+        "name": "Current User",
+        "avatar": "avatar-1.jpg",
+        "username": "@currentuser"
+      },
+      "image": "ce5a4a79-2976-4c8f-8abd-ad9d89f688d0.jpg",
+      "caption": "#😘",
+      "likes_count": 1,
+      "comments_count": 0,
+      "shares_count": 5,
+      "time": "Just now",
+      "timestamp": "2025-10-29T11:25:56.170071",
+      "is_liked": true,
+      "is_saved": false,
+      "allow_comments": true,
+      "show_like_count": true
+    },
+    {
+      "id": 1,
+      "username": "john_doe",
+      "avatar": "avatar-1.jpg",
+      "time_ago": "2 hours ago",
+      "image": "post-1.jpg",
+      "caption": "Just had an amazing sunset view from the mountains! Nature never fails to amaze me. #nature #sunset #mountains #photography",
+      "comments_count": 8,
+      "likes_count": 1,
+      "shares_count": 0,
+      "is_saved": true,
+      "is_liked": true,
+      "comments": [
+        {
+          "id": 1,
+          "username": "current_user",
+          "text": "hellow",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg",
+          "replies": [
+            {
+              "id": 7,
+              "username": "current_user",
+              "text": "okay",
+              "time_ago": "Just now",
+              "avatar": "avatar-2.jpg",
+              "replies": [
+                {
+                  "id": 8,
+                  "username": "current_user",
+                  "text": "poa",
+                  "time_ago": "Just now",
+                  "avatar": "avatar-2.jpg",
+                  "replies": [
+                    {
+                      "id": 9,
+                      "username": "current_user",
+                      "text": "sawa sawa",
+                      "time_ago": "Just now",
+                      "avatar": "avatar-2.jpg",
+                      "replies": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": 10,
+              "username": "current_user",
+              "text": "okay",
+              "time_ago": "Just now",
+              "avatar": "avatar-2.jpg",
+              "replies": []
+            },
+            {
+              "id": 11,
+              "username": "current_user",
+              "text": "sawa",
+              "time_ago": "Just now",
+              "avatar": "avatar-2.jpg",
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "username": "current_user",
+          "text": "Mkindi",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg",
+          "replies": [
+            {
+              "id": 13,
+              "username": "current_user",
+              "text": "aiyaaa",
+              "time_ago": "Just now",
+              "avatar": "avatar-2.jpg",
+              "replies": []
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "username": "current_user",
+          "text": "my name is",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg"
+        },
+        {
+          "id": 4,
+          "username": "current_user",
+          "text": "hellow",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg"
+        },
+        {
+          "id": 5,
+          "username": "current_user",
+          "text": "kijana",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg"
+        },
+        {
+          "id": 6,
+          "username": "current_user",
+          "text": "kijana",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg"
+        },
+        {
+          "id": 12,
+          "username": "current_user",
+          "text": "good job broo",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg",
+          "replies": []
+        },
+        {
+          "id": 14,
+          "username": "current_user",
+          "text": "hello",
+          "time_ago": "Just now",
+          "avatar": "avatar-2.jpg",
+          "replies": []
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "username": "sarah_wilson",
+      "avatar": "avatar-2.jpg",
+      "time_ago": "5 hours ago",
+      "image": "img-2.jpg",
+      "caption": "Coffee and coding session! ☕️ Working on some exciting new features for our app. #coding #coffee #developer #tech",
+      "comments_count": 0,
+      "likes_count": 0,
+      "shares_count": 0,
+      "is_saved": false,
+      "is_liked": false
+    },
+    {
+      "id": 3,
+      "username": "mike_chen",
+      "avatar": "avatar-3.jpg",
+      "time_ago": "1 day ago",
+      "image": "img-3.jpg",
+      "caption": "Team dinner was incredible! Great food, great company. Thanks everyone for making it special! #team #dinner #friends #goodtimes",
+      "comments_count": 0,
+      "likes_count": 1,
+      "shares_count": 0,
+      "is_saved": false,
+      "is_liked": true
+    },
+    {
+      "id": 4,
+      "username": "emma_taylor",
+      "avatar": "avatar-4.jpg",
+      "time_ago": "2 days ago",
+      "image": "img-4.jpg",
+      "caption": "New workout routine is paying off! Feeling stronger and more confident every day. #fitness #workout #motivation #health",
+      "comments_count": 0,
+      "likes_count": 0,
+      "shares_count": 0,
+      "is_saved": false,
+      "is_liked": false
+    },
+    {
+      "id": 5,
+      "username": "alex_rodriguez",
+      "avatar": "avatar-5.jpg",
+      "time_ago": "3 days ago",
+      "image": "post-1.jpg",
+      "caption": "Traveling solo has been one of the best decisions I've made. Met so many amazing people along the way! #travel #solo #adventure #wanderlust",
+      "comments_count": 0,
+      "likes_count": 0,
+      "shares_count": 0,
+      "is_saved": false,
+      "is_liked": false
+    }
+  ]
+}

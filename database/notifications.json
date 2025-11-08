@@ -1,0 +1,199 @@
+{
+  "notifications": [
+    {
+      "id": 18,
+      "type": "message_reply",
+      "user": "davidmkindi",
+      "target_user": "shottadee",
+      "avatar": "avatar-3.jpg",
+      "conversation_id": 1,
+      "message_id": 31,
+      "replied_to_message_id": 25,
+      "time_ago": "Just now",
+      "is_read": false,
+      "action_text": "replied to your message"
+    },
+    {
+      "id": 17,
+      "type": "group_reply",
+      "user": "shottadee",
+      "target_user": "davidmkindi",
+      "avatar": "avatar-4.jpg",
+      "group_id": 1,
+      "group_name": "the Boys",
+      "message_id": 23,
+      "replied_to_message_id": 22,
+      "time_ago": "Just now",
+      "is_read": true,
+      "action_text": "replied to your message in the Boys"
+    },
+    {
+      "id": 16,
+      "type": "group_reply",
+      "user": "davidmkindi",
+      "target_user": "shottadee",
+      "avatar": "avatar-3.jpg",
+      "group_id": 1,
+      "group_name": "the Boys",
+      "message_id": 22,
+      "replied_to_message_id": 21,
+      "time_ago": "Just now",
+      "is_read": true,
+      "action_text": "replied to your message in the Boys"
+    },
+    {
+      "id": 15,
+      "type": "group_reply",
+      "user": "shottadee",
+      "target_user": "davidmkindi",
+      "avatar": "avatar-4.jpg",
+      "group_id": 1,
+      "group_name": "the Boys",
+      "message_id": 21,
+      "replied_to_message_id": 20,
+      "time_ago": "Just now",
+      "is_read": true,
+      "action_text": "replied to your message in the Boys"
+    },
+    {
+      "id": 1,
+      "type": "like",
+      "user": "sarah_wilson",
+      "avatar": "avatar-2.jpg",
+      "post_id": 1,
+      "time_ago": "5 minutes ago",
+      "is_read": true,
+      "action_text": "liked your post"
+    },
+    {
+      "id": 2,
+      "type": "comment",
+      "user": "mike_chen",
+      "avatar": "avatar-3.jpg",
+      "post_id": 1,
+      "comment_preview": "Amazing sunset! Where was this taken?",
+      "time_ago": "12 minutes ago",
+      "is_read": true,
+      "action_text": "commented on your post"
+    },
+    {
+      "id": 3,
+      "type": "follow",
+      "user": "emma_taylor",
+      "avatar": "avatar-4.jpg",
+      "time_ago": "1 hour ago",
+      "is_read": true,
+      "action_text": "started following you"
+    },
+    {
+      "id": 4,
+      "type": "like",
+      "user": "alex_rodriguez",
+      "avatar": "avatar-5.jpg",
+      "post_id": 2,
+      "time_ago": "2 hours ago",
+      "is_read": true,
+      "action_text": "liked your post"
+    },
+    {
+      "id": 5,
+      "type": "comment",
+      "user": "john_doe",
+      "avatar": "avatar-1.jpg",
+      "post_id": 3,
+      "comment_preview": "Looks delicious! What restaurant is this?",
+      "time_ago": "3 hours ago",
+      "is_read": true,
+      "action_text": "commented on your post"
+    },
+    {
+      "id": 6,
+      "type": "follow",
+      "user": "sarah_wilson",
+      "avatar": "avatar-2.jpg",
+      "time_ago": "1 day ago",
+      "is_read": true,
+      "action_text": "started following you"
+    },
+    {
+      "id": 7,
+      "type": "like",
+      "user": "mike_chen",
+      "avatar": "avatar-3.jpg",
+      "post_id": 4,
+      "time_ago": "1 day ago",
+      "is_read": true,
+      "action_text": "liked your post"
+    },
+    {
+      "id": 8,
+      "type": "comment",
+      "user": "emma_taylor",
+      "avatar": "avatar-4.jpg",
+      "post_id": 5,
+      "comment_preview": "Inspiring! I need to try solo traveling too.",
+      "time_ago": "2 days ago",
+      "is_read": true,
+      "action_text": "commented on your post"
+    },
+    {
+      "id": 9,
+      "type": "like",
+      "user": "alex_rodriguez",
+      "avatar": "avatar-5.jpg",
+      "post_id": 1,
+      "time_ago": "2 days ago",
+      "is_read": true,
+      "action_text": "liked your post"
+    },
+    {
+      "id": 10,
+      "type": "follow",
+      "user": "john_doe",
+      "avatar": "avatar-1.jpg",
+      "time_ago": "3 days ago",
+      "is_read": true,
+      "action_text": "started following you"
+    },
+    {
+      "id": 11,
+      "type": "like",
+      "user": "test_user_1",
+      "avatar": "avatar-2.jpg",
+      "post_id": 2,
+      "time_ago": "2 minutes ago",
+      "is_read": true,
+      "action_text": "liked your post"
+    },
+    {
+      "id": 12,
+      "type": "comment",
+      "user": "test_user_2",
+      "avatar": "avatar-3.jpg",
+      "post_id": 3,
+      "comment_preview": "This is a test comment for mark all as read functionality!",
+      "time_ago": "5 minutes ago",
+      "is_read": true,
+      "action_text": "commented on your post"
+    },
+    {
+      "id": 13,
+      "type": "follow",
+      "user": "test_user_3",
+      "avatar": "avatar-4.jpg",
+      "time_ago": "10 minutes ago",
+      "is_read": true,
+      "action_text": "started following you"
+    },
+    {
+      "id": 14,
+      "type": "like",
+      "user": "test_user_4",
+      "avatar": "avatar-5.jpg",
+      "post_id": 4,
+      "time_ago": "15 minutes ago",
+      "is_read": true,
+      "action_text": "liked your post"
+    }
+  ]
+}

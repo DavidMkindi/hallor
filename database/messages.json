@@ -1,0 +1,351 @@
+{
+  "conversations": [
+    {
+      "id": 1,
+      "user": {
+        "username": "shottadee",
+        "full_name": "David",
+        "avatar": "avatar-4.jpg",
+        "is_online": false
+      },
+      "last_message": {
+        "text": "hii hapa☝️☝️",
+        "timestamp": "23:10",
+        "is_read": false,
+        "sender": "davidmkindi"
+      },
+      "unread_count": 8,
+      "messages": [
+        {
+          "id": 1,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "hey",
+          "timestamp": "01:35 PM",
+          "is_read": true
+        },
+        {
+          "id": 2,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "whats up",
+          "timestamp": "01:35 PM",
+          "is_read": true
+        },
+        {
+          "id": 3,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "hello",
+          "timestamp": "01:35 PM",
+          "is_read": true
+        },
+        {
+          "id": 4,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "whats your name dude😂",
+          "timestamp": "01:36 PM",
+          "is_read": true
+        },
+        {
+          "id": 5,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "david sir",
+          "timestamp": "01:37 PM",
+          "is_read": true
+        },
+        {
+          "id": 6,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "okay",
+          "timestamp": "01:41 PM",
+          "is_read": true
+        },
+        {
+          "id": 7,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "byee",
+          "timestamp": "02:23 PM",
+          "is_read": true
+        },
+        {
+          "id": 8,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "fine boy",
+          "timestamp": "02:34 PM",
+          "is_read": true
+        },
+        {
+          "id": 9,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "good",
+          "timestamp": "02:42 PM",
+          "is_read": true
+        },
+        {
+          "id": 10,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "aloo",
+          "timestamp": "02:42 PM",
+          "is_read": true
+        },
+        {
+          "id": 11,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "kutoka",
+          "timestamp": "02:43 PM",
+          "is_read": true
+        },
+        {
+          "id": 12,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "haloo",
+          "timestamp": "02:43 PM",
+          "is_read": true
+        },
+        {
+          "id": 13,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "ewaa",
+          "timestamp": "02:43 PM",
+          "is_read": true
+        },
+        {
+          "id": 14,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "duuh",
+          "timestamp": "02:51 PM",
+          "is_read": true
+        },
+        {
+          "id": 15,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "aiyaa",
+          "timestamp": "14:57",
+          "is_read": true
+        },
+        {
+          "id": 16,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "okay",
+          "timestamp": "14:57",
+          "is_read": true
+        },
+        {
+          "id": 17,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "tufanye nn sasa",
+          "timestamp": "14:58",
+          "is_read": true
+        },
+        {
+          "id": 18,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "kula nyama",
+          "timestamp": "15:04",
+          "is_read": true
+        },
+        {
+          "id": 19,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "asa mamen nile nyama alafu ije kuwaje sasa",
+          "timestamp": "15:07",
+          "is_read": true
+        },
+        {
+          "id": 20,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "tule nyama tuu man",
+          "timestamp": "15:28",
+          "is_read": true
+        },
+        {
+          "id": 21,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "oya",
+          "timestamp": "16:04",
+          "is_read": true
+        },
+        {
+          "id": 22,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "oyaa",
+          "timestamp": "16:04",
+          "is_read": true
+        },
+        {
+          "id": 23,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "wee",
+          "timestamp": "16:04",
+          "is_read": true
+        },
+        {
+          "id": 24,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "hey",
+          "timestamp": "16:11",
+          "is_read": true
+        },
+        {
+          "id": 25,
+          "sender": "shottadee",
+          "sender_avatar": "avatar-4.jpg",
+          "sender_full_name": "David",
+          "text": "hellow",
+          "timestamp": "16:22",
+          "is_read": true
+        },
+        {
+          "id": 26,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "hey",
+          "timestamp": "21:49",
+          "is_read": false
+        },
+        {
+          "id": 27,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": ".",
+          "timestamp": "22:24",
+          "is_read": false
+        },
+        {
+          "id": 28,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "oy",
+          "timestamp": "22:58",
+          "is_read": false
+        },
+        {
+          "id": 29,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "hii apa",
+          "timestamp": "22:59",
+          "is_read": false
+        },
+        {
+          "id": 30,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "oy",
+          "timestamp": "23:05",
+          "is_read": false
+        },
+        {
+          "id": 31,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "oy",
+          "timestamp": "23:10",
+          "is_read": false,
+          "reply_to": {
+            "id": 25,
+            "sender": "shottadee",
+            "text": "hellow"
+          }
+        },
+        {
+          "id": 32,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "hapo",
+          "timestamp": "23:10",
+          "is_read": false,
+          "reply_to": {
+            "id": 28,
+            "sender": "davidmkindi",
+            "text": "oy"
+          }
+        },
+        {
+          "id": 33,
+          "sender": "davidmkindi",
+          "sender_avatar": "avatar-3.jpg",
+          "sender_full_name": "David",
+          "text": "hii hapa☝️☝️",
+          "timestamp": "23:10",
+          "is_read": false,
+          "reply_to": {
+            "id": 32,
+            "sender": "davidmkindi",
+            "text": "hapo"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "user": {
+        "username": "shottadee",
+        "full_name": "David",
+        "avatar": "avatar-4.jpg",
+        "is_online": false
+      },
+      "last_message": {
+        "text": "No messages yet",
+        "timestamp": "Just now",
+        "is_read": true,
+        "sender": "davidmkindi"
+      },
+      "unread_count": 0,
+      "messages": []
+    }
+  ]
+}

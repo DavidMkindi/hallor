@@ -1,0 +1,50 @@
+{
+  "settings": {
+    "account": {
+      "username": "john_doe",
+      "email": "john.doe@example.com",
+      "phone": "+1 (555) 123-4567",
+      "full_name": "John Doe",
+      "bio": "📸 Photography enthusiast | 🌍 Travel lover | ☕ Coffee addict",
+      "website": "https://johndoe.com",
+      "location": "San Francisco, CA",
+      "birth_date": "1995-05-15",
+      "gender": "Male"
+    },
+    "privacy": {
+      "account_privacy": "public",
+      "show_activity_status": true,
+      "show_last_seen": true,
+      "allow_mentions": true,
+      "allow_tags": true,
+      "hide_story_from": [],
+      "close_friends": []
+    },
+    "notifications": {
+      "push_notifications": true,
+      "email_notifications": true,
+      "likes": true,
+      "comments": true,
+      "new_followers": true,
+      "mentions": true,
+      "direct_messages": true,
+      "group_activity": true,
+      "event_reminders": true
+    },
+    "security": {
+      "two_factor_auth": false,
+      "login_alerts": true,
+      "save_login_info": true
+    },
+    "appearance": {
+      "theme": "auto",
+      "language": "en",
+      "timezone": "America/Los_Angeles"
+    },
+    "data": {
+      "download_data_requested": false,
+      "download_data_date": null
+    }
+  }
+}
+
